@@ -13,7 +13,12 @@
 <main class="music-container container">
 <div class="swiss-layout">
 <section class="archive-list"><div class="section-label">Index_Of_Releases</div><ul class="technical-list" id="track-list"><li class="track-select" data-index="0"><span class="id">01</span><span class="name">Alive_But_Im_Dying.wav</span><span class="size">4.2MB</span></li><li class="track-select" data-index="1"><span class="id">02</span><span class="name">Sorry.wav</span><span class="size">3.8MB</span></li><li class="track-select" data-index="2"><span class="id">03</span><span class="name">Need_Somebody.wav</span><span class="size">5.1MB</span></li><li class="track-select" data-index="3"><span class="id">04</span><span class="name">Promise.wav</span><span class="size">4.9MB</span></li></ul></section>
-<section class="vibe-module"><div class="artwork-frame"><img id="active-cover" src="assets/img/music_covers/default.jpg" alt="Source Artwork"></div><div class="meta-footer"><p id="lyric-text">Awaiting playback stream initialization...</p></div></section>
+<section class="vibe-module"><div class="artwork-frame">
+    <picture>
+        <source srcset="assets/img/music_covers/default.webp" type="image/webp">
+        <img id="active-cover" src="assets/img/music_covers/default.jpg" alt="Source Artwork">
+    </picture>
+</div><div class="meta-footer"><p id="lyric-text">Awaiting playback stream initialization...</p></div></section>
 </div>
 </main>
 <footer class="player-console floating"><div class="player-inner container"><div class="now-playing"><div class="track-meta"><span id="player-track-title">No Track Selected</span><span id="player-artist">Colin Elliott Cherry</span></div></div><div class="player-controls"><button id="prev-btn">⏮</button><button id="play-btn">▶</button><button id="next-btn">⏭</button><div class="scrub-container"><input type="range" id="progress-bar" min="0" max="100" value="0"></div></div><div class="volume-box"><input type="range" id="volume-slider" min="0" max="1" step="0.01" value="0.7"></div></div></footer>
