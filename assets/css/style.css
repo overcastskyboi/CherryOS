@@ -30,3 +30,53 @@ body { background-color: var(--bg); color: var(--text); font-family: var(--font-
 .cli-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 2000; display: flex; justify-content: center; align-items: center; }
 .cli-window { width: 800px; height: 500px; background: #000; border: 1px solid var(--gold); padding: 2rem; display: flex; flex-direction: column; }
 .hidden { display: none !important; }
+
+/* Boot Screen Styles */
+.boot-screen {
+    position: fixed;
+    inset: 0;
+    background: var(--card-bg); /* Bittersweet gray/charcoal background */
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Center horizontally */
+    justify-content: center; /* Center vertically */
+    padding: 4rem;
+    font-family: var(--font-mono);
+    color: var(--gold); /* Goldenrod text */
+    text-align: left; /* Align text within its own block */
+    transition: opacity 1s ease-out;
+}
+
+.boot-screen.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.boot-screen p {
+    margin-bottom: 0.5rem;
+    white-space: pre; /* Preserve whitespace for typing effect */
+    overflow: hidden;
+    animation: typing 0.05s steps(1, end) forwards; /* Faster typing for immediate text */
+    width: 0; /* Start with zero width for typing effect */
+    animation-fill-mode: forwards; /* Keep the last state of the animation */
+}
+
+/* Specific delays for sequential text appearance */
+.boot-screen p:nth-child(1) { animation-delay: 0s; }
+.boot-screen p:nth-child(2) { animation-delay: 0.2s; }
+.boot-screen p:nth-child(3) { animation-delay: 0.4s; }
+.boot-screen p:nth-child(4) { animation-delay: 0.6s; }
+.boot-screen p:nth-child(5) { animation-delay: 0.8s; }
+.boot-screen p:nth-child(6) { animation-delay: 1.0s; }
+
+
+@keyframes typing {
+    from { width: 0 }
+    to { width: 100% }
+}
+
+@keyframes blink-caret {
+    from, to { border-color: transparent }
+    50% { border-color: var(--gold); } /* Goldenrod blinking caret */
+}
