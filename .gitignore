@@ -1,7 +1,7 @@
-# Ignore the actual music files
+# Block the heavy/private stuff
 music/
 assets/img/music_covers/
 
-# Do NOT ignore the scripts or styles
+# Allow the logic and styles
 !assets/js/
 !assets/css/

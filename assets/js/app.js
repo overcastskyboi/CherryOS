@@ -12,6 +12,9 @@ const TELEMETRY_UPDATE_INTERVAL_MS = 10000; // 10 seconds
 // Initial site setup and boot sequence
 window.addEventListener('load', initializeSite);
 
+// Fallback: Force transition after 3 seconds if telemetry fails or is slow
+setTimeout(hideBootScreen, 3000);
+
 // Function to hide the boot screen and show main content
 function hideBootScreen() {
     const bootScreen = document.getElementById('boot-screen');
