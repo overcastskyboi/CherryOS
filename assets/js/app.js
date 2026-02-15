@@ -39,3 +39,16 @@ async function updateLiveTelemetry() {
 }
 setInterval(updateLiveTelemetry, 10000);
 updateLiveTelemetry();
+
+// Transition from boot screen to main content after "READY." appears (defined in index.html)
+setTimeout(() => {
+    const terminal = document.getElementById('boot-screen'); 
+    const mainContent = document.getElementById('main-portfolio'); 
+
+    if (terminal) {
+        terminal.style.display = 'none'; // Hide the black screen
+    }
+    if (mainContent) {
+        mainContent.style.opacity = '1';  // Show your portfolio
+    }
+}, 1200); 
