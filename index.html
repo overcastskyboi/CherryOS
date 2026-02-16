@@ -1,43 +1,153 @@
 <!DOCTYPE html>
-
 <html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CC Portfolio | Hub</title>
-<link rel="stylesheet" href="assets/css/style.css">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;800&family=Space+Mono&display=swap" rel="stylesheet">
-<style>
-.hub-split { display: flex; height: 100vh; width: 100vw; overflow: hidden; background: var(--bg); }
-.split-side { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; text-decoration: none; position: relative; transition: 0.8s cubic-bezier(0.16, 1, 0.3, 1); border-left: 1px solid rgba(212, 175, 55, 0.2); }
-.split-side:first-child { border-left: none; }
-.split-side:hover { background: #0a0a0a; }
-.side-title { font-family: var(--font-main); font-weight: 800; font-size: 3rem; color: var(--text); letter-spacing: 0.2em; text-transform: uppercase; z-index: 2; transition: color 0.3s ease; }
-.split-side:hover .side-title { color: var(--accent); }
-.side-desc { font-family: var(--font-main); font-weight: 300; color: var(--text-dim); max-width: 300px; text-align: center; margin-top: 1.5rem; z-index: 2; text-transform: uppercase; letter-spacing: 0.1em; font-size: 0.75rem; }
-.boot-screen { position: fixed; inset: 0; background: #000; z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 4rem; font-family: var(--font-mono); color: #fff; }
-.boot-screen .ready-line { color: var(--accent); font-weight: bold; }
-.boot-screen.hidden { opacity: 0; pointer-events: none; transition: 1.2s cubic-bezier(0.7, 0, 0.3, 1); }
-</style>
-</head>
-<body class="booting">
-<div id="boot-screen" class="boot-screen">
-<div class="boot-content">
-<p>> INITIALIZING_KERNEL...</p>
-<p>> MOUNTING_ORACLE_OCI_STORAGE... DONE</p>
-<p>> ENABLING_BBR_CONGESTION_CONTROL... DONE</p>
-<p>> LOADING_DYNAMICS_ENGINE_V2.0...</p>
-<p>> LOADING_CHERRY_OS... DONE 🍒</p>
-<p>> SESSION_ESTABLISHED_FOR: CC_OS_VER_1.0 🍒</p>
-<p class="ready-line">> READY.</p>
-</div>
-</div>
-<main class="hub-split" id="main-portfolio">
-<a href="systems.html" class="split-side sys-side"><h2 class="side-title">Systems</h2><p class="side-desc">Cloud Infrastructure & Telemetry Optimization</p></a>
-<a href="music.html" class="split-side art-side"><h2 class="side-title">Studio</h2><p class="side-desc">Atmospheric Archives & Production Lab</p></a>
-</main>
-<div id="cli-overlay" class="cli-overlay hidden"><div class="cli-window"><div id="cli-output" class="cli-output"></div><div class="cli-input-wrapper"><span class="prompt">opc @cec:~$</span><input type="text" id="cli-input" autocomplete="off" spellcheck="false"></div></div></div>
-<audio id="main-audio"></audio>
-<script src="assets/js/app.js"></script>
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CC Portfolio | Hub</title>
+    <link rel="stylesheet" href="assets/css/style.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;800&family=Space+Mono&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      .hub-split {
+        display: flex;
+        height: 100vh;
+        width: 100vw;
+        overflow: hidden;
+        background: var(--bg);
+      }
+      .split-side {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        text-decoration: none;
+        position: relative;
+        transition: 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        border-left: 1px solid rgba(212, 175, 55, 0.2);
+      }
+      .split-side:first-child {
+        border-left: none;
+      }
+      .split-side:hover {
+        background: #0a0a0a;
+      }
+      .side-title {
+        font-family: var(--font-main);
+        font-weight: 800;
+        font-size: 3rem;
+        color: var(--text);
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        z-index: 2;
+        transition: color 0.3s ease;
+      }
+      .split-side:hover .side-title {
+        color: var(--accent);
+      }
+      .side-desc {
+        font-family: var(--font-main);
+        font-weight: 300;
+        color: var(--text-dim);
+        max-width: 300px;
+        text-align: center;
+        margin-top: 1.5rem;
+        z-index: 2;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        font-size: 0.75rem;
+      }
+      #nav-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: var(--bg-light);
+        padding: 0.5rem 1.5rem;
+        font-family: var(--font-main);
+        color: var(--text);
+        position: fixed;
+        width: 100%;
+        top: 0;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        z-index: 1000;
+      }
+      #clock {
+        font-size: 1rem;
+        font-weight: bold;
+      }
+      .boot-screen {
+        position: fixed;
+        inset: 0;
+        background: #000;
+        z-index: 9999;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        padding: 4rem;
+        font-family: var(--font-mono);
+        color: #fff;
+      }
+      .boot-screen .ready-line {
+        color: var(--accent);
+        font-weight: bold;
+      }
+      .boot-screen.hidden {
+        opacity: 0;
+        pointer-events: none;
+        transition: 1.2s cubic-bezier(0.7, 0, 0.3, 1);
+      }
+    </style>
+  </head>
+  <body class="booting">
+    <div id="nav-bar">
+      <nav>
+        <a href="systems.html">Systems</a>
+        <a href="music.html">Studio</a>
+      </nav>
+      <div id="clock"></div>
+    </div>
+    <div id="boot-screen" class="boot-screen">
+      <div class="boot-content">
+        <p>> INITIALIZING_KERNEL...</p>
+        <p>> MOUNTING_ORACLE_OCI_STORAGE... DONE</p>
+        <p>> ENABLING_BBR_CONGESTION_CONTROL... DONE</p>
+        <p>> LOADING_DYNAMICS_ENGINE_V2.0...</p>
+        <p>> LOADING_CHERRY_OS... DONE 🍒</p>
+        <p>> SESSION_ESTABLISHED_FOR: CC_OS_VER_1.0 🍒</p>
+        <p class="ready-line">> READY.</p>
+      </div>
+    </div>
+    <main class="hub-split" id="main-portfolio">
+      <a href="systems.html" class="split-side sys-side"
+        ><h2 class="side-title">Systems</h2>
+        <p class="side-desc">Cloud Infrastructure & Telemetry Optimization</p></a
+      >
+      <a href="music.html" class="split-side art-side"
+        ><h2 class="side-title">Studio</h2>
+        <p class="side-desc">Atmospheric Archives & Production Lab</p></a
+      >
+    </main>
+    <audio id="main-audio" controls>
+      <source src="assets/music/sample.mp3" type="audio/mp3" />
+      Your browser does not support the audio element.
+    </audio>
+    <script>
+      const clockElement = document.getElementById("clock");
+
+      function updateClock() {
+        const now = new Date();
+        clockElement.innerHTML = now.toLocaleTimeString();
+      }
+
+      setInterval(updateClock, 1000);
+
+      const audioElement = document.getElementById("main-audio");
+      if (audioElement) {
+        audioElement.style.display = "block"; // Ensure visibility
+      }
+    </script>
+  </body>
 </html>
