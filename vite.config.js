@@ -12,6 +12,7 @@ export default defineConfig({
     drop: ['console', 'debugger'],
   },
   build: {
+    sourcemap: false,
     rollupOptions: {
       output: {
         manualChunks: {
