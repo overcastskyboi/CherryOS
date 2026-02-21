@@ -3,6 +3,7 @@
     "album_name": "Alive But I'm Dying",
     "artist": "Colin Cherry",
     "type": "Single",
+    "releaseDate": "2024-03-12",
     "cover_url": "https://objectstorage.us-ashburn-1.oraclecloud.com/n/idg3nfddgypd/b/cherryos-deploy-prod/o/music/Alive%20But%20I%27m%20Dying/Alive%20But%20I%27m%20Dying.jpg",
     "tracks": [
       {
@@ -16,6 +17,7 @@
     "album_name": "BAND$",
     "artist": "Colin Cherry",
     "type": "Single",
+    "releaseDate": "2023-11-20",
     "cover_url": "https://objectstorage.us-ashburn-1.oraclecloud.com/n/idg3nfddgypd/b/cherryos-deploy-prod/o/music/BAND%24/BAND%24.jpg",
     "tracks": [
       {
@@ -29,6 +31,7 @@
     "album_name": "Coulda Been (feat. Emerson Vernon)",
     "artist": "Colin Cherry",
     "type": "Single",
+    "releaseDate": "2023-08-15",
     "cover_url": "https://objectstorage.us-ashburn-1.oraclecloud.com/n/idg3nfddgypd/b/cherryos-deploy-prod/o/music/Coulda%20Been%20%28feat.%20Emerson%20Vernon%29/Coulda%20Been%20%28feat.%20Emerson%20Vernon%29.jpg",
     "tracks": [
       {
@@ -42,6 +45,7 @@
     "album_name": "Look At What You've Done",
     "artist": "Colin Cherry",
     "type": "Single",
+    "releaseDate": "2022-12-05",
     "cover_url": "https://objectstorage.us-ashburn-1.oraclecloud.com/n/idg3nfddgypd/b/cherryos-deploy-prod/o/music/Look%20At%20What%20You%27ve%20Done/Look%20At%20What%20You%27ve%20Done.jpg",
     "tracks": [
       {
@@ -55,6 +59,7 @@
     "album_name": "Meant to Be",
     "artist": "Colin Cherry",
     "type": "Single",
+    "releaseDate": "2022-09-18",
     "cover_url": "https://objectstorage.us-ashburn-1.oraclecloud.com/n/idg3nfddgypd/b/cherryos-deploy-prod/o/music/Meant%20to%20Be/Meant%20to%20Be.jpg",
     "tracks": [
       {
@@ -68,6 +73,7 @@
     "album_name": "Melancholy (2021)",
     "artist": "Colin Cherry",
     "type": "Album",
+    "releaseDate": "2021-06-25",
     "cover_url": "https://objectstorage.us-ashburn-1.oraclecloud.com/n/idg3nfddgypd/b/cherryos-deploy-prod/o/music/Melancholy%20%282021%29/Melancholy%20%282021%29.jpg",
     "tracks": [
       {
@@ -111,6 +117,7 @@
     "album_name": "Miserable In Secret",
     "artist": "Colin Cherry",
     "type": "Single",
+    "releaseDate": "2021-04-10",
     "cover_url": "https://objectstorage.us-ashburn-1.oraclecloud.com/n/idg3nfddgypd/b/cherryos-deploy-prod/o/music/Miserable%20In%20Secret/Miserable%20In%20Secret.jpg",
     "tracks": [
       {
@@ -124,6 +131,7 @@
     "album_name": "Moonlight Freestyle",
     "artist": "Colin Cherry",
     "type": "Single",
+    "releaseDate": "2020-11-28",
     "cover_url": "https://objectstorage.us-ashburn-1.oraclecloud.com/n/idg3nfddgypd/b/cherryos-deploy-prod/o/music/Moonlight%20Freestyle/Moonlight%20Freestyle.jpg",
     "tracks": [
       {
@@ -137,6 +145,7 @@
     "album_name": "More to Life",
     "artist": "Colin Cherry",
     "type": "Single",
+    "releaseDate": "2020-10-14",
     "cover_url": "https://objectstorage.us-ashburn-1.oraclecloud.com/n/idg3nfddgypd/b/cherryos-deploy-prod/o/music/More%20to%20Life/More%20to%20Life.jpg",
     "tracks": [
       {
@@ -150,6 +159,7 @@
     "album_name": "Need Somebody",
     "artist": "Colin Cherry",
     "type": "Single",
+    "releaseDate": "2020-09-02",
     "cover_url": "https://objectstorage.us-ashburn-1.oraclecloud.com/n/idg3nfddgypd/b/cherryos-deploy-prod/o/music/Need%20Somebody/Need%20Somebody.jpg",
     "tracks": [
       {
@@ -163,6 +173,7 @@
     "album_name": "Pretend (ft. CJ Vana)",
     "artist": "Colin Cherry",
     "type": "Single",
+    "releaseDate": "2020-08-19",
     "cover_url": "https://objectstorage.us-ashburn-1.oraclecloud.com/n/idg3nfddgypd/b/cherryos-deploy-prod/o/music/Pretend%20%28ft.%20CJ%20Vana%29/Pretend.png",
     "tracks": [
       {
@@ -176,6 +187,7 @@
     "album_name": "Promise",
     "artist": "Colin Cherry",
     "type": "Single",
+    "releaseDate": "2020-07-30",
     "cover_url": "https://objectstorage.us-ashburn-1.oraclecloud.com/n/idg3nfddgypd/b/cherryos-deploy-prod/o/music/Promise/Promise.jpg",
     "tracks": [
       {
@@ -189,6 +201,7 @@
     "album_name": "Reflection",
     "artist": "Colin Cherry",
     "type": "Single",
+    "releaseDate": "2020-07-01",
     "cover_url": "https://objectstorage.us-ashburn-1.oraclecloud.com/n/idg3nfddgypd/b/cherryos-deploy-prod/o/music/Reflection/Reflection.jpg",
     "tracks": [
       {
@@ -202,6 +215,7 @@
     "album_name": "Sorry",
     "artist": "Colin Cherry",
     "type": "Single",
+    "releaseDate": "2020-06-15",
     "cover_url": "https://objectstorage.us-ashburn-1.oraclecloud.com/n/idg3nfddgypd/b/cherryos-deploy-prod/o/music/Sorry/Sorry.jpg",
     "tracks": [
       {
@@ -215,6 +229,7 @@
     "album_name": "Still Ballin (2020)",
     "artist": "Colin Cherry",
     "type": "Album",
+    "releaseDate": "2020-01-20",
     "cover_url": "https://objectstorage.us-ashburn-1.oraclecloud.com/n/idg3nfddgypd/b/cherryos-deploy-prod/o/music/Still%20Ballin%20%282020%29/Still%20Ballin%20%282020%29.jpg",
     "tracks": [
       {

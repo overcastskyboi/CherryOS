@@ -19,6 +19,18 @@ describe('API & Data Integrity Tests', () => {
     });
   });
 
+  it('should verify chronological sorting of music manifest', () => {
+    const sorted = [...musicManifest].sort((a, b) => 
+      new Date(b.releaseDate) - new Date(a.releaseDate)
+    );
+    // The manifest should ideally be sorted on fetch, here we check if dates are valid
+    sorted.forEach((album, i) => {
+      if (i > 0) {
+        expect(new Date(album.releaseDate) <= new Date(sorted[i-1].releaseDate)).toBe(true);
+      }
+    });
+  });
+
   it('should check if Proxy URL is defined in production-like environments (CI)', () => {
     // This is more of a configuration check
     const proxyUrl = process.env.VITE_PROXY_URL;

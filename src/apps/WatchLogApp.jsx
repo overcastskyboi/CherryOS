@@ -1,7 +1,7 @@
-import { useState, useEffect, useCallback } from 'react';
-import { Clapperboard, ArrowLeft, RefreshCcw, Star, AlertCircle } from 'lucide-react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
+import { Clapperboard, ArrowLeft, RefreshCcw, Star, AlertCircle, Search } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import DataGrid from '../components/DataGrid';
+import LazyImage from '../components/LazyImage';
 import { ANIME_DATA } from '../data/constants';
 
 const WatchLogApp = () => {
@@ -9,6 +9,7 @@ const WatchLogApp = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [data, setData] = useState(ANIME_DATA.catalogue); // Default to local data
+  const [searchQuery, setSearchQuery] = useState('');
 
   const fetchData = useCallback(async () => {
     const PROXY_URL = import.meta.env.VITE_PROXY_URL;
@@ -23,13 +24,11 @@ const WatchLogApp = () => {
       });
       if (!response.ok) throw new Error("Connection failed");
       const json = await response.json();
-      // If we have live data, use it, otherwise keep fallback
       if (json.data && Array.isArray(json.data)) {
         setData(json.data);
       }
     } catch (err) {
       console.error("Fetch error:", err);
-      // Keep using fallback data on error but show a toast or status
     } finally {
       setLoading(false);
     }
@@ -39,106 +38,133 @@ const WatchLogApp = () => {
     fetchData();
   }, [fetchData]);
 
-  const columns = [
-    { 
-      key: 'title', 
-      label: 'Title',
-      render: (val) => <span className="font-bold text-white tracking-tight">{val}</span>
-    },
-    { 
-      key: 'type', 
-      label: 'Format',
-      render: (val) => (
-        <span className="px-2 py-0.5 rounded-full bg-yellow-500/10 text-yellow-500 text-[10px] font-bold uppercase tracking-wider border border-yellow-500/20">
-          {val}
-        </span>
+  const filteredAndSortedData = useMemo(() => {
+    return data
+      .filter(item => 
+        item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        item.type.toLowerCase().includes(searchQuery.toLowerCase())
       )
-    },
-    { key: 'progress', label: 'Progress' },
-    { 
-      key: 'score', 
-      label: 'Rating',
-      render: (val) => (
-        <div className="flex items-center gap-1.5">
-          <Star size={12} className="fill-yellow-500 text-yellow-500" />
-          <span className="font-mono text-gray-300">{val}</span>
+      .sort((a, b) => (b.score || 0) - (a.score || 0));
+  }, [data, searchQuery]);
+
+  const getScoreColor = (score) => {
+    if (score >= 9) return 'text-yellow-400';
+    if (score >= 8) return 'text-green-400';
+    if (score >= 7) return 'text-blue-400';
+    return 'text-gray-400';
+  };
+
+  const MediaCard = ({ item }) => (
+    <div className="group relative bg-gray-900/40 border border-white/5 rounded-2xl overflow-hidden hover:border-yellow-500/30 transition-all hover:-translate-y-1 shadow-2xl">
+      <div className="aspect-[2/3] relative">
+        <LazyImage 
+          src={item.coverImage || 'https://via.placeholder.com/300x450?text=No+Image'} 
+          alt={item.title}
+          className="w-full h-full object-cover"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent opacity-80" />
+        
+        <div className="absolute top-3 right-3">
+          <div className={`px-3 py-1 rounded-full bg-black/60 backdrop-blur-md border border-white/10 flex items-center gap-1.5 ${getScoreColor(item.score)}`}>
+            <Star size={12} className="fill-current" />
+            <span className="text-xs font-black font-mono">{item.score || 'N/A'}</span>
+          </div>
         </div>
-      )
-    },
-    { 
-      key: 'status', 
-      label: 'Status',
-      render: (val) => (
-        <span className={`text-[11px] font-medium ${
-          val === 'Completed' ? 'text-green-400' : 'text-blue-400'
+
+        <div className="absolute bottom-4 left-4 right-4">
+          <div className="flex flex-col gap-1">
+            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-yellow-500/80">{item.type}</span>
+            <h3 className="text-sm font-bold text-white leading-tight line-clamp-2 group-hover:text-yellow-400 transition-colors uppercase italic">{item.title}</h3>
+          </div>
+        </div>
+      </div>
+      
+      <div className="p-4 bg-black/40 border-t border-white/5 flex items-center justify-between">
+        <div className="flex flex-col">
+          <span className="text-[9px] text-gray-500 uppercase font-bold tracking-widest">Progress</span>
+          <span className="text-[10px] text-gray-300 font-mono">{item.progress}</span>
+        </div>
+        <div className={`text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-sm ${
+          item.status === 'Completed' ? 'bg-green-500/10 text-green-500' : 'bg-blue-500/10 text-blue-500'
         }`}>
-          {val}
-        </span>
-      )
-    }
-  ];
+          {item.status}
+        </div>
+      </div>
+    </div>
+  );
 
   return (
     <div className="bg-[#0a0a0a] text-gray-100 min-h-screen flex flex-col font-sans overflow-hidden">
       {/* Header */}
-      <div className="bg-gray-900/80 backdrop-blur-xl sticky top-0 z-30 border-b border-gray-800 px-4 py-3 flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <button onClick={() => navigate('/')} className="p-2 hover:bg-gray-800 rounded-full text-yellow-500 transition-colors">
-            <ArrowLeft size={20} />
+      <div className="bg-black/60 backdrop-blur-2xl sticky top-0 z-30 border-b border-white/5 px-6 py-4 flex items-center justify-between">
+        <div className="flex items-center gap-6">
+          <button onClick={() => navigate('/')} className="p-2 hover:bg-white/5 rounded-full text-yellow-500 transition-colors">
+            <ArrowLeft size={24} />
           </button>
           <div className="flex flex-col">
-            <h1 className="text-xl font-bold tracking-tight text-white leading-none">Watch List</h1>
-            <span className="text-[10px] text-gray-500 uppercase tracking-widest mt-1">Live Media Tracker</span>
+            <h1 className="text-2xl font-black tracking-tighter text-white uppercase italic">Activity Log</h1>
+            <span className="text-[10px] text-gray-500 uppercase tracking-[0.3em] mt-1 font-bold">Media Tracking System</span>
           </div>
         </div>
-        <div className="flex items-center gap-2">
-          <div className="hidden md:flex items-center gap-2 mr-4 px-3 py-1 bg-black/40 rounded-full border border-gray-800">
-            <div className={`w-1.5 h-1.5 rounded-full ${import.meta.env.VITE_PROXY_URL ? 'bg-green-500' : 'bg-yellow-500'} animate-pulse`} />
-            <span className="text-[10px] text-gray-400 font-mono uppercase">
-              {import.meta.env.VITE_PROXY_URL ? 'Secure Proxy' : 'Local Cache'}
-            </span>
-          </div>
-          <button 
-            onClick={fetchData} 
-            disabled={loading} 
-            className="p-2 hover:bg-gray-800 rounded-xl transition-all disabled:opacity-30"
-          >
-            <RefreshCcw size={18} className={loading ? 'animate-spin' : 'text-yellow-500'} />
-          </button>
+
+        <div className="flex items-center gap-4">
+            <div className="relative hidden md:block">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" size={16} />
+                <input 
+                    type="text"
+                    placeholder="Search catalog..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="bg-white/5 border border-white/10 rounded-full py-2 pl-10 pr-4 text-xs font-bold text-white placeholder-gray-600 focus:outline-none focus:border-yellow-500/50 w-64 transition-all"
+                />
+            </div>
+            <button 
+                onClick={fetchData} 
+                disabled={loading} 
+                className="p-3 bg-white/5 hover:bg-white/10 rounded-full transition-all disabled:opacity-30 border border-white/5"
+            >
+                <RefreshCcw size={18} className={loading ? 'animate-spin' : 'text-yellow-500'} />
+            </button>
         </div>
       </div>
 
-      {/* Main Content */}
-      <main className="flex-1 overflow-hidden p-4 md:p-8 max-w-6xl w-full mx-auto flex flex-col">
-        <div className="mb-8 flex items-start gap-4">
-          <div className="w-12 h-12 bg-yellow-500/10 rounded-2xl flex items-center justify-center border border-yellow-500/20 shrink-0">
-            <Clapperboard className="text-yellow-500" size={24} />
+      <main className="flex-1 overflow-y-auto p-6 md:p-12">
+        <div className="max-w-7xl mx-auto">
+          {/* Search Mobile */}
+          <div className="md:hidden mb-8 relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" size={16} />
+                <input 
+                    type="text"
+                    placeholder="Search catalog..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-4 text-sm font-bold text-white placeholder-gray-600 focus:outline-none focus:border-yellow-500/50 w-full transition-all"
+                />
           </div>
-          <div>
-            <h2 className="text-2xl font-black text-white italic tracking-tighter uppercase">Activity Log</h2>
-            <p className="text-sm text-gray-500 max-w-xl">
-              Synchronized media consumption across AniList and local databases. 
-              Real-time updates provided via encrypted serverless relay.
-            </p>
-          </div>
-        </div>
 
-        <div className="flex-1 min-h-0 bg-gray-900/10 rounded-3xl p-1">
-          <DataGrid 
-            data={data} 
-            columns={columns} 
-            pageSize={10} 
-            emptyMessage="No media found in this collection."
-          />
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+            {filteredAndSortedData.map((item, idx) => (
+              <MediaCard key={idx} item={item} />
+            ))}
+          </div>
+
+          {filteredAndSortedData.length === 0 && (
+              <div className="h-96 flex flex-col items-center justify-center text-center space-y-4">
+                  <div className="p-6 bg-white/5 rounded-full">
+                    <Clapperboard size={48} className="text-gray-700" />
+                  </div>
+                  <p className="text-gray-500 font-bold uppercase tracking-widest text-xs">No media found matching your search</p>
+              </div>
+          )}
         </div>
       </main>
 
       {/* Footer Info */}
       {!import.meta.env.VITE_PROXY_URL && (
-        <div className="bg-yellow-500/5 border-t border-yellow-500/10 px-4 py-2 flex items-center gap-2">
+        <div className="bg-yellow-500/5 border-t border-yellow-500/10 px-6 py-2 flex items-center gap-3">
           <AlertCircle size={14} className="text-yellow-500" />
-          <p className="text-[10px] text-yellow-500/80 uppercase font-bold tracking-tight">
-            Proxy Unavailable: Displaying snapshot data from last successful sync.
+          <p className="text-[9px] text-yellow-500/80 uppercase font-black tracking-widest">
+            OCI Proxy Offline: Running in local demonstration mode.
           </p>
         </div>
       )}

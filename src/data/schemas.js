@@ -33,7 +33,7 @@ export const AlbumSchema = z.object({
   type: z.enum(['Single', 'Album', 'EP', 'LP']),
   cover_url: z.string().url(),
   tracks: z.array(TrackSchema),
-  releaseDate: z.string().optional(),
+  releaseDate: z.string(),
 });
 
 export const MusicManifestSchema = z.array(AlbumSchema);

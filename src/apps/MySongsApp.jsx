@@ -48,7 +48,12 @@ const MyMusicApp = () => {
         throw new Error("Invalid music manifest format.");
       }
       
-      setLibrary(result.data);
+      // Sort: Newest to Oldest
+      const sortedLibrary = result.data.sort((a, b) => {
+        return new Date(b.releaseDate || 0) - new Date(a.releaseDate || 0);
+      });
+
+      setLibrary(sortedLibrary);
     } catch (err) {
       console.error("Fetch Failed:", err);
       setError(err.message || "Failed to load music library.");
