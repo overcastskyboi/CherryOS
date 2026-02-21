@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Monitor, Music, Clapperboard, Gamepad2 } from 'lucide-react';
+import { Monitor, Music, Clapperboard, Gamepad2, Cloud } from 'lucide-react';
 import SystemHealth from './SystemHealth';
 
 const Desktop = () => {
@@ -22,6 +22,7 @@ const Desktop = () => {
     { id: 'songs', name: 'My Music', icon: <Music size={64} />, path: '/songs', color: 'text-pink-500' },
     { id: 'games', name: 'Game Center', icon: <Gamepad2 size={64} />, path: '/games', color: 'text-green-500' },
     { id: 'studio', name: 'Studio Rack', icon: <Monitor size={64} />, path: '/studio', color: 'text-blue-500' },
+    { id: 'cloud', name: 'OCI Console', icon: <Cloud size={64} />, path: '/cloud', color: 'text-cyan-500' },
   ];
 
   return (
