@@ -1,4 +1,5 @@
 # dependencies
+node_modules/
 /node_modules
 /.pnp
 .pnp.js
@@ -8,6 +9,7 @@
 
 # build
 /build
+/dist
 
 # env
 .env
@@ -31,3 +33,11 @@
 # OS
 Thumbs.db
 Desktop.ini
+
+# Infrastructure
+.terraform/
+*.tfstate
+*.tfstate.backup
+OCI/
+infra/
+backend/

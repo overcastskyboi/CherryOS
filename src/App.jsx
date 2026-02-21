@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, createContext, useContext } from 'react';
+import React, { useState, useEffect, useRef, createContext, useContext, memo } from 'react';
 import {
   Terminal,
   Activity,
@@ -105,9 +105,15 @@ const useDraggable = (initialPosition) => {
 
   useEffect(() => {
     const handleMouseMove = (e) => {
-      if (isDragging) setPosition({ x: e.clientX - offset.x, y: e.clientY - offset.y });
+      if (isDragging) {
+        // Constrain window to viewport boundaries so it doesn't get lost
+        const newX = Math.max(0, Math.min(e.clientX - offset.x, window.innerWidth - 100));
+        const newY = Math.max(0, Math.min(e.clientY - offset.y, window.innerHeight - 100));
+        setPosition({ x: newX, y: newY });
+      }
     };
     const handleMouseUp = () => setIsDragging(false);
+    
     if (isDragging) {
       window.addEventListener('mousemove', handleMouseMove);
       window.addEventListener('mouseup', handleMouseUp);
@@ -146,8 +152,7 @@ const OSProvider = ({ children }) => {
 
   const openWindow = (appId, component, title, icon, initialProps = {}) => {
     if (windows.find((w) => w.id === appId)) {
-      setActiveWindowId(appId);
-      setWindows((prev) => prev.map((w) => (w.id === appId ? { ...w, minimized: false } : w)));
+      focusWindow(appId);
       return;
     }
     const newWindow = {
@@ -160,15 +165,20 @@ const OSProvider = ({ children }) => {
       zIndex: windows.length + 1,
       position: { x: isMobile ? 0 : 50 + windows.length * 30, y: isMobile ? 0 : 50 + windows.length * 30 },
     };
-    setWindows([...windows, newWindow]);
+    setWindows((prev) => [...prev, newWindow]);
     setActiveWindowId(appId);
   };
 
-  const closeWindow = (id) => setWindows((prev) => prev.filter((w) => w.id !== id));
+  const closeWindow = (id) => {
+    setWindows((prev) => prev.filter((w) => w.id !== id));
+    if (activeWindowId === id) setActiveWindowId(null);
+  };
+  
   const minimizeWindow = (id) => {
     setWindows((prev) => prev.map((w) => (w.id === id ? { ...w, minimized: true } : w)));
-    setActiveWindowId(null);
+    if (activeWindowId === id) setActiveWindowId(null);
   };
+
   const focusWindow = (id) => {
     setActiveWindowId(id);
     setWindows((prev) => {
@@ -198,12 +208,11 @@ const TerminalApp = () => {
     const fetchTelemetry = async () => {
       try {
         const response = await fetch('https://129.80.222.26:3000/metrics/');
-        if (response.ok) {
-          const data = await response.json();
-          setTelemetry(data);
-        }
+        if (!response.ok) throw new Error('Bad response');
+        const data = await response.json();
+        setTelemetry(data);
       } catch (err) {
-        console.error('Telemetry fetch failed', err);
+        setTelemetry({ error: true });
       }
     };
     fetchTelemetry();
@@ -226,10 +235,10 @@ const TerminalApp = () => {
           output += '\nresume.pdf  beats/  projects/  anime_list.json';
           break;
         case 'telemetry':
-          if (telemetry) {
+          if (telemetry && !telemetry.error) {
             output += `\nCPU: ${telemetry.cpu}% | MEM: ${telemetry.mem}% | Uptime: ${Math.floor(telemetry.uptime / 3600)}h ${Math.floor((telemetry.uptime % 3600) / 60)}m`;
           } else {
-            output += '\nTelemetry data unavailable.';
+            output += '\nTelemetry data unavailable. Host unreachable or connection refused.';
           }
           break;
         case 'clear':
@@ -482,7 +491,7 @@ const StudioRackApp = () => (
   </div>
 );
 
-const WindowFrame = ({ window: win }) => {
+const WindowFrame = memo(({ window: win }) => {
   const { closeWindow, focusWindow, minimizeWindow, isMobile, activeWindowId } = useOS();
   const { position, handleMouseDown } = useDraggable(win.position);
   if (win.minimized) return null;
@@ -515,20 +524,29 @@ const WindowFrame = ({ window: win }) => {
       </div>
     </div>
   );
-};
+});
 
-const DesktopIcon = ({ icon: Icon, label, onClick }) => (
+const DesktopIcon = memo(({ icon: Icon, label, onClick }) => (
   <div className="flex flex-col items-center justify-center w-32 gap-3 p-3 rounded-xl hover:bg-white/5 cursor-pointer transition-all group active:scale-95 pointer-events-auto" onClick={(e) => { e.stopPropagation(); onClick(); }}>
     <div className="w-20 h-20 bg-gradient-to-b from-gray-800 to-black rounded-2xl shadow-xl flex items-center justify-center border border-gray-700 group-hover:border-yellow-500/50 transition-colors relative">
       <Icon size={40} className="text-yellow-500" />
     </div>
     <span className="text-sm text-gray-200 text-center font-semibold tracking-wide bg-black/40 px-3 py-1 rounded-full">{label}</span>
   </div>
-);
+));
 
 const Taskbar = () => {
-  const { windows, focusWindow, setBootState } = useOS();
+  const { windows, focusWindow, minimizeWindow, activeWindowId, setBootState } = useOS();
   const time = useTime();
+
+  const handleTaskbarClick = (id) => {
+    if (activeWindowId === id) {
+      minimizeWindow(id);
+    } else {
+      focusWindow(id);
+    }
+  };
+
   return (
     <div className="h-14 bg-[#0a0a0a]/90 backdrop-blur-md border-t border-gray-800 flex items-center justify-between px-4 fixed bottom-0 w-full z-[9999] pointer-events-auto">
       <div className="flex items-center space-x-4">
@@ -537,7 +555,7 @@ const Taskbar = () => {
         </button>
         <div className="flex space-x-2">
           {windows.map((win) => (
-            <button key={win.id} onClick={() => focusWindow(win.id)} className={`p-2 rounded-lg transition-all flex items-center space-x-2 ${win.minimized ? 'bg-transparent text-gray-500 hover:bg-white/5' : 'bg-gray-800 text-yellow-500'}`}>
+            <button key={win.id} onClick={() => handleTaskbarClick(win.id)} className={`p-2 rounded-lg transition-all flex items-center space-x-2 ${win.minimized || activeWindowId !== win.id ? 'bg-transparent text-gray-500 hover:bg-white/5' : 'bg-gray-800 text-yellow-500'}`}>
               <win.icon size={18} />
               <span className="text-xs font-bold hidden lg:block">{win.title}</span>
             </button>
