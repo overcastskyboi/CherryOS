@@ -1,0 +1,247 @@
+[
+  {
+    "album_name": "Alive But I'm Dying",
+    "artist": "Colin Cherry",
+    "type": "Single",
+    "cover_url": "https://objectstorage.us-ashburn-1.oraclecloud.com/n/idg3nfddgypd/b/cherryos-deploy-prod/o/music/Alive%20But%20I%27m%20Dying/Alive%20But%20I%27m%20Dying.jpg",
+    "tracks": [
+      {
+        "title": "Alive But I'm Dying",
+        "track_number": null,
+        "url": "https://objectstorage.us-ashburn-1.oraclecloud.com/n/idg3nfddgypd/b/cherryos-deploy-prod/o/music/Alive%20But%20I%27m%20Dying/Alive%20But%20I%27m%20Dying.wav"
+      }
+    ]
+  },
+  {
+    "album_name": "BAND$",
+    "artist": "Colin Cherry",
+    "type": "Single",
+    "cover_url": "https://objectstorage.us-ashburn-1.oraclecloud.com/n/idg3nfddgypd/b/cherryos-deploy-prod/o/music/BAND%24/BAND%24.jpg",
+    "tracks": [
+      {
+        "title": "BAND$",
+        "track_number": null,
+        "url": "https://objectstorage.us-ashburn-1.oraclecloud.com/n/idg3nfddgypd/b/cherryos-deploy-prod/o/music/BAND%24/BAND%24.wav"
+      }
+    ]
+  },
+  {
+    "album_name": "Coulda Been (feat. Emerson Vernon)",
+    "artist": "Colin Cherry",
+    "type": "Single",
+    "cover_url": "https://objectstorage.us-ashburn-1.oraclecloud.com/n/idg3nfddgypd/b/cherryos-deploy-prod/o/music/Coulda%20Been%20%28feat.%20Emerson%20Vernon%29/Coulda%20Been%20%28feat.%20Emerson%20Vernon%29.jpg",
+    "tracks": [
+      {
+        "title": "Coulda Been (feat. Emerson Vernon)",
+        "track_number": null,
+        "url": "https://objectstorage.us-ashburn-1.oraclecloud.com/n/idg3nfddgypd/b/cherryos-deploy-prod/o/music/Coulda%20Been%20%28feat.%20Emerson%20Vernon%29/Coulda%20Been%20%28feat.%20Emerson%20Vernon%29.wav"
+      }
+    ]
+  },
+  {
+    "album_name": "Look At What You've Done",
+    "artist": "Colin Cherry",
+    "type": "Single",
+    "cover_url": "https://objectstorage.us-ashburn-1.oraclecloud.com/n/idg3nfddgypd/b/cherryos-deploy-prod/o/music/Look%20At%20What%20You%27ve%20Done/Look%20At%20What%20You%27ve%20Done.jpg",
+    "tracks": [
+      {
+        "title": "Look At What You've Done",
+        "track_number": null,
+        "url": "https://objectstorage.us-ashburn-1.oraclecloud.com/n/idg3nfddgypd/b/cherryos-deploy-prod/o/music/Look%20At%20What%20You%27ve%20Done/Look%20At%20What%20You%27ve%20Done.wav"
+      }
+    ]
+  },
+  {
+    "album_name": "Meant to Be",
+    "artist": "Colin Cherry",
+    "type": "Single",
+    "cover_url": "https://objectstorage.us-ashburn-1.oraclecloud.com/n/idg3nfddgypd/b/cherryos-deploy-prod/o/music/Meant%20to%20Be/Meant%20to%20Be.jpg",
+    "tracks": [
+      {
+        "title": "Meant to Be",
+        "track_number": null,
+        "url": "https://objectstorage.us-ashburn-1.oraclecloud.com/n/idg3nfddgypd/b/cherryos-deploy-prod/o/music/Meant%20to%20Be/Meant%20to%20Be.wav"
+      }
+    ]
+  },
+  {
+    "album_name": "Melancholy (2021)",
+    "artist": "Colin Cherry",
+    "type": "Album",
+    "cover_url": "https://objectstorage.us-ashburn-1.oraclecloud.com/n/idg3nfddgypd/b/cherryos-deploy-prod/o/music/Melancholy%20%282021%29/Melancholy%20%282021%29.jpg",
+    "tracks": [
+      {
+        "title": "Intrusive Thoughts",
+        "track_number": 1,
+        "url": "https://objectstorage.us-ashburn-1.oraclecloud.com/n/idg3nfddgypd/b/cherryos-deploy-prod/o/music/Melancholy%20%282021%29/1%20-%20Intrusive%20Thoughts.wav"
+      },
+      {
+        "title": "Eyes Closed",
+        "track_number": 2,
+        "url": "https://objectstorage.us-ashburn-1.oraclecloud.com/n/idg3nfddgypd/b/cherryos-deploy-prod/o/music/Melancholy%20%282021%29/2%20-%20Eyes%20Closed.wav"
+      },
+      {
+        "title": "Wave (ft. DIGITAL)",
+        "track_number": 3,
+        "url": "https://objectstorage.us-ashburn-1.oraclecloud.com/n/idg3nfddgypd/b/cherryos-deploy-prod/o/music/Melancholy%20%282021%29/3%20-%20Wave%20%28ft.%20DIGITAL%29.wav"
+      },
+      {
+        "title": "Myself",
+        "track_number": 5,
+        "url": "https://objectstorage.us-ashburn-1.oraclecloud.com/n/idg3nfddgypd/b/cherryos-deploy-prod/o/music/Melancholy%20%282021%29/5%20-%20Myself.wav"
+      },
+      {
+        "title": "Constant",
+        "track_number": 6,
+        "url": "https://objectstorage.us-ashburn-1.oraclecloud.com/n/idg3nfddgypd/b/cherryos-deploy-prod/o/music/Melancholy%20%282021%29/6%20-%20Constant.wav"
+      },
+      {
+        "title": "Guess Not",
+        "track_number": 7,
+        "url": "https://objectstorage.us-ashburn-1.oraclecloud.com/n/idg3nfddgypd/b/cherryos-deploy-prod/o/music/Melancholy%20%282021%29/7%20-%20Guess%20Not.wav"
+      },
+      {
+        "title": "In My Head",
+        "track_number": null,
+        "url": "https://objectstorage.us-ashburn-1.oraclecloud.com/n/idg3nfddgypd/b/cherryos-deploy-prod/o/music/Melancholy%20%282021%29/In%20My%20Head.wav"
+      }
+    ]
+  },
+  {
+    "album_name": "Miserable In Secret",
+    "artist": "Colin Cherry",
+    "type": "Single",
+    "cover_url": "https://objectstorage.us-ashburn-1.oraclecloud.com/n/idg3nfddgypd/b/cherryos-deploy-prod/o/music/Miserable%20In%20Secret/Miserable%20In%20Secret.jpg",
+    "tracks": [
+      {
+        "title": "Miserable In Secret",
+        "track_number": null,
+        "url": "https://objectstorage.us-ashburn-1.oraclecloud.com/n/idg3nfddgypd/b/cherryos-deploy-prod/o/music/Miserable%20In%20Secret/Miserable%20In%20Secret.wav"
+      }
+    ]
+  },
+  {
+    "album_name": "Moonlight Freestyle",
+    "artist": "Colin Cherry",
+    "type": "Single",
+    "cover_url": "https://objectstorage.us-ashburn-1.oraclecloud.com/n/idg3nfddgypd/b/cherryos-deploy-prod/o/music/Moonlight%20Freestyle/Moonlight%20Freestyle.jpg",
+    "tracks": [
+      {
+        "title": "Moonlight Freestyle",
+        "track_number": null,
+        "url": "https://objectstorage.us-ashburn-1.oraclecloud.com/n/idg3nfddgypd/b/cherryos-deploy-prod/o/music/Moonlight%20Freestyle/Moonlight%20Freestyle.wav"
+      }
+    ]
+  },
+  {
+    "album_name": "More to Life",
+    "artist": "Colin Cherry",
+    "type": "Single",
+    "cover_url": "https://objectstorage.us-ashburn-1.oraclecloud.com/n/idg3nfddgypd/b/cherryos-deploy-prod/o/music/More%20to%20Life/More%20to%20Life.jpg",
+    "tracks": [
+      {
+        "title": "More to Life",
+        "track_number": null,
+        "url": "https://objectstorage.us-ashburn-1.oraclecloud.com/n/idg3nfddgypd/b/cherryos-deploy-prod/o/music/More%20to%20Life/More%20to%20Life.wav"
+      }
+    ]
+  },
+  {
+    "album_name": "Need Somebody",
+    "artist": "Colin Cherry",
+    "type": "Single",
+    "cover_url": "https://objectstorage.us-ashburn-1.oraclecloud.com/n/idg3nfddgypd/b/cherryos-deploy-prod/o/music/Need%20Somebody/Need%20Somebody.jpg",
+    "tracks": [
+      {
+        "title": "Need Somebody",
+        "track_number": null,
+        "url": "https://objectstorage.us-ashburn-1.oraclecloud.com/n/idg3nfddgypd/b/cherryos-deploy-prod/o/music/Need%20Somebody/Need%20Somebody.wav"
+      }
+    ]
+  },
+  {
+    "album_name": "Pretend (ft. CJ Vana)",
+    "artist": "Colin Cherry",
+    "type": "Single",
+    "cover_url": "https://objectstorage.us-ashburn-1.oraclecloud.com/n/idg3nfddgypd/b/cherryos-deploy-prod/o/music/Pretend%20%28ft.%20CJ%20Vana%29/Pretend.png",
+    "tracks": [
+      {
+        "title": "Pretend (ft. CJ Vana)",
+        "track_number": null,
+        "url": "https://objectstorage.us-ashburn-1.oraclecloud.com/n/idg3nfddgypd/b/cherryos-deploy-prod/o/music/Pretend%20%28ft.%20CJ%20Vana%29/Pretend%20%28ft.%20CJ%20Vana%29.wav"
+      }
+    ]
+  },
+  {
+    "album_name": "Promise",
+    "artist": "Colin Cherry",
+    "type": "Single",
+    "cover_url": "https://objectstorage.us-ashburn-1.oraclecloud.com/n/idg3nfddgypd/b/cherryos-deploy-prod/o/music/Promise/Promise.jpg",
+    "tracks": [
+      {
+        "title": "Promise",
+        "track_number": null,
+        "url": "https://objectstorage.us-ashburn-1.oraclecloud.com/n/idg3nfddgypd/b/cherryos-deploy-prod/o/music/Promise/Promise.wav"
+      }
+    ]
+  },
+  {
+    "album_name": "Reflection",
+    "artist": "Colin Cherry",
+    "type": "Single",
+    "cover_url": "https://objectstorage.us-ashburn-1.oraclecloud.com/n/idg3nfddgypd/b/cherryos-deploy-prod/o/music/Reflection/Reflection.jpg",
+    "tracks": [
+      {
+        "title": "Reflection",
+        "track_number": null,
+        "url": "https://objectstorage.us-ashburn-1.oraclecloud.com/n/idg3nfddgypd/b/cherryos-deploy-prod/o/music/Reflection/Reflection.wav"
+      }
+    ]
+  },
+  {
+    "album_name": "Sorry",
+    "artist": "Colin Cherry",
+    "type": "Single",
+    "cover_url": "https://objectstorage.us-ashburn-1.oraclecloud.com/n/idg3nfddgypd/b/cherryos-deploy-prod/o/music/Sorry/Sorry.jpg",
+    "tracks": [
+      {
+        "title": "Sorry",
+        "track_number": null,
+        "url": "https://objectstorage.us-ashburn-1.oraclecloud.com/n/idg3nfddgypd/b/cherryos-deploy-prod/o/music/Sorry/Sorry.wav"
+      }
+    ]
+  },
+  {
+    "album_name": "Still Ballin (2020)",
+    "artist": "Colin Cherry",
+    "type": "Album",
+    "cover_url": "https://objectstorage.us-ashburn-1.oraclecloud.com/n/idg3nfddgypd/b/cherryos-deploy-prod/o/music/Still%20Ballin%20%282020%29/Still%20Ballin%20%282020%29.jpg",
+    "tracks": [
+      {
+        "title": "Money (ft. Lord Madley)",
+        "track_number": 1,
+        "url": "https://objectstorage.us-ashburn-1.oraclecloud.com/n/idg3nfddgypd/b/cherryos-deploy-prod/o/music/Still%20Ballin%20%282020%29/1%20-Money%20%28ft.%20Lord%20Madley%29.wav"
+      },
+      {
+        "title": "Rainbow Road",
+        "track_number": 2,
+        "url": "https://objectstorage.us-ashburn-1.oraclecloud.com/n/idg3nfddgypd/b/cherryos-deploy-prod/o/music/Still%20Ballin%20%282020%29/2%20-%20Rainbow%20Road.wav"
+      },
+      {
+        "title": "Real Slick",
+        "track_number": 3,
+        "url": "https://objectstorage.us-ashburn-1.oraclecloud.com/n/idg3nfddgypd/b/cherryos-deploy-prod/o/music/Still%20Ballin%20%282020%29/3%20-%20Real%20Slick.wav"
+      },
+      {
+        "title": "Still Ballin",
+        "track_number": 4,
+        "url": "https://objectstorage.us-ashburn-1.oraclecloud.com/n/idg3nfddgypd/b/cherryos-deploy-prod/o/music/Still%20Ballin%20%282020%29/4%20-%20Still%20Ballin.wav"
+      },
+      {
+        "title": "What Do I Know",
+        "track_number": 5,
+        "url": "https://objectstorage.us-ashburn-1.oraclecloud.com/n/idg3nfddgypd/b/cherryos-deploy-prod/o/music/Still%20Ballin%20%282020%29/5%20-%20What%20Do%20I%20Know.wav"
+      }
+    ]
+  }
+]
