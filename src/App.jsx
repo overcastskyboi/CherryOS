@@ -211,7 +211,7 @@ const TerminalApp = () => {
         if (!response.ok) throw new Error('Bad response');
         const data = await response.json();
         setTelemetry(data);
-      } catch (err) {
+      } catch {
         setTelemetry({ error: true });
       }
     };
@@ -525,6 +525,7 @@ const WindowFrame = memo(({ window: win }) => {
     </div>
   );
 });
+WindowFrame.displayName = 'WindowFrame';
 
 const DesktopIcon = memo(({ icon: Icon, label, onClick }) => (
   <div className="flex flex-col items-center justify-center w-32 gap-3 p-3 rounded-xl hover:bg-white/5 cursor-pointer transition-all group active:scale-95 pointer-events-auto" onClick={(e) => { e.stopPropagation(); onClick(); }}>
@@ -534,6 +535,7 @@ const DesktopIcon = memo(({ icon: Icon, label, onClick }) => (
     <span className="text-sm text-gray-200 text-center font-semibold tracking-wide bg-black/40 px-3 py-1 rounded-full">{label}</span>
   </div>
 ));
+DesktopIcon.displayName = 'DesktopIcon';
 
 const Taskbar = () => {
   const { windows, focusWindow, minimizeWindow, activeWindowId, setBootState } = useOS();
