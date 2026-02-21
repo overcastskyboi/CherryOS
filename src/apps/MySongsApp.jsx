@@ -1,17 +1,18 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { Disc, Pause, Play, SkipForward, ArrowLeft, Music, ListMusic, LayoutGrid, AlertCircle, RefreshCcw, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Disc, Pause, Play, SkipForward, ArrowLeft, Music, LayoutGrid, AlertCircle, RefreshCcw, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import LazyImage from '../components/LazyImage';
 import { MusicManifestSchema } from '../data/schemas';
 
 const MyMusicApp = () => {
+  // eslint-disable-next-line no-unused-vars
   const navigate = useNavigate();
-  
+
   // Data State
   const [library, setLibrary] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  
+
   // Pagination State
   const [currentPage, setCurrentPage] = useState(1);
   const ITEMS_PER_PAGE = 8;
@@ -31,6 +32,15 @@ const MyMusicApp = () => {
   const APPLE_MUSIC_URL = "https://music.apple.com/us/artist/colin-cherry/1639040887";
   const SPOTIFY_URL = "https://open.spotify.com/artist/2lCz91g9DugcZhbtvMnaUN";
 
+  // --- Audio Logic ---
+  const skipTrack = useCallback((dir) => {
+    let next = currentIndex + dir;
+    if (next >= queue.length) next = 0;
+    if (next < 0) next = queue.length - 1;
+    setCurrentIndex(next);
+    setIsPlaying(true);
+  }, [currentIndex, queue]);
+
   // --- Data Fetching ---
   const fetchMusicData = useCallback(async () => {
     setLoading(true);
@@ -38,16 +48,16 @@ const MyMusicApp = () => {
     try {
       const response = await fetch(manifestUrl);
       if (!response.ok) throw new Error(`HTTP Error: ${response.status}`);
-      
+
       const json = await response.json();
-      
+
       // Validate Data Schema
       const result = MusicManifestSchema.safeParse(json);
       if (!result.success) {
         console.error("Schema Validation Failed:", result.error);
         throw new Error("Invalid music manifest format.");
       }
-      
+
       // Sort: Newest to Oldest
       const sortedLibrary = result.data.sort((a, b) => {
         return new Date(b.releaseDate || 0) - new Date(a.releaseDate || 0);
@@ -73,7 +83,6 @@ const MyMusicApp = () => {
     };
   }, [fetchMusicData]);
 
-  // --- Audio Logic ---
   useEffect(() => {
     const audio = audioRef.current;
 
@@ -96,7 +105,7 @@ const MyMusicApp = () => {
       audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
       audio.removeEventListener('error', handleError);
     };
-  }, [queue, currentIndex]); // Re-attach if queue changes significantly, though useRef is stable
+  }, [queue, currentIndex, skipTrack]); // Added skipTrack to dependencies
 
   useEffect(() => {
     if (queue.length > 0) {
@@ -138,14 +147,6 @@ const MyMusicApp = () => {
     setIsPlaying(!isPlaying);
   };
 
-  const skipTrack = (dir) => {
-    let next = currentIndex + dir;
-    if (next >= queue.length) next = 0;
-    if (next < 0) next = queue.length - 1;
-    setCurrentIndex(next);
-    setIsPlaying(true);
-  };
-  
   const handleSeek = (e) => {
       const newTime = Number(e.target.value);
       audioRef.current.currentTime = newTime;
@@ -162,7 +163,7 @@ const MyMusicApp = () => {
   // --- Components ---
 
   const LoadingState = () => (
-    <div className="h-full flex flex-col items-center justify-center text-yellow-500 font-mono text-xs animate-pulse">     
+    <div className="h-full flex flex-col items-center justify-center text-yellow-500 font-mono text-xs animate-pulse">
       <Disc className="animate-spin mb-4" size={32} />
       <span>INITIALIZING_AUDIO_CORE...</span>
     </div>
@@ -170,12 +171,13 @@ const MyMusicApp = () => {
 
   const ErrorState = () => (
     <div className="h-full flex flex-col items-center justify-center text-red-500 space-y-4">
+      <img src="/assets/images/cloud_mascot.png" alt="Cloud Mascot" className="w-24 h-24 mb-4" />
       <AlertCircle size={48} />
       <div className="text-center">
         <h2 className="text-xl font-bold uppercase tracking-widest">Connection Error</h2>
         <p className="text-sm text-red-400/60 font-mono mt-2">{error}</p>
       </div>
-      <button 
+      <button
         onClick={fetchMusicData}
         className="px-6 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-500 rounded-full text-xs font-bold uppercase tracking-widest transition-colors flex items-center gap-2"
       >
@@ -190,7 +192,7 @@ const MyMusicApp = () => {
 
       return (
           <div className="flex items-center justify-center gap-4 mt-8 pb-8">
-              <button 
+              <button
                 onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                 disabled={currentPage === 1}
                 className="p-2 rounded-full bg-white/5 hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
@@ -198,7 +200,7 @@ const MyMusicApp = () => {
                   <ChevronLeft size={20} />
               </button>
               <span className="text-xs font-mono text-gray-500">PAGE {currentPage} / {totalPages}</span>
-              <button 
+              <button
                 onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                 disabled={currentPage === totalPages}
                 className="p-2 rounded-full bg-white/5 hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
@@ -211,7 +213,7 @@ const MyMusicApp = () => {
 
   const LibraryView = () => {
       const paginatedLibrary = library.slice(
-          (currentPage - 1) * ITEMS_PER_PAGE, 
+          (currentPage - 1) * ITEMS_PER_PAGE,
           currentPage * ITEMS_PER_PAGE
       );
 
@@ -239,20 +241,20 @@ const MyMusicApp = () => {
                 className="group text-left space-y-3 focus:outline-none w-full"
             >
                 <div className="relative aspect-square rounded-2xl overflow-hidden shadow-2xl border border-white/5 bg-gray-900 group-hover:border-yellow-500/30 transition-all group-hover:-translate-y-1">
-                <LazyImage 
-                    src={album.cover_url} 
-                    alt={album.album_name} 
+                <LazyImage
+                    src={album.cover_url}
+                    alt={album.album_name}
                     className="w-full h-full"
                 />
-                
+
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-60" />
-                
+
                 <div className="absolute bottom-3 left-3 flex gap-2 z-10">
                     <span className={`px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-widest ${album.type === 'Album' ? 'bg-blue-600 text-white' : 'bg-yellow-600 text-black'}`}>
                     {album.type}
                     </span>
                 </div>
-                
+
                 <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/40 backdrop-blur-[2px]">
                     <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-xl transform scale-75 group-hover:scale-100 transition-transform">
                         <Play fill="black" className="text-black ml-1" size={20} />
@@ -266,7 +268,7 @@ const MyMusicApp = () => {
             </button>
             ))}
         </div>
-        
+
         <PaginationControls />
         </div>
       );
@@ -323,7 +325,7 @@ const MyMusicApp = () => {
     return (
       <div className="flex-1 flex flex-col items-center justify-center p-6 space-y-10 animate-in zoom-in-95 duration-500 relative z-10">
         <div className="absolute top-6 left-6 md:top-10 md:left-10 flex gap-4 items-center z-20">
-          <button onClick={() => setView('library')} className="p-2 hover:bg-white/10 rounded-full text-gray-400 hover:text-white transition-colors">        
+          <button onClick={() => setView('library')} className="p-2 hover:bg-white/10 rounded-full text-gray-400 hover:text-white transition-colors">
             <LayoutGrid size={24} />
           </button>
         </div>
@@ -339,19 +341,19 @@ const MyMusicApp = () => {
         <div className="text-center space-y-2 max-w-lg px-4">
           <h2 className="text-3xl md:text-5xl font-black tracking-tighter text-white uppercase italic leading-tight">{current.title}</h2>
           <div className="flex flex-col items-center gap-1">
-            <p className="text-yellow-500 text-xs md:text-sm font-black tracking-[0.3em] uppercase">{current.artist}</p>  
+            <p className="text-yellow-500 text-xs md:text-sm font-black tracking-[0.3em] uppercase">{current.artist}</p>
             <p className="text-gray-600 text-[10px] font-mono uppercase tracking-widest">{current.albumName}</p>
           </div>
         </div>
-        
+
         {/* Progress Bar (Visual Only for now) */}
         <div className="w-full max-w-md flex items-center gap-4 text-[10px] font-mono text-gray-500">
             <span>{formatTime(progress)}</span>
-            <input 
-                type="range" 
-                min="0" 
-                max={duration || 0} 
-                value={progress} 
+            <input
+                type="range"
+                min="0"
+                max={duration || 0}
+                value={progress}
                 onChange={handleSeek}
                 className="flex-1 h-1 bg-gray-800 rounded-lg appearance-none cursor-pointer accent-yellow-500"
             />
@@ -361,8 +363,8 @@ const MyMusicApp = () => {
         {/* Controls */}
         <div className="flex items-center justify-center gap-8 md:gap-12">
             <button onClick={() => skipTrack(-1)} className="text-gray-500 hover:text-white transition-colors active:scale-90 p-4"><SkipForward size={32} className="rotate-180" /></button>
-            <button 
-                onClick={togglePlay} 
+            <button
+                onClick={togglePlay}
                 className="w-20 h-20 bg-white rounded-full flex items-center justify-center text-black hover:scale-105 active:scale-95 transition-all shadow-2xl hover:shadow-yellow-500/20"
             >
               {isPlaying ? <Pause size={32} fill="currentColor" /> : <Play size={32} fill="currentColor" className="ml-1" />}

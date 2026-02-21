@@ -1,41 +1,48 @@
 export const ANIME_DATA = {
   catalogue: [
-    { 
-      title: "Berserk", 
-      type: "Manga", 
-      score: 9.5, 
-      progress: "376+ Ch", 
+    {
+      title: "Berserk",
+      type: "Manga",
+      score: 9.5,
+      progress: "376+ Ch",
       status: "Reading"
     },
-    { 
-      title: "Hunter x Hunter (2011)", 
-      type: "Anime", 
-      score: 10, 
-      progress: "148 Eps", 
+    {
+      title: "Hunter x Hunter (2011)",
+      type: "Anime",
+      score: 10,
+      progress: "148 Eps",
       status: "Completed"
     },
-    { 
-      title: "Fullmetal Alchemist: B", 
-      type: "Anime", 
-      score: 10, 
-      progress: "64 Eps", 
+    {
+      title: "Fullmetal Alchemist: B",
+      type: "Anime",
+      score: 10,
+      progress: "64 Eps",
       status: "Completed"
     },
-    { 
-      title: "Steins;Gate", 
-      type: "Anime", 
-      score: 10, 
-      progress: "24 Eps", 
+    {
+      title: "Steins;Gate",
+      type: "Anime",
+      score: 10,
+      progress: "24 Eps",
       status: "Completed"
     },
-    { 
-      title: "Vinland Saga Season 2", 
-      type: "Anime", 
-      score: 10, 
-      progress: "24 Eps", 
+    {
+      title: "Vinland Saga Season 2",
+      type: "Anime",
+      score: 10,
+      progress: "24 Eps",
       status: "Completed"
     }
-  ]
+  ],
+  covers: {
+    "Berserk": "https://via.placeholder.com/300x450?text=Berserk+Cover",
+    "Hunter x Hunter (2011)": "https://via.placeholder.com/300x450?text=HxH+Cover",
+    "Fullmetal Alchemist: B": "https://via.placeholder.com/300x450?text=FMA+Cover",
+    "Steins;Gate": "https://via.placeholder.com/300x450?text=SteinsGate+Cover",
+    "Vinland Saga Season 2": "https://via.placeholder.com/300x450?text=Vinland+Saga+Cover"
+  }
 };
 
 export const TRACKS = [
@@ -52,7 +59,14 @@ export const GAMING_DATA = {
     { title: "Metal Gear Solid", platform: "Retro", playtime: "20h", status: "Completed", rating: 9.5 },
     { title: "Silent Hill 2", platform: "Retro", playtime: "12h", status: "Completed", rating: 10 },
     { title: "Cyberpunk 2077", platform: "Steam", playtime: "65h", status: "Completed", rating: 9 }
-  ]
+  ],
+  covers: {
+    "Final Fantasy VII": "https://via.placeholder.com/400x400?text=FF7+Cover",
+    "Elden Ring": "https://via.placeholder.com/400x400?text=EldenRing+Cover",
+    "Metal Gear Solid": "https://via.placeholder.com/400x400?text=MGS+Cover",
+    "Silent Hill 2": "https://via.placeholder.com/400x400?text=SH2+Cover",
+    "Cyberpunk 2077": "https://via.placeholder.com/400x400?text=CP2077+Cover"
+  }
 };
 
 export const VST_LIST = {

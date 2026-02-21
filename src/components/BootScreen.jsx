@@ -12,7 +12,6 @@ const BootScreen = () => {
           clearInterval(timer);
           return 100;
         }
-        // eslint-disable-next-line sonarjs/pseudo-random
         return Math.min(100, p + Math.floor(Math.random() * 10));
       });
     }, 100);
@@ -27,6 +26,7 @@ const BootScreen = () => {
 
   return (
     <div className="h-screen w-screen bg-black flex flex-col items-center justify-center font-mono">
+      <img src="/assets/images/cloud_mascot.png" alt="Cloud Mascot" className="w-24 h-24 mb-4" />
       <div className="w-64 space-y-2">
         <div className="flex justify-between text-xs text-green-500">
           <span>BOOT_LOADER</span>

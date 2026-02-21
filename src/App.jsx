@@ -8,6 +8,11 @@ import WatchLogApp from './apps/WatchLogApp';
 import GameCenterApp from './apps/GameCenterApp';
 import StudioRackApp from './apps/StudioRackApp';
 import CloudDashboardApp from './apps/CloudDashboardApp';
+import CodeFlowApp from './apps/CodeFlowApp';
+import CloudCastApp from './apps/CloudCastApp';
+import ScratchpadApp from './apps/ScratchpadApp';
+import CalculatorApp from './apps/CalculatorApp';
+import CollectionTrackerApp from './apps/CollectionTrackerApp';
 
 const MainContent = () => {
   const { bootState } = useOS();
@@ -18,11 +23,16 @@ const MainContent = () => {
   return (
     <Routes>
       <Route path="/" element={<Desktop />} />
-      <Route path="/songs" element={<div className="h-screen w-screen bg-black overflow-hidden"><MySongsApp /></div>} />  
-      <Route path="/watch" element={<div className="h-screen w-screen bg-black overflow-hidden"><WatchLogApp /></div>} /> 
-      <Route path="/games" element={<div className="h-screen w-screen bg-black overflow-hidden"><GameCenterApp /></div>} />
-      <Route path="/studio" element={<div className="h-screen w-screen bg-black overflow-hidden"><StudioRackApp /></div>} />
-      <Route path="/cloud" element={<div className="h-screen w-screen bg-black overflow-hidden"><CloudDashboardApp /></div>} />
+      <Route path="/songs" element={<div className="bg-black"><MySongsApp /></div>} />  
+      <Route path="/watch" element={<div className="bg-black"><WatchLogApp /></div>} /> 
+      <Route path="/games" element={<div className="bg-black"><GameCenterApp /></div>} />
+      <Route path="/studio" element={<div className="bg-black"><StudioRackApp /></div>} />
+      <Route path="/cloud" element={<div className="bg-black"><CloudDashboardApp /></div>} />
+      <Route path="/codeflow" element={<div className="bg-gray-900"><CodeFlowApp /></div>} />
+      <Route path="/cloudcast" element={<div className="bg-blue-900"><CloudCastApp /></div>} />
+      <Route path="/scratchpad" element={<div className="bg-gray-800"><ScratchpadApp /></div>} />
+      <Route path="/calculator" element={<div className="bg-gray-900"><CalculatorApp /></div>} />
+      <Route path="/collection-tracker" element={<div className="bg-slate-900"><CollectionTrackerApp /></div>} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );

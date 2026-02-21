@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Monitor, Music, Clapperboard, Gamepad2, Cloud } from 'lucide-react';
+import { Monitor, Music, Clapperboard, Gamepad2, Cloud, FileText, CloudRain, Calculator, Package } from 'lucide-react';
 import SystemHealth from './SystemHealth';
 
 const Desktop = () => {
@@ -23,6 +23,11 @@ const Desktop = () => {
     { id: 'games', name: 'Game Center', icon: <Gamepad2 size={64} />, path: '/games', color: 'text-green-500' },
     { id: 'studio', name: 'Studio Rack', icon: <Monitor size={64} />, path: '/studio', color: 'text-blue-500' },
     { id: 'cloud', name: 'OCI Console', icon: <Cloud size={64} />, path: '/cloud', color: 'text-cyan-500' },
+    { id: 'codeflow', name: 'CodeFlow', icon: <FileText size={64} />, path: '/codeflow', color: 'text-purple-500' },
+    { id: 'cloudcast', name: 'CloudCast', icon: <CloudRain size={64} />, path: '/cloudcast', color: 'text-blue-400' },
+    { id: 'scratchpad', name: 'Scratchpad', icon: <FileText size={64} />, path: '/scratchpad', color: 'text-orange-400' },
+    { id: 'calculator', name: 'Calculator', icon: <Calculator size={64} />, path: '/calculator', color: 'text-rose-500' },
+    { id: 'collection-tracker', name: 'Collection Tracker', icon: <Package size={64} />, path: '/collection-tracker', color: 'text-amber-500' },
   ];
 
   return (

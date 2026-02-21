@@ -1,8 +1,25 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Gamepad2, ArrowLeft, RefreshCcw, Star, AlertCircle, Search, Trophy, Monitor } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import LazyImage from '../components/LazyImage';
 import { GAMING_DATA } from '../data/constants';
+
+const ErrorState = ({ message, onRetry }) => (
+  <div className="h-full flex flex-col items-center justify-center text-red-500 space-y-4">
+    <img src="/assets/images/cloud_mascot.png" alt="Cloud Mascot" className="w-24 h-24 mb-4" />
+    <AlertCircle size={48} />
+    <div className="text-center">
+      <h2 className="text-xl font-bold uppercase tracking-widest">Connection Error</h2>
+      <p className="text-sm text-red-400/60 font-mono mt-2">{message}</p>
+    </div>
+    <button
+      onClick={onRetry}
+      className="px-6 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-500 rounded-full text-xs font-bold uppercase tracking-widest transition-colors flex items-center gap-2"
+    >
+      <RefreshCcw size={14} /> Retry Connection
+    </button>
+  </div>
+);
 
 const GameCenterApp = () => {
   const navigate = useNavigate();
@@ -27,8 +44,8 @@ const GameCenterApp = () => {
     try {
       // Fetch from both Steam and RetroAchievements
       const [steamRes, raRes] = await Promise.all([
-        fetch(`${PROXY_URL}/steam`, { headers: { 'Accept': 'application/json' } }).catch(() => null),
-        fetch(`${PROXY_URL}/retroachievements`, { headers: { 'Accept': 'application/json' } }).catch(() => null)
+        fetch(`${PROXY_URL}/steam`, { headers: { 'Accept': 'application/json' } }).catch(err => { console.error("Steam fetch error:", err); return null; }),
+        fetch(`${PROXY_URL}/retroachievements`, { headers: { 'Accept': 'application/json' } }).catch(err => { console.error("RetroAchievements fetch error:", err); return null; })
       ]);
 
       let combinedData = [];
@@ -38,7 +55,7 @@ const GameCenterApp = () => {
         if (Array.isArray(steamJson.data)) {
           combinedData = [...combinedData, ...steamJson.data.map(item => ({
             ...item,
-            coverImage: item.coverImage || gameCoversMap.get(item.title) || undefined
+            coverImage: item.coverImage || GAMING_DATA.covers[item.title] || undefined
           }))];
         }
       }
@@ -48,7 +65,7 @@ const GameCenterApp = () => {
         if (Array.isArray(raJson.data)) {
           combinedData = [...combinedData, ...raJson.data.map(item => ({
             ...item,
-            coverImage: item.coverImage || gameCoversMap.get(item.title) || undefined
+            coverImage: item.coverImage || GAMING_DATA.covers[item.title] || undefined
           }))];
         }
       }
@@ -57,7 +74,8 @@ const GameCenterApp = () => {
         setData(combinedData);
       }
     } catch (err) {
-      console.error("Fetch error:", err);
+      console.error("Fetch error in fetchData:", err); // Log the error explicitly
+      setError(err.message || 'Failed to fetch game data.');
     } finally {
       setLoading(false);
     }
@@ -69,7 +87,7 @@ const GameCenterApp = () => {
 
   const filteredAndSortedData = useMemo(() => {
     return data
-      .filter(item => 
+      .filter(item =>
         item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         item.platform.toLowerCase().includes(searchQuery.toLowerCase())
       )
@@ -85,13 +103,13 @@ const GameCenterApp = () => {
   const GameCard = ({ item }) => (
     <div className="group relative bg-gray-900/40 border border-white/5 rounded-2xl overflow-hidden hover:border-green-500/30 transition-all hover:-translate-y-1 shadow-2xl">
       <div className="aspect-square relative">
-        <LazyImage 
-          src={item.coverImage || 'https://via.placeholder.com/400x400?text=No+Image'} 
+        <LazyImage
+          src={item.coverImage || 'https://via.placeholder.com/400x400?text=No+Image'}
           alt={item.title}
           className="w-full h-full object-cover"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent opacity-80" />
-        
+
         <div className="absolute top-3 right-3">
           <div className={`px-3 py-1 rounded-full bg-black/60 backdrop-blur-md border border-white/10 flex items-center gap-1.5 ${getRatingColor(item.rating)}`}>
             <Star size={12} className="fill-current" />
@@ -108,7 +126,7 @@ const GameCenterApp = () => {
           </div>
         </div>
       </div>
-      
+
       <div className="p-4 bg-black/40 border-t border-white/5 flex items-center justify-between">
         <div className="flex flex-col">
           <span className="text-[9px] text-gray-500 uppercase font-bold tracking-widest">Playtime</span>
@@ -149,10 +167,10 @@ const GameCenterApp = () => {
                     </div>
                 ))}
             </div>
-            
+
             <div className="relative hidden md:block">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" size={16} />
-                <input 
+                <input
                     type="text"
                     placeholder="Search collection..."
                     value={searchQuery}
@@ -160,10 +178,10 @@ const GameCenterApp = () => {
                     className="bg-white/5 border border-white/10 rounded-full py-2 pl-10 pr-4 text-xs font-bold text-white placeholder-gray-600 focus:outline-none focus:border-green-500/50 w-64 transition-all"
                 />
             </div>
-            
-            <button 
-                onClick={fetchData} 
-                disabled={loading} 
+
+            <button
+                onClick={fetchData}
+                disabled={loading}
                 className="p-3 bg-white/5 hover:bg-white/10 rounded-full transition-all disabled:opacity-30 border border-white/5"
             >
                 <RefreshCcw size={18} className={loading ? 'animate-spin' : 'text-green-500'} />
@@ -173,31 +191,36 @@ const GameCenterApp = () => {
 
       <main className="flex-1 overflow-y-auto p-6 md:p-12">
         <div className="max-w-7xl mx-auto">
-          {/* Search Mobile */}
-          <div className="md:hidden mb-8 relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" size={16} />
-                <input 
-                    type="text"
-                    placeholder="Search collection..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-4 text-sm font-bold text-white placeholder-gray-600 focus:outline-none focus:border-green-500/50 w-full transition-all"
-                />
-          </div>
-
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 gap-8">
-            {filteredAndSortedData.map((item, idx) => (
-              <GameCard key={idx} item={item} />
-            ))}
-          </div>
-
-          {filteredAndSortedData.length === 0 && (
-              <div className="h-96 flex flex-col items-center justify-center text-center space-y-4">
-                  <div className="p-6 bg-white/5 rounded-full">
-                    <Gamepad2 size={48} className="text-gray-700" />
-                  </div>
-                  <p className="text-gray-500 font-bold uppercase tracking-widest text-xs">No games found in your collection</p>
+          {error && <ErrorState message={error} onRetry={fetchData} />}
+          {!error && (
+            <>
+              {/* Search Mobile */}
+              <div className="md:hidden mb-8 relative">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" size={16} />
+                    <input
+                        type="text"
+                        placeholder="Search collection..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-4 text-sm font-bold text-white placeholder-gray-600 focus:outline-none focus:border-green-500/50 w-full transition-all"
+                    />
               </div>
+
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 gap-8">
+                {filteredAndSortedData.map((item, idx) => (
+                  <GameCard key={idx} item={item} />
+                ))}
+              </div>
+
+              {filteredAndSortedData.length === 0 && (
+                  <div className="h-96 flex flex-col items-center justify-center text-center space-y-4">
+                      <div className="p-6 bg-white/5 rounded-full">
+                        <Gamepad2 size={48} className="text-gray-700" />
+                      </div>
+                      <p className="text-gray-500 font-bold uppercase tracking-widest text-xs">No games found in your collection</p>
+                  </div>
+              )}
+            </>
           )}
         </div>
       </main>

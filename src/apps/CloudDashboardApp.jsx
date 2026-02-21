@@ -1,11 +1,47 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
-  Activity, ArrowLeft, Shield, DollarSign, Server, 
+import {
+  Activity, ArrowLeft, Shield, DollarSign, Server,
   AlertTriangle, CheckCircle, Database, Globe, Lock,
-  RefreshCw, TrendingUp
+  TrendingUp
 } from 'lucide-react';
 import { useOS } from '../context/OSContext';
+
+const TabButton = ({ id, label, icon: Icon, activeTab, setActiveTab, isMobile }) => (
+  <button
+    onClick={() => setActiveTab(id)}
+    className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-all ${
+      activeTab === id
+        ? 'bg-blue-600/20 text-blue-400 border border-blue-600/50 shadow-lg shadow-blue-900/20'
+        : 'text-gray-500 hover:text-white hover:bg-white/5'
+    }`}
+  >
+    <Icon size={16} />
+    {!isMobile && <span>{label}</span>}
+  </button>
+);
+
+const StatCard = ({ label, value, unit, icon: Icon, color, trend }) => (
+  <div className="bg-gray-900/50 border border-white/5 p-6 rounded-2xl relative overflow-hidden group">
+    <div className={`absolute top-0 right-0 p-3 opacity-20 group-hover:opacity-40 transition-opacity ${color}`}>
+      <Icon size={64} />
+    </div>
+    <div className="relative z-10">
+      <h3 className="text-gray-500 text-[10px] font-bold uppercase tracking-widest mb-1">{label}</h3>
+      <div className="flex items-baseline gap-1">
+        <span className="text-2xl font-black text-white">{value}</span>
+        <span className="text-xs text-gray-400 font-mono">{unit}</span>
+      </div>
+      {trend && (
+        <div className="flex items-center gap-1 mt-2 text-[10px] font-bold text-green-500">
+          <TrendingUp size={12} />
+          <span>{trend}</span>
+        </div>
+      )}
+    </div>
+  </div>
+);
+
 
 const CloudDashboardApp = () => {
   const navigate = useNavigate();
@@ -32,6 +68,7 @@ const CloudDashboardApp = () => {
           requests: prev.requests + Math.floor(Math.random() * 5) + 1
         }));
       } catch (e) {
+        console.error("Failed to fetch real metrics:", e); // Handle exception
         setMetrics(prev => ({ ...prev, status: 'degraded' }));
       }
     };
@@ -41,73 +78,38 @@ const CloudDashboardApp = () => {
     return () => clearInterval(interval);
   }, []);
 
-  const TabButton = ({ id, label, icon: Icon }) => (
-    <button
-      onClick={() => setActiveTab(id)}
-      className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-all ${
-        activeTab === id 
-          ? 'bg-blue-600/20 text-blue-400 border border-blue-600/50 shadow-lg shadow-blue-900/20' 
-          : 'text-gray-500 hover:text-white hover:bg-white/5'
-      }`}
-    >
-      <Icon size={16} />
-      {!isMobile && <span>{label}</span>}
-    </button>
-  );
-
-  const StatCard = ({ label, value, unit, icon: Icon, color, trend }) => (
-    <div className="bg-gray-900/50 border border-white/5 p-6 rounded-2xl relative overflow-hidden group">
-      <div className={`absolute top-0 right-0 p-3 opacity-20 group-hover:opacity-40 transition-opacity ${color}`}>
-        <Icon size={64} />
-      </div>
-      <div className="relative z-10">
-        <h3 className="text-gray-500 text-[10px] font-bold uppercase tracking-widest mb-1">{label}</h3>
-        <div className="flex items-baseline gap-1">
-          <span className="text-2xl font-black text-white">{value}</span>
-          <span className="text-xs text-gray-400 font-mono">{unit}</span>
-        </div>
-        {trend && (
-          <div className="flex items-center gap-1 mt-2 text-[10px] font-bold text-green-500">
-            <TrendingUp size={12} />
-            <span>{trend}</span>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-
   const renderOverview = () => (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard 
-          label="Network Latency" 
-          value={metrics.latency} 
-          unit="ms" 
-          icon={Activity} 
-          color="text-green-500" 
+        <StatCard
+          label="Network Latency"
+          value={metrics.latency}
+          unit="ms"
+          icon={Activity}
+          color="text-green-500"
           trend="-2% vs avg"
         />
-        <StatCard 
-          label="System Uptime" 
-          value={metrics.uptime} 
-          unit="%" 
-          icon={Server} 
-          color="text-blue-500" 
+        <StatCard
+          label="System Uptime"
+          value={metrics.uptime}
+          unit="%"
+          icon={Server}
+          color="text-blue-500"
         />
-        <StatCard 
-          label="Total Requests" 
-          value={(1420 + metrics.requests).toLocaleString()} 
-          unit="req" 
-          icon={Globe} 
-          color="text-purple-500" 
+        <StatCard
+          label="Total Requests"
+          value={(1420 + metrics.requests).toLocaleString()}
+          unit="req"
+          icon={Globe}
+          color="text-purple-500"
           trend="+12% today"
         />
-        <StatCard 
-          label="Security Score" 
-          value="A+" 
-          unit="OWASP" 
-          icon={Shield} 
-          color="text-yellow-500" 
+        <StatCard
+          label="Security Score"
+          value="A+"
+          unit="OWASP"
+          icon={Shield}
+          color="text-yellow-500"
         />
       </div>
 
@@ -127,10 +129,10 @@ const CloudDashboardApp = () => {
             {[...Array(40)].map((_, i) => {
               const height = Math.max(10, Math.random() * 100);
               return (
-                <div 
-                  key={i} 
+                <div
+                  key={i}
                   className="flex-1 bg-blue-600/20 hover:bg-blue-500 transition-colors rounded-t-sm"
-                  style={{ height: `${height}%` }} 
+                  style={{ height: `${height}%` }}
                 />
               );
             })}
@@ -156,7 +158,7 @@ const CloudDashboardApp = () => {
                 <span className="text-[10px] text-green-500 font-bold">ACTIVE</span>
               </div>
             </div>
-            
+
             <div className="flex items-center justify-between p-3 bg-black/40 rounded-xl border border-white/5">
               <div className="flex items-center gap-3">
                 <Globe size={18} className="text-gray-400" />
@@ -197,7 +199,7 @@ const CloudDashboardApp = () => {
         <div>
           <h4 className="text-sm font-bold text-yellow-500 uppercase tracking-wide">Public Demo Mode</h4>
           <p className="text-xs text-yellow-200/70 mt-1">
-            Billing data displayed below is simulated for portfolio demonstration purposes. 
+            Billing data displayed below is simulated for portfolio demonstration purposes.
             Actual OCI billing details are private.
           </p>
         </div>
@@ -219,8 +221,8 @@ const CloudDashboardApp = () => {
                   <span className="text-white font-mono">${item.val}.00</span>
                 </div>
                 <div className="h-2 bg-gray-800 rounded-full overflow-hidden">
-                  <div 
-                    className="h-full bg-blue-500 rounded-full" 
+                  <div
+                    className="h-full bg-blue-500 rounded-full"
                     style={{ width: `${item.val}%` }}
                   />
                 </div>
@@ -273,9 +275,9 @@ const CloudDashboardApp = () => {
           </div>
         </div>
         <div className="flex gap-2">
-          <TabButton id="overview" label="Overview" icon={Activity} />
-          <TabButton id="cost" label="Cost Analysis" icon={DollarSign} />
-          <TabButton id="security" label="Security" icon={Shield} />
+          <TabButton id="overview" label="Overview" icon={Activity} activeTab={activeTab} setActiveTab={setActiveTab} isMobile={isMobile} />
+          <TabButton id="cost" label="Cost Analysis" icon={DollarSign} activeTab={activeTab} setActiveTab={setActiveTab} isMobile={isMobile} />
+          <TabButton id="security" label="Security" icon={Shield} activeTab={activeTab} setActiveTab={setActiveTab} isMobile={isMobile} />
         </div>
       </div>
 
@@ -289,7 +291,7 @@ const CloudDashboardApp = () => {
               <Shield size={64} className="text-green-500 opacity-20" />
               <h2 className="text-2xl font-bold text-white">Zero Trust Architecture</h2>
               <p className="max-w-md text-gray-500 text-sm">
-                All endpoints are secured via strict Content Security Policy (CSP) and serverless proxy verification. 
+                All endpoints are secured via strict Content Security Policy (CSP) and serverless proxy verification.
                 Vulnerability scanning is automated via GitHub Actions.
               </p>
               <div className="flex gap-2 mt-4">

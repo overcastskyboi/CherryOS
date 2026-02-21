@@ -1,5 +1,28 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { ShieldCheck, Globe, Database, Activity, X } from 'lucide-react';
+
+const StatusPill = ({ label, icon: Icon, state, latency }) => {
+  const colors = {
+    online: 'text-green-500 bg-green-500/10 border-green-500/20',
+    checking: 'text-yellow-500 bg-yellow-500/10 border-yellow-500/20 animate-pulse',
+    offline: 'text-red-500 bg-red-500/10 border-red-500/20',
+    error: 'text-orange-500 bg-orange-500/10 border-orange-500/20',
+    demo: 'text-blue-500 bg-blue-500/10 border-blue-500/20'
+  };
+
+  return (
+    <div className={`flex items-center justify-between p-3 rounded-xl border ${colors[state] || colors.offline}`}>
+      <div className="flex items-center gap-3">
+        <Icon size={18} />
+        <span className="text-xs font-bold uppercase tracking-widest">{label}</span>
+      </div>
+      <div className="flex flex-col items-end">
+        <span className="text-[10px] font-black uppercase">{state}</span>
+        {latency > 0 && <span className="text-[8px] font-mono opacity-60">{latency}ms</span>}
+      </div>
+    </div>
+  );
+};
 
 const SystemHealth = ({ onClose }) => {
   const [status, setStatus] = useState({
@@ -8,7 +31,7 @@ const SystemHealth = ({ onClose }) => {
     storage: { state: 'checking', used: '...' }
   });
 
-  const checkConnectivity = async () => {
+  const checkConnectivity = useCallback(async () => {
     // Check OCI
     const startOci = Date.now();
     try {
@@ -31,36 +54,17 @@ const SystemHealth = ({ onClose }) => {
     } else {
       setStatus(prev => ({ ...prev, proxy: { state: 'demo', latency: 0 } }));
     }
-  };
+  }, [setStatus]); // Dependency on setStatus, which is stable
 
   useEffect(() => {
-    checkConnectivity();
+    const init = async () => {
+      await checkConnectivity();
+    };
+    init();
+
     const interval = setInterval(checkConnectivity, 30000);
     return () => clearInterval(interval);
-  }, []);
-
-  const StatusPill = ({ label, icon: Icon, state, latency }) => {
-    const colors = {
-      online: 'text-green-500 bg-green-500/10 border-green-500/20',
-      checking: 'text-yellow-500 bg-yellow-500/10 border-yellow-500/20 animate-pulse',
-      offline: 'text-red-500 bg-red-500/10 border-red-500/20',
-      error: 'text-orange-500 bg-orange-500/10 border-orange-500/20',
-      demo: 'text-blue-500 bg-blue-500/10 border-blue-500/20'
-    };
-
-    return (
-      <div className={`flex items-center justify-between p-3 rounded-xl border ${colors[state] || colors.offline}`}>
-        <div className="flex items-center gap-3">
-          <Icon size={18} />
-          <span className="text-xs font-bold uppercase tracking-widest">{label}</span>
-        </div>
-        <div className="flex flex-col items-end">
-          <span className="text-[10px] font-black uppercase">{state}</span>
-          {latency > 0 && <span className="text-[8px] font-mono opacity-60">{latency}ms</span>}
-        </div>
-      </div>
-    );
-  };
+  }, [checkConnectivity]); // Dependency on checkConnectivity
 
   return (
     <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 bg-black/90 backdrop-blur-2xl border border-white/10 rounded-3xl p-6 shadow-[0_50px_100px_rgba(0,0,0,0.8)] z-[1000] animate-in zoom-in-95 duration-200">
