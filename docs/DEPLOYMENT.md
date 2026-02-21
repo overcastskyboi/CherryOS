@@ -16,7 +16,7 @@ This guide outlines the procedures for deploying CherryOS to various environment
 
 Before deploying CherryOS, ensure you have:
 
-- Node.js v16 or later
+- Node.js v18 or later (see `engines` in package.json)
 - npm or yarn package manager
 - Git (for version control)
 - Access to deployment target (local server, cloud provider, etc.)
@@ -35,9 +35,9 @@ To run CherryOS locally for development:
    npm run dev
    ```
 
-3. Open your browser to `http://localhost:5173`
+3. Open your browser to `http://localhost:5173` (or the URL shown in the terminal).
 
-The development server includes hot reloading for immediate feedback on code changes.
+The development server includes hot reloading and applies security headers (X-Content-Type-Options, X-Frame-Options, Referrer-Policy, Permissions-Policy) for local testing.
 
 ## Production Build
 
@@ -154,7 +154,7 @@ To use environment variables:
 
 ### GitHub Actions
 
-Example workflow for automated deployment:
+This repository uses the **CherryOS Lifecycle** workflow (`.github/workflows/main.yml`). On every **push to `main`** it runs lint, unit tests, dependency audit, and E2E tests (including cross-browser and mobile), then builds and deploys to **GitHub Pages**. Ensure GitHub Pages is enabled in the repo settings (Actions → Pages). Example pattern:
 
 ```yaml
 name: Deploy to GitHub Pages

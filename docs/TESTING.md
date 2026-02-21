@@ -2,6 +2,15 @@
 
 This document outlines the testing procedures and protocols for ensuring the quality and reliability of CherryOS.
 
+## Current Implementation (Quick Reference)
+
+- **Unit tests:** Vitest — `npm test` (or `npm run test:coverage` for coverage).
+- **E2E tests:** Playwright — `npm run test:e2e`. Covers Chromium, Firefox, WebKit, and mobile viewports (Pixel 5, iPhone 12).
+- **Lint:** ESLint 9 — `npm run lint`.
+- **CI:** On every push to `main`, the workflow runs lint, unit tests, dependency audit, E2E (all browsers/devices), then deploys to GitHub Pages. See [.github/workflows/main.yml](../.github/workflows/main.yml).
+- **Performance:** E2E performance test enforces DOM Content Loaded &lt; 2s and LCP &lt; 2.5s (Core Web Vitals–aligned). See `src/test/e2e/performance.spec.js`.
+- **Security:** Headers in dev/preview; dependency audit in CI; see [SECURITY_AUDIT.md](SECURITY_AUDIT.md).
+
 ## Table of Contents
 
 1. [Testing Strategy](#testing-strategy)
@@ -63,12 +72,17 @@ describe('formatTime', () => {
 ### Running Unit Tests
 
 ```bash
-npm run test:unit
+npm test
 ```
 
 Or for continuous testing:
 ```bash
-npm run test:unit -- --watch
+npm test -- --watch
+```
+
+Coverage:
+```bash
+npm run test:coverage
 ```
 
 ## Component Testing
@@ -133,8 +147,10 @@ describe('DesktopIcon', () => {
 
 ### Running Component Tests
 
+Component tests are run with the same Vitest suite:
+
 ```bash
-npm run test:components
+npm test
 ```
 
 ## Integration Testing
@@ -186,64 +202,37 @@ describe('Window Management', () => {
 
 ### Running Integration Tests
 
+Integration tests are part of the main test suite:
+
 ```bash
-npm run test:integration
+npm test
 ```
 
 ## End-to-End Testing
 
-End-to-end tests simulate real user scenarios across the entire application.
+End-to-end tests simulate real user scenarios across the entire application using **Playwright**.
 
 ### Setup
 
-Using Cypress:
+Playwright is already a dev dependency. Install browsers (first time or CI):
+
 ```bash
-npm install --save-dev cypress
+npx playwright install --with-deps
 ```
 
-### Example E2E Test
+### E2E Test Suites
 
-```javascript
-// cypress/e2e/desktop.cy.js
-describe('Desktop Experience', () => {
-  beforeEach(() => {
-    cy.visit('/');
-  });
-  
-  it('completes boot sequence', () => {
-    // Wait for boot to complete
-    cy.contains('CHERRY OS').should('be.visible');
-    
-    // Click to unlock
-    cy.get('[data-testid="lockscreen"]').click();
-    
-    // Verify desktop is visible
-    cy.contains('My Songs').should('be.visible');
-  });
-  
-  it('opens and interacts with Terminal app', () => {
-    // Unlock desktop
-    cy.get('[data-testid="lockscreen"]').click();
-    
-    // Open Terminal
-    cy.contains('Terminal').click();
-    
-    // Type command
-    cy.get('[data-testid="terminal-input"]')
-      .type('help{enter}');
-      
-    // Verify output
-    cy.contains('Commands:').should('be.visible');
-  });
-});
-```
+- **basic.spec.js** — Boot, lock screen, unlock, open Terminal.
+- **mobile.spec.js** — Mobile viewport: boot, unlock, desktop, mobile nav, open app.
+- **performance.spec.js** — Load and LCP thresholds (DOM Content Loaded &lt; 2s, LCP &lt; 2.5s).
+- **screenshot.spec.js**, **debug_console.spec.js** — Visual and console checks.
 
 ### What to E2E Test
 
 - Complete user journeys
 - Critical business flows
-- Multi-page navigation
-- External service integrations
+- Mobile and desktop viewports
+- Performance budgets
 
 ### Running E2E Tests
 
@@ -251,71 +240,65 @@ describe('Desktop Experience', () => {
 npm run test:e2e
 ```
 
-Or open Cypress UI:
+To run with UI or a single browser:
+
 ```bash
-npm run test:e2e:open
+npx playwright test --ui
+npx playwright test --project=chromium
 ```
 
-## Cross-Browser Testing
+## Cross-Browser and Device Testing
 
-Ensure CherryOS works across different browsers and devices.
+Ensure CherryOS works across major browsers and devices.
 
-### Supported Browsers
+### Automated Browser/Device Matrix (Playwright)
+
+- **Chromium** (Desktop Chrome)
+- **Firefox** (Desktop Firefox)
+- **WebKit** (Desktop Safari)
+- **Mobile Chrome** (Pixel 5 viewport: 393×851)
+- **Mobile Safari** (iPhone 12 viewport: 390×844)
+
+All E2E specs run against these projects; CI runs the full matrix on every push to `main`.
+
+### Supported Browsers (Manual / Production)
 
 - Chrome (latest 2 versions)
 - Firefox (latest 2 versions)
 - Safari (latest 2 versions)
 - Edge (latest 2 versions)
 
-### Testing Process
-
-1. Manual testing on supported browsers
-2. Automated testing with BrowserStack or Sauce Labs
-3. Visual regression testing
-
 ### Responsive Testing
 
-Test on various screen sizes:
-- Mobile (320px, 375px, 414px)
-- Tablet (768px, 1024px)
-- Desktop (1280px, 1440px, 1920px)
+E2E covers mobile viewports; for manual checks use:
+
+- Mobile: 320px, 375px, 390px, 414px
+- Tablet: 768px, 1024px
+- Desktop: 1280px, 1440px, 1920px
 
 ## Performance Testing
 
-Monitor and optimize performance metrics.
+Performance is enforced in CI via Playwright.
 
-### Metrics to Track
+### Enforced Thresholds (Industry-Standard)
+
+- **DOM Content Loaded:** &lt; 2s
+- **Largest Contentful Paint (LCP):** &lt; 2.5s (Core Web Vitals–aligned)
+
+Implemented in `src/test/e2e/performance.spec.js`.
+
+### Metrics to Monitor
 
 - First Contentful Paint (FCP)
 - Largest Contentful Paint (LCP)
-- First Input Delay (FID)
+- First Input Delay (FID) / Interaction to Next Paint (INP)
 - Cumulative Layout Shift (CLS)
 
-### Tools
+### Additional Tools
 
-- Lighthouse audits
+- Lighthouse (Chrome DevTools or CLI)
 - WebPageTest.org
 - Chrome DevTools Performance panel
-
-### Performance Testing Script
-
-```javascript
-// performance/test-performance.js
-const lighthouse = require('lighthouse');
-const chromeLauncher = require('chrome-launcher');
-
-async function runLighthouse(url) {
-  const chrome = await chromeLauncher.launch({chromeFlags: ['--headless']});
-  const options = {logLevel: 'info', output: 'html', port: chrome.port};
-  const runnerResult = await lighthouse(url, options);
-  
-  // Assert performance metrics
-  const categories = runnerResult.lhr.categories;
-  expect(categories.performance.score).toBeGreaterThan(0.9);
-  
-  await chrome.kill();
-}
-```
 
 ## Accessibility Testing
 
@@ -358,76 +341,31 @@ Target WCAG 2.1 Level AA compliance:
 
 ## Security Testing
 
-Identify and mitigate security vulnerabilities.
-
 ### Dependency Scanning
+
+CI runs `npm audit --audit-level=high` on every push. Locally:
 
 ```bash
 npm audit
+npm audit fix
 ```
 
-### Security Headers Testing
+### Security Headers and Pen-Test
 
-Verify security headers are properly configured:
-- Content Security Policy (CSP)
-- XSS Protection
-- Frame Options
-- Strict Transport Security
-
-### Penetration Testing
-
-Regular penetration testing for:
-- Input validation
-- Authentication mechanisms
-- Authorization controls
-- Session management
+Security headers (X-Content-Type-Options, X-Frame-Options, Referrer-Policy, Permissions-Policy) are applied in dev/preview. For penetration-testing checklist and remediation steps, see **[SECURITY_AUDIT.md](SECURITY_AUDIT.md)**.
 
 ## Continuous Integration
 
-Automated testing in CI/CD pipeline.
+The **CherryOS Lifecycle** workflow (`.github/workflows/main.yml`) runs on every **push to `main`** and on **workflow_dispatch** and **release**:
 
-### GitHub Actions Workflow
+1. **quality-gate** — Node 18 and 20: `npm ci`, `npm audit --audit-level=high`, `npm run lint`, `npm test`
+2. **e2e-tests** — Playwright (Chromium, Firefox, WebKit, Mobile Chrome, Mobile Safari); artifacts uploaded on failure
+3. **deploy** — Build and deploy to GitHub Pages (only when `ref == main` and event is `push`)
+4. **publish** — On release: build and publish to npm/GitHub Packages (when NPM_TOKEN is configured)
 
-```yaml
-name: Tests
+### Test Coverage
 
-on: [push, pull_request]
-
-jobs:
-  test:
-    runs-on: ubuntu-latest
-    
-    steps:
-    - uses: actions/checkout@v2
-    
-    - name: Setup Node.js
-      uses: actions/setup-node@v2
-      with:
-        node-version: '16'
-        
-    - name: Install dependencies
-      run: npm ci
-      
-    - name: Run unit tests
-      run: npm run test:unit -- --coverage
-      
-    - name: Run component tests
-      run: npm run test:components
-      
-    - name: Run linting
-      run: npm run lint
-      
-    - name: Upload coverage
-      uses: codecov/codecov-action@v1
-```
-
-### Test Coverage Requirements
-
-Minimum coverage thresholds:
-- Statements: 80%
-- Branches: 80%
-- Functions: 80%
-- Lines: 80%
+Run `npm run test:coverage` for Vitest coverage. Set or adjust thresholds in `vitest.config.js` if required.
 
 ## Test Reporting
 
