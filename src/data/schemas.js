@@ -19,3 +19,21 @@ export const APIResponseSchema = z.object({
     lastPage: z.number(),
   }).optional(),
 });
+
+export const TrackSchema = z.object({
+  title: z.string(),
+  track_number: z.number().nullable().optional(),
+  url: z.string().url(),
+  duration: z.string().optional(),
+});
+
+export const AlbumSchema = z.object({
+  album_name: z.string(),
+  artist: z.string(),
+  type: z.enum(['Single', 'Album', 'EP', 'LP']),
+  cover_url: z.string().url(),
+  tracks: z.array(TrackSchema),
+  releaseDate: z.string().optional(),
+});
+
+export const MusicManifestSchema = z.array(AlbumSchema);
