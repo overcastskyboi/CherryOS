@@ -13,6 +13,11 @@ node_modules/
 /assets/
 music_staging/
 
+# Cache Directories
+/node_modules/.cache/
+/node_modules/.vite/
+/node_modules/.cache/gh-pages/
+
 # Environment & Secrets
 .env
 .env.local
