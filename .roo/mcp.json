@@ -14,16 +14,19 @@
         "query-docs"
       ]
     },
-    "filesystem": {
-      "command": "docker",
+    "sequentialthinking": {
+      "command": "npx",
       "args": [
-        "run",
-        "-i",
-        "--rm",
-        "--mount",
-        "type=bind,src=S:/CherryOS/,dst=/projects",
-        "mcp/filesystem",
-        "/projects"
+        "-y",
+        "@modelcontextprotocol/server-sequential-thinking"
+      ]
+    },
+    "filesystem": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "S:/CherryOS/CherryOS-dev"
       ]
     }
   }
