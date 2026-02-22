@@ -117,3 +117,25 @@ jobs:
             org.opencontainers.image.created=${{ github.event.head_commit.timestamp }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+          
+      - name: Configure OCI Bucket
+        uses: oci-actions/oci-cli@v1
+        with:
+          command: 'object put -ns ${{ secrets.OCI_NAMESPACE }} -bn ${{ secrets.OCI_BUCKET_NAME }} -src ./dist -dest / --recursive'
+        env:
+          OCI_CLI_USER: ${{ secrets.OCI_USERNAME }}
+          OCI_CLI_TENANCY: ${{ secrets.OCI_TENANCY }}
+          OCI_CLI_FINGERPRINT: ${{ secrets.OCI_FINGERPRINT }}
+          OCI_CLI_PRIVATE_KEY: ${{ secrets.OCI_PRIVATE_KEY }}
+          OCI_CLI_REGION: ${{ secrets.OCI_REGION }}
+          
+      - name: Configure OCI Bucket
+        uses: oci-actions/oci-cli@v1
+        with:
+          command: 'object put -ns ${{ secrets.OCI_NAMESPACE }} -bn ${{ secrets.OCI_BUCKET_NAME }} -src ./dist -dest / --recursive'
+        env:
+          OCI_CLI_USER: ${{ secrets.OCI_USERNAME }}
+          OCI_CLI_TENANCY: ${{ secrets.OCI_TENANCY }}
+          OCI_CLI_FINGERPRINT: ${{ secrets.OCI_FINGERPRINT }}
+          OCI_CLI_PRIVATE_KEY: ${{ secrets.OCI_PRIVATE_KEY }}
+          OCI_CLI_REGION: ${{ secrets.OCI_REGION }}
