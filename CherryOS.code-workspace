@@ -1,0 +1,17 @@
+{
+  "folders": [
+    {
+      "path": "CherryOS-dev",
+    },
+    {
+      "path": "OCI",
+    },
+  ],
+  "settings": {
+    "oci.defaultProfileName": "DEFAULT",
+    "yaml.schemas": {
+      "https://www.schemastore.org/prettierrc.json": "file:///c%3A/Users/unkno/AppData/Roaming/Code/User/globalStorage/rooveterinaryinc.roo-cline/settings/custom_modes.yaml",
+    },
+    "git.ignoreLimitWarning": true,
+  },
+}
