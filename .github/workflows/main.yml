@@ -84,9 +84,44 @@ jobs:
           commit_message: 'Automated Deployment via GitHub Actions'
           cname: cherryos.dev
 
+  sync-to-oci-storage:
+    name: Sync Build Artifacts to OCI Object Storage
+    needs: [deploy-github-pages]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build Application
+        run: npm run build
+
+      - name: Setup OCI CLI
+        uses: oracle-actions/setup-oci-cli@v1.3.2
+        with:
+          user: ${{ secrets.OCI_USER_OCID }}
+          fingerprint: ${{ secrets.OCI_FINGERPRINT }}
+          tenancy: ${{ secrets.OCI_TENANCY_OCID }}
+          region: ${{ secrets.OCI_REGION }}
+          api_key: ${{ secrets.OCI_API_KEY }}
+
+      - name: Sync dist to Bucket
+        run: |
+          oci os object bulk-upload -ns ${{ secrets.OCI_NAMESPACE }} -bn cherryos-deploy-prod --src-dir ./dist --overwrite --content-type auto
+          oci os object put -ns ${{ secrets.OCI_NAMESPACE }} -bn cherryos-deploy-prod --file healthcheck.txt --name healthcheck.txt --force --content-type text/plain
+          oci os object put -ns ${{ secrets.OCI_NAMESPACE }} -bn cherryos-deploy-prod --file src/data/music_manifest.json --name music_manifest.json --force --content-type application/json
+
   deploy-oci-container:
     name: Build and Push Docker to OCI
-    needs: [test-and-lint, security-scan, deploy-github-pages]
+    needs: [sync-to-oci-storage]
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
     steps:
