@@ -4,6 +4,8 @@ on:
   push:
     branches: [ main ]
   workflow_dispatch:
+  schedule:
+    - cron: '0 0,12 * * *' # Run twice a day to refresh data without commits
 
 permissions:
   contents: write
@@ -12,7 +14,9 @@ permissions:
 
 jobs:
   build-and-deploy:
+    name: Build, Test, & Deploy
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -26,13 +30,85 @@ jobs:
       - name: Install Dependencies
         run: npm ci
 
-      - name: Lint
+      - name: Run Linter
         run: npm run lint
 
-      - name: Test
+      - name: Run Tests
         run: npm test -- --run
 
-      - name: Build
+      - name: Fetch Live API Data (Dynamic Pre-build)
+        env:
+          VITE_STEAM_ID: "76561198043191125"
+          VITE_AL_ID: "36296"
+          VITE_AL_TOKEN: ${{ secrets.ANILIST_TOKEN }}
+          VITE_PROXY_URL: ${{ secrets.VITE_PROXY_URL }}
+        run: |
+          mkdir -p public/data/mirror
+          node -e "
+          const fs = require('fs');
+          const https = require('https');
+          
+          async function request(url, options = {}) {
+            return new Promise((resolve, reject) => {
+              const req = https.request(url, options, (res) => {
+                let body = '';
+                res.on('data', (chunk) => body += chunk);
+                res.on('end', () => {
+                  if (res.statusCode >= 200 && res.statusCode < 300) {
+                    try { resolve(JSON.parse(body)); } catch (e) { reject(new Error('JSON Parse Error: ' + e.message)); }
+                  } else {
+                    reject(new Error(\`HTTP Status \${res.statusCode}: \${body}\`));
+                  }
+                });
+              });
+              req.on('error', reject);
+              if (options.body) {
+                req.write(options.body);
+              }
+              req.end();
+            });
+          }
+
+          async function run() {
+            try {
+              const proxyUrl = process.env.VITE_PROXY_URL;
+              if (!proxyUrl) console.warn('VITE_PROXY_URL secret is missing. Steam fetch may fail.');
+
+              console.log('Fetching AniList Data...');
+              let aniData = null;
+              try {
+                aniData = await request('https://graphql.anilist.co', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + process.env.VITE_AL_TOKEN },
+                  body: JSON.stringify({
+                    query: 'query(\$userId:Int){MediaListCollection(userId:\$userId,type:ANIME){lists{entries{media{id title{english romaji}coverImage{extraLarge}averageScore type status}score(format:POINT_10)progress status}}}MangaList:MediaListCollection(userId:\$userId,type:MANGA){lists{entries{media{id title{english romaji}coverImage{extraLarge}averageScore type status}score(format:POINT_10)progress status}}}}',
+                    variables: { userId: Number(process.env.VITE_AL_ID) }
+                  })
+                });
+              } catch(e) { console.error('AniList fetch failed:', e.message); }
+              if (aniData) fs.writeFileSync('public/data/mirror/anilist.json', JSON.stringify(aniData));
+
+              console.log('Fetching Steam Data...');
+              let steamData = null;
+              try {
+                if(proxyUrl) {
+                  const sUrl = proxyUrl.endsWith('/') ? proxyUrl : proxyUrl + '/';
+                  steamData = await request(\`\${sUrl}steam?steamId=\${process.env.VITE_STEAM_ID}\`);
+                }
+              } catch(e) { console.error('Steam fetch failed:', e.message); }
+              if (steamData) fs.writeFileSync('public/data/mirror/steam.json', JSON.stringify(steamData));
+
+              fs.writeFileSync('public/data/mirror/metadata.json', JSON.stringify({ lastUpdated: new Date().toISOString() }));
+              console.log('Data mirror generated successfully.');
+            } catch (err) {
+              console.error('Data script failed:', err.message);
+              process.exit(1);
+            }
+          }
+          run();
+          "
+
+      - name: Build Application
         env:
           VITE_PROXY_URL: ${{ secrets.VITE_PROXY_URL }}
           VITE_WEATHER_API_KEY: ${{ secrets.VITE_WEATHER_API_KEY }}
@@ -40,45 +116,41 @@ jobs:
         run: npm run build
 
       - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v3
+        uses: peaceiris/actions-gh-pages@v4 # Upgraded to v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./dist
           commit_message: 'Automated Deployment via GitHub Actions [skip ci]'
 
-      - name: Sync Artifacts to OCI
-        env:
-          OCI_API_KEY: ${{ secrets.OCI_API_KEY }}
-          OCI_USER_OCID: ${{ secrets.OCI_USER_OCID }}
-          OCI_FINGERPRINT: ${{ secrets.OCI_FINGERPRINT }}
-          OCI_TENANCY_OCID: ${{ secrets.OCI_TENANCY_OCID }}
-          OCI_REGION: ${{ secrets.OCI_REGION }}
-          OCI_NAMESPACE: ${{ secrets.OCI_NAMESPACE }}
+      - name: Install OCI CLI
+        env: { OCI_API_KEY: ${{ secrets.OCI_API_KEY }} }
         run: |
           mkdir -p ~/.oci
           echo "$OCI_API_KEY" > ~/.oci/oci_api_key.pem
           chmod 600 ~/.oci/oci_api_key.pem
           cat <<EOF > ~/.oci/config
           [DEFAULT]
-          user=$OCI_USER_OCID
-          fingerprint=$OCI_FINGERPRINT
-          tenancy=$OCI_TENANCY_OCID
-          region=$OCI_REGION
+          user=${{ secrets.OCI_USER_OCID }}
+          fingerprint=${{ secrets.OCI_FINGERPRINT }}
+          tenancy=${{ secrets.OCI_TENANCY_OCID }}
+          region=${{ secrets.OCI_REGION }}
           key_file=~/.oci/oci_api_key.pem
           EOF
           chmod 600 ~/.oci/config
           bash -c "$(curl -L https://raw.githubusercontent.com/oracle/oci-cli/master/scripts/install/install.sh)" -- --accept-all-defaults
           echo "/home/runner/bin" >> $GITHUB_PATH
-          /home/runner/bin/oci os object bulk-upload -ns $OCI_NAMESPACE -bn cherryos-deploy-prod --src-dir ./dist --overwrite
 
-      - name: Login to OCI Registry
+      - name: Sync Artifacts to OCI Object Storage
+        run: /home/runner/bin/oci os object bulk-upload -ns ${{ secrets.OCI_NAMESPACE }} -bn cherryos-deploy-prod --src-dir ./dist --overwrite
+
+      - name: Login to OCI Container Registry
         uses: docker/login-action@v3
         with:
           registry: ${{ secrets.OCI_REGISTRY_URL }}
           username: ${{ secrets.OCI_USERNAME }}
           password: ${{ secrets.OCI_AUTH_TOKEN }}
 
-      - name: Build and Push Docker
+      - name: Build and Push Docker Image
         uses: docker/build-push-action@v5
         with:
           context: .
@@ -88,3 +160,4 @@ jobs:
             VITE_PROXY_URL=${{ secrets.VITE_PROXY_URL }}
             VITE_WEATHER_API_KEY=${{ secrets.VITE_WEATHER_API_KEY }}
             VITE_OCI_NAMESPACE=${{ secrets.OCI_NAMESPACE }}
+            VITE_OCI_REGION=${{ secrets.OCI_REGION }}

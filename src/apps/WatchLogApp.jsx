@@ -18,14 +18,14 @@ const WatchLogApp = () => {
     setLoading(true);
     try {
       // 1. Fetch Metadata
-      const metaRes = await fetch('https://overcastskyboi.github.io/CherryOS/src/data/mirror/metadata.json').catch(() => null);
+      const metaRes = await fetch(`${import.meta.env.BASE_URL}data/mirror/metadata.json`).catch(() => null);
       if (metaRes?.ok) {
         const meta = await metaRes.json();
         setLastSynced(meta.lastUpdated);
       }
 
       // 2. Fetch Mirrored AniList Data
-      const response = await fetch('https://overcastskyboi.github.io/CherryOS/src/data/mirror/anilist.json');
+      const response = await fetch(`${import.meta.env.BASE_URL}data/mirror/anilist.json`);
       if (!response.ok) throw new Error("Mirror fetch failed.");
       
       const json = await response.json();
