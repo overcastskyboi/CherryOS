@@ -29,7 +29,6 @@ export const TRACKS = [
 export const GAMING_DATA = {
   steam: { 
     user: "AugustElliott", 
-    steamId: "76561198043191125",
     level: 42, 
     gamesCount: 184 
   },

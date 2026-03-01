@@ -29,12 +29,13 @@ const GameCenterApp = () => {
       if (json.data && Array.isArray(json.data)) {
         const processed = json.data.map(item => ({
           ...item,
-          coverImage: item.coverImage || GAMING_DATA.covers[item.title] || undefined
+          // Generate official Steam Header URL if ID is present
+          coverImage: item.id ? `https://cdn.akamai.steamstatic.com/steam/apps/${item.id}/header.jpg` : (item.coverImage || GAMING_DATA.covers[item.title])
         }));
         setData(processed);
       }
     } catch (err) {
-      console.warn("Cloud synchronization silent fail - using local buffer.");
+      console.warn("Cloud synchronization silent fail.");
     } finally {
       setLoading(false);
     }
@@ -60,6 +61,7 @@ const GameCenterApp = () => {
     return data
       .filter(item => item.platform === 'Steam')
       .filter(item => item.title.toLowerCase().includes(searchQuery.toLowerCase()))
+      // Highest achievements first
       .sort((a, b) => (b.achievementPercent || 0) - (a.achievementPercent || 0));
   }, [data, searchQuery]);
 
@@ -69,9 +71,9 @@ const GameCenterApp = () => {
 
   const GameCard = ({ item }) => (
     <div className="group relative glass-card rounded-2xl overflow-hidden hover:bg-white/[0.05] transition-all duration-500 animate-elegant">
-      <div className="aspect-square relative overflow-hidden">
+      <div className="aspect-video relative overflow-hidden bg-gray-900">
         <LazyImage
-          src={item.coverImage || GAMING_DATA.covers[item.title] || 'https://via.placeholder.com/400x400?text=No+Image'}
+          src={item.coverImage || (item.id ? `https://cdn.akamai.steamstatic.com/steam/apps/${item.id}/header.jpg` : 'https://via.placeholder.com/460x215?text=No+Artwork')}
           alt={item.title}
           className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
         />
@@ -83,7 +85,7 @@ const GameCenterApp = () => {
           </div>
         </div>
         <div className="absolute bottom-4 left-4 right-4 space-y-1">
-          <span className="text-[8px] font-black uppercase tracking-[0.3em] text-blue-400">Steam Sync</span>
+          <span className="text-[8px] font-black uppercase tracking-[0.3em] text-blue-400">Library Entry</span>
           <h3 className="text-xs font-black text-white leading-tight line-clamp-2 uppercase italic">{item.title}</h3>
         </div>
       </div>
@@ -142,9 +144,9 @@ const GameCenterApp = () => {
       </main>
 
       <footer className="mt-auto px-6 py-4 flex justify-between items-center border-t border-white/5 text-gray-700 bg-black/40">
-        <span className="text-[8px] font-mono uppercase tracking-widest">Steam_ID: AugustElliott</span>
+        <span className="text-[8px] font-mono uppercase tracking-widest">Source: Steam_API</span>
         <div className="flex gap-4 items-center">
-          <a href={`https://steamcommunity.com/profiles/${STEAM_ID}`} target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">
+          <a href={`https://steamcommunity.com/profiles/${STEAM_ID}`} target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors text-emerald-500">
             <ExternalLink size={12} />
           </a>
           <div className="flex gap-1">

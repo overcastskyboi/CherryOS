@@ -7,6 +7,7 @@ import { ANIME_DATA } from '../data/constants';
 const WatchLogApp = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
   const [data, setData] = useState(ANIME_DATA.catalogue);
   const [searchQuery, setSearchQuery] = useState('');
   
@@ -14,10 +15,16 @@ const WatchLogApp = () => {
   const [displayCount, setDisplayCount] = useState(12);
   const loaderRef = useRef(null);
 
-  const ANILIST_ID = 36296;
-  const ANILIST_TOKEN = "U88HlfpPU37Ghu8r3bgHfnuSe7cMQwDpWOWu602w";
+  // Environment-based Secrets
+  const ANILIST_ID = import.meta.env.VITE_AL_ID || 36296;
+  const ANILIST_TOKEN = import.meta.env.VITE_AL_TOKEN;
 
   const fetchAniList = useCallback(async () => {
+    if (!ANILIST_TOKEN) {
+      console.warn("AniList Token missing, staying in local mode.");
+      return;
+    }
+
     setLoading(true);
     const query = `
       query ($userId: Int) {
@@ -37,7 +44,7 @@ const WatchLogApp = () => {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${ANILIST_TOKEN}`
         },
-        body: JSON.stringify({ query, variables: { userId: ANILIST_ID } })
+        body: JSON.stringify({ query, variables: { userId: Number(ANILIST_ID) } })
       });
 
       const json = await response.json();
@@ -57,14 +64,16 @@ const WatchLogApp = () => {
           id: entry.media.id
         }));
 
+        // Strict rating-based sort (highest to lowest)
+        processed.sort((a, b) => (b.score || 0) - (a.score || 0));
         setData(processed);
       }
     } catch (err) {
-      console.warn("AniList sync silent fail.");
+      console.error("AniList sync silent fail.");
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [ANILIST_ID, ANILIST_TOKEN]);
 
   useEffect(() => {
     fetchAniList();
@@ -97,9 +106,9 @@ const WatchLogApp = () => {
 
   const MediaCard = ({ item }) => (
     <div className="group relative glass-card rounded-2xl overflow-hidden hover:bg-white/[0.05] transition-all duration-500 animate-elegant">
-      <div className="aspect-[2/3] relative overflow-hidden">
+      <div className="aspect-[2/3] relative overflow-hidden bg-gray-900">
         <LazyImage
-          src={item.coverImage || ANIME_DATA.covers[item.title] || 'https://via.placeholder.com/300x450?text=No+Image'}
+          src={item.coverImage || `https://img.youtube.com/vi/placeholder/maxresdefault.jpg`}
           alt={item.title}
           className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
         />
@@ -172,7 +181,7 @@ const WatchLogApp = () => {
       </main>
 
       <footer className="mt-auto px-6 py-4 flex justify-between items-center border-t border-white/5 text-gray-700 bg-black/40">
-        <span className="text-[8px] font-mono uppercase tracking-widest">Source: AniList_API</span>
+        <span className="text-[8px] font-mono uppercase tracking-widest">Profile: AugustElliott</span>
         <div className="flex gap-1">
           <div className="w-1 h-1 bg-yellow-500" />
           <div className="w-1 h-1 bg-yellow-500 animate-pulse" />
