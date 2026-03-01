@@ -7,16 +7,23 @@ import {
   Zap, Shield, Target, Crosshair
 } from 'lucide-react';
 import LazyImage from '../components/LazyImage';
-import { TYPE_COLORS } from '../data/constants';
+import { TYPE_COLORS, VERSION_ORDER } from '../data/constants';
 
 const PokedexApp = () => {
   const navigate = useNavigate();
-  const [view, setView] = useState('gallery'); // 'gallery' or 'details'
+  const [view, setView] = useState('gallery');
   const [pokemonList, setPokemonList] = useState([]);
   const [selectedPokemon, setSelectedPokemon] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isShiny, setIsShiny] = useState(false);
   const [selectedVersionGroup, setSelectedVersionGroup] = useState('');
+
+  const formatPokemonName = (name) => {
+    if (name === 'mimikyu-disguised') return 'MIMIKYU';
+    if (name === 'corsola-galar') return 'CORSOLA (GALAR)';
+    if (name === 'aegislash-shield') return 'AEGISLASH';
+    return name.replace(/-/g, ' ').toUpperCase();
+  };
 
   const fetchMirroredData = useCallback(async () => {
     setLoading(true);
@@ -27,16 +34,9 @@ const PokedexApp = () => {
       if (!response.ok) throw new Error("Failed to load database");
       const data = await response.json();
       
-      // Post-process to add BASE_URL to mirrored paths
-      const processed = data.map(p => ({
-        ...p,
-        sprite: `${baseUrl}${p.sprite}`.replace(/\/+/g, '/'),
-        shinySprite: `${baseUrl}${p.shinySprite}`.replace(/\/+/g, '/'),
-        artwork: `${baseUrl}${p.artwork}`.replace(/\/+/g, '/'),
-        footprint: `${baseUrl}${p.footprint}`.replace(/\/+/g, '/')
-      }));
-      
-      setPokemonList(processed);
+      // Sort by Dex ID
+      const sorted = data.sort((a, b) => a.id - b.id);
+      setPokemonList(sorted);
     } catch (err) {
       console.error('Pokedex Data Load Error:', err);
     } finally {
@@ -52,8 +52,11 @@ const PokedexApp = () => {
     setSelectedPokemon(pokemon);
     setIsShiny(false);
     setView('details');
+    
     if (pokemon.moves) {
-      const versions = Object.keys(pokemon.moves);
+      const versions = Object.keys(pokemon.moves).sort((a, b) => {
+        return (VERSION_ORDER[a] || 999) - (VERSION_ORDER[b] || 999);
+      });
       if (versions.length > 0) {
         const bestVersion = versions.find(v => pokemon.moves[v].length > 0) || versions[0];
         setSelectedVersionGroup(bestVersion);
@@ -79,16 +82,6 @@ const PokedexApp = () => {
       backgroundColor: `${color}22`,
       borderColor: `${color}44`,
       color: color,
-      textShadow: `0 0 10px ${color}44`
-    };
-  };
-
-  const getMoveTypeStyle = (type) => {
-    const color = TYPE_COLORS[type.toLowerCase()] || '#777';
-    return {
-      borderColor: `${color}33`,
-      borderLeftColor: color,
-      borderLeftWidth: '3px'
     };
   };
 
@@ -102,9 +95,10 @@ const PokedexApp = () => {
   return (
     <div className="min-h-[100dvh] bg-[#050505] text-white flex flex-col font-mono animate-elegant pb-20">
       <style>{`
-        .pokedex-glass { background: rgba(20, 20, 20, 0.6); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.05); }
+        .pokedex-glass { background: rgba(15, 15, 15, 0.8); border: 1px solid rgba(255,255,255,0.05); }
         .stat-bar { background: rgba(255,255,255,0.05); height: 4px; border-radius: 2px; overflow: hidden; }
         .stat-fill { height: 100%; transition: width 1s cubic-bezier(0.16, 1, 0.3, 1); }
+        .pixelated { image-rendering: pixelated; }
         .scrollbar-hide::-webkit-scrollbar { display: none; }
       `}</style>
 
@@ -118,7 +112,7 @@ const PokedexApp = () => {
           </button>
           <div>
             <h1 className="text-xl font-black tracking-widest uppercase italic leading-none">Pokédex</h1>
-            <p className="text-[8px] text-gray-500 uppercase tracking-[0.4em] font-bold mt-1.5">National_Archive // v2.5.3</p>
+            <p className="text-[8px] text-gray-500 uppercase tracking-[0.4em] font-bold mt-1.5">National_Archive // v2.5.4</p>
           </div>
         </div>
         <div className="flex items-center gap-3">
@@ -139,18 +133,17 @@ const PokedexApp = () => {
                 onClick={() => handleOpenDetails(p)}
                 className="group pokedex-glass p-6 rounded-[2.5rem] flex flex-col items-center gap-6 hover:bg-white/[0.05] transition-all hover:-translate-y-2 active:scale-95 shadow-2xl border-white/5"
               >
-                <div className="w-24 h-24 relative">
-                  <div className="absolute inset-0 bg-red-500/10 blur-3xl rounded-full scale-0 group-hover:scale-100 transition-transform duration-700" />
+                <div className="w-24 h-24 relative flex items-center justify-center">
                   <LazyImage 
                     src={p.sprite}
                     alt={p.name}
-                    className="w-full h-full object-contain relative z-10 drop-shadow-[0_0_20px_rgba(255,255,255,0.3)] group-hover:scale-110 transition-transform duration-500"
+                    className="w-full h-full object-contain pixelated relative z-10 group-hover:scale-110 transition-transform duration-500"
                     placeholderColor="bg-transparent"
                   />
                 </div>
                 <div className="text-center space-y-1">
                   <p className="text-[9px] font-black text-red-500 tracking-[0.2em]">#{String(p.id).padStart(3, '0')}</p>
-                  <p className="text-xs font-black uppercase tracking-tight truncate w-28 group-hover:text-red-400 transition-colors italic">{p.name.replace(/-/g, ' ')}</p>
+                  <p className="text-[10px] font-black uppercase tracking-tight truncate w-28 italic">{formatPokemonName(p.name)}</p>
                   <div className="flex justify-center gap-1 mt-2">
                     {p.types.map(t => (
                       <span key={t} className="text-[6px] font-black uppercase px-2 py-0.5 rounded-full border" style={getTypeStyle(t)}>{t}</span>
@@ -165,13 +158,11 @@ const PokedexApp = () => {
             {selectedPokemon && (
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
                 <div className="lg:col-span-5 space-y-8">
-                  <div className="pokedex-glass rounded-[3.5rem] p-12 relative overflow-hidden group border-white/10 shadow-[0_0_100px_rgba(239,68,68,0.05)]">
-                    <div className="absolute inset-0 bg-gradient-to-b from-red-500/5 to-transparent pointer-events-none" />
-                    
+                  <div className="pokedex-glass rounded-[3.5rem] p-12 relative overflow-hidden group border-white/10 shadow-2xl">
                     <div className="flex justify-between items-start mb-12 relative z-10">
                       <div className="space-y-1">
                         <span className="text-[10px] font-black text-red-500 tracking-[0.5em] uppercase">Biological_Archive</span>
-                        <h2 className="text-6xl font-black uppercase italic tracking-tighter leading-none text-white drop-shadow-2xl">{selectedPokemon.name.replace(/-/g, ' ')}</h2>
+                        <h2 className="text-5xl font-black uppercase italic tracking-tighter leading-none text-white">{formatPokemonName(selectedPokemon.name)}</h2>
                       </div>
                       <button 
                         onClick={() => setIsShiny(!isShiny)}
@@ -182,11 +173,10 @@ const PokedexApp = () => {
                     </div>
 
                     <div className="relative h-80 flex items-center justify-center">
-                      <div className="absolute inset-0 bg-red-500/10 blur-[100px] rounded-full animate-pulse" />
                       <LazyImage 
                         src={isShiny ? selectedPokemon.shinySprite : selectedPokemon.sprite}
                         alt={selectedPokemon.name}
-                        className="w-64 h-64 object-contain relative z-10 drop-shadow-[0_0_50px_rgba(255,255,255,0.2)]"
+                        className="w-64 h-64 object-contain pixelated relative z-10"
                         placeholderColor="bg-transparent"
                       />
                     </div>
@@ -199,18 +189,18 @@ const PokedexApp = () => {
                   </div>
 
                   <div className="grid grid-cols-3 gap-6">
-                    <div className="pokedex-glass p-8 rounded-[2rem] space-y-2 text-center border-white/5 group hover:bg-white/[0.02] transition-all">
+                    <div className="pokedex-glass p-8 rounded-[2rem] space-y-2 text-center border-white/5">
                       <Ruler size={14} className="mx-auto text-gray-600 mb-2" />
                       <p className="text-[9px] font-black text-gray-600 uppercase tracking-widest leading-none">Height</p>
                       <p className="text-xl font-black italic tracking-tighter text-white">{selectedPokemon.height / 10}m</p>
                     </div>
-                    <div className="pokedex-glass p-8 rounded-[2rem] space-y-2 text-center border-white/5 group hover:bg-white/[0.02] transition-all">
+                    <div className="pokedex-glass p-8 rounded-[2rem] space-y-2 text-center border-white/5">
                       <Weight size={14} className="mx-auto text-gray-600 mb-2" />
                       <p className="text-[9px] font-black text-gray-600 uppercase tracking-widest leading-none">Weight</p>
                       <p className="text-xl font-black italic tracking-tighter text-white">{selectedPokemon.weight / 10}kg</p>
                     </div>
-                    <div className="pokedex-glass p-6 rounded-[2rem] flex items-center justify-center group border-white/5 hover:bg-white/[0.02] transition-all">
-                      <LazyImage src={selectedPokemon.footprint} alt="footprint" className="h-16 grayscale invert filter brightness-200 opacity-20 group-hover:opacity-80 transition-opacity" placeholderColor="bg-transparent" />
+                    <div className="pokedex-glass p-6 rounded-[2rem] flex items-center justify-center border-white/5">
+                      <LazyImage src={selectedPokemon.footprint} alt="footprint" className="h-16 grayscale invert filter brightness-200 opacity-20" placeholderColor="bg-transparent" />
                     </div>
                   </div>
                 </div>
@@ -221,7 +211,7 @@ const PokedexApp = () => {
                       <BookOpen size={20} className="text-red-500" />
                       <h3 className="text-sm font-black uppercase tracking-[0.4em]">Historical Log</h3>
                     </div>
-                    <p className="text-base leading-relaxed text-gray-400 font-medium uppercase italic bg-white/[0.02] p-10 rounded-[3rem] border border-white/5 shadow-inner">{selectedPokemon.description}</p>
+                    <p className="text-base leading-relaxed text-gray-400 font-medium uppercase italic bg-white/[0.02] p-10 rounded-[3rem] border border-white/5">{selectedPokemon.description}</p>
                   </div>
 
                   <div className="space-y-8">
@@ -256,22 +246,28 @@ const PokedexApp = () => {
                           value={selectedVersionGroup} 
                           className="w-full bg-white/5 border border-white/10 p-5 rounded-[1.5rem] font-mono text-[11px] font-black uppercase tracking-widest focus:outline-none focus:border-red-500/50 transition-all appearance-none text-white shadow-xl cursor-pointer"
                         >
-                          {selectedPokemon.moves && Object.keys(selectedPokemon.moves).map(vg => (<option key={vg} value={vg} className="bg-[#0a0a0a]">{vg.replace(/-/g, ' ')}</option>))}
+                          {Object.keys(selectedPokemon.moves).sort((a,b) => (VERSION_ORDER[a] || 999) - (VERSION_ORDER[b] || 999)).map(vg => (
+                            <option key={vg} value={vg} className="bg-[#0a0a0a]">{vg.replace(/-/g, ' ')}</option>
+                          ))}
                         </select>
                         <div className="absolute right-6 top-1/2 -translate-y-1/2 pointer-events-none opacity-20"><Box size={18} /></div>
                       </div>
                       <div className="bg-black/40 rounded-[3rem] p-10 h-[32rem] overflow-y-auto border border-white/5 scrollbar-hide shadow-inner">
                         <div className="grid grid-cols-1 gap-3">
-                          {selectedPokemon.moves && selectedPokemon.moves[selectedVersionGroup]?.map((move, i) => (
-                            <div key={i} className="flex items-center justify-between p-4 bg-white/5 rounded-2xl border border-white/5 transition-all group" style={getMoveTypeStyle(move.type)}>
+                          {selectedPokemon.moves[selectedVersionGroup]?.map((move, i) => (
+                            <div key={i} className="flex items-center justify-between p-4 bg-white/5 rounded-2xl border border-white/5 transition-all group border-l-4" style={{ borderLeftColor: TYPE_COLORS[move.type.toLowerCase()] }}>
                               <div className="flex items-center gap-4">
                                 <div className="flex flex-col items-center justify-center w-10 h-10 bg-black/40 rounded-xl border border-white/5">
-                                  <span className="text-[8px] text-gray-600 font-bold uppercase">{move.method === 'egg' ? 'Egg' : 'Lvl'}</span>
-                                  <span className="text-xs font-black text-rose-500">{move.method === 'egg' ? '—' : move.level}</span>
+                                  {move.method === 'egg' ? <Sparkles size={14} className="text-yellow-500" /> : (
+                                    <>
+                                      <span className="text-[8px] text-gray-600 font-bold uppercase">Lvl</span>
+                                      <span className="text-xs font-black text-rose-500">{move.level}</span>
+                                    </>
+                                  )}
                                 </div>
                                 <div className="space-y-0.5">
                                   <p className="text-xs font-black uppercase tracking-tight text-white group-hover:text-rose-400 transition-colors">{move.name}</p>
-                                  <p className="text-[8px] font-black text-gray-600 uppercase tracking-widest" style={{ color: TYPE_COLORS[move.type.toLowerCase()] }}>{move.type}</p>
+                                  <p className="text-[8px] font-black uppercase tracking-widest" style={{ color: TYPE_COLORS[move.type.toLowerCase()] }}>{move.type}</p>
                                 </div>
                               </div>
                               <div className="flex gap-6">
@@ -297,7 +293,7 @@ const PokedexApp = () => {
         )}
       </main>
 
-      <footer className="fixed bottom-0 left-0 right-0 px-8 py-5 flex justify-between items-center bg-black/80 backdrop-blur-3xl border-t border-white/5 text-gray-700 z-50">
+      <footer className="fixed bottom-0 left-0 right-0 px-8 py-5 flex justify-between items-center bg-black/80 backdrop-blur-3xl border-t border-white/5 text-gray-700 z-50 shadow-2xl">
         <div className="flex items-center gap-6">
           <span className="text-[9px] font-mono uppercase tracking-widest italic flex items-center gap-2">
             <LayoutGrid size={12} className="text-red-900" /> 

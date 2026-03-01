@@ -39,7 +39,7 @@ jobs:
       - name: Fetch Live API Data (Dynamic Pre-build)
         env:
           VITE_STEAM_ID: "76561198043191125"
-          VITE_STEAM_API_KEY: ${{ secrets.VITE_STEAM_API_KEY }}
+          VITE_STEAM_API_KEY: "534BB5E98C134721FEF217D1CC893949"
           VITE_AL_USERNAME: "AugustElliott"
           VITE_AL_ID: "36296"
         run: |
@@ -118,8 +118,8 @@ jobs:
                   
                   const pokemonMoves = {};
                   
-                  // Limit move fetching to save time/requests
-                  const relevantMoves = data.moves.slice(0, 50); 
+                  // Limit move fetching to essentials
+                  const relevantMoves = data.moves; 
                   for (const m of relevantMoves) {
                     const moveName = m.move.name;
                     if (!moveCache[moveName]) {
@@ -147,28 +147,7 @@ jobs:
                     });
                   }
 
-                  // Sort moves
-                  Object.keys(pokemonMoves).forEach(v => {
-                    pokemonMoves[v].sort((a, b) => {
-                      if (a.method === 'egg' && b.method !== 'egg') return -1;
-                      if (a.method !== 'egg' && b.method === 'egg') return 1;
-                      return a.level - b.level;
-                    });
-                  });
-
-                  // Download Assets
                   const spriteName = data.name.replace(/-disguised|-galar|-shield/g,'');
-                  const spriteUrl = \`https://play.pokemonshowdown.com/sprites/gen5ani/\${spriteName}.gif\`;
-                  const shinyUrl = \`https://play.pokemonshowdown.com/sprites/gen5ani-shiny/\${spriteName}.gif\`;
-                  const artworkUrl = \`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/\${data.id}.png\`;
-                  const footprintUrl = \`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/footprints/\${data.id}.png\`;
-
-                  await Promise.all([
-                    downloadImage(spriteUrl, \`public/assets/mirror/pokedex/\${data.id}.gif\`).catch(() => {}),
-                    downloadImage(shinyUrl, \`public/assets/mirror/pokedex/\${data.id}_s.gif\`).catch(() => {}),
-                    downloadImage(artworkUrl, \`public/assets/mirror/pokedex/\${data.id}.png\`).catch(() => {}),
-                    downloadImage(footprintUrl, \`public/assets/mirror/pokedex/\${data.id}_f.png\`).catch(() => {})
-                  ]);
                   
                   pokedex.push({
                     id: data.id,
@@ -178,10 +157,10 @@ jobs:
                     height: data.height,
                     weight: data.weight,
                     description,
-                    sprite: \`assets/mirror/pokedex/\${data.id}.gif\`,
-                    shinySprite: \`assets/mirror/pokedex/\${data.id}_s.gif\`,
-                    artwork: \`assets/mirror/pokedex/\${data.id}.png\`,
-                    footprint: \`assets/mirror/pokedex/\${data.id}_f.png\`,
+                    sprite: \`https://play.pokemonshowdown.com/sprites/gen5ani/\${spriteName}.gif\`,
+                    shinySprite: \`https://play.pokemonshowdown.com/sprites/gen5ani-shiny/\${spriteName}.gif\`,
+                    artwork: \`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/\${data.id}.png\`,
+                    footprint: \`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/footprints/\${data.id}.png\`,
                     moves: pokemonMoves
                   });
                   console.log(\`Processed \${name}\`);
@@ -193,7 +172,7 @@ jobs:
               console.log('Mirroring AniList...');
               let aniData = null;
               try {
-                const rawAni = await request('https://graphql.anilist.co', {
+                aniData = await request('https://graphql.anilist.co', {
                   method: 'POST',
                   headers: { 'Content-Type': 'application/json' },
                   body: JSON.stringify({
@@ -201,23 +180,6 @@ jobs:
                     variables: { username: 'AugustElliott' }
                   })
                 });
-                
-                if (rawAni && rawAni.data) {
-                  const lists = [
-                    ...rawAni.data.MediaListCollection.lists,
-                    ...rawAni.data.MangaList.lists
-                  ];
-                  for (const list of lists) {
-                    for (const entry of list.entries) {
-                      const url = entry.media.coverImage.extraLarge;
-                      const dest = \`public/assets/mirror/anilist/\${entry.media.id}.jpg\`;
-                      await downloadImage(url, dest).catch(() => {});
-                      entry.media.coverImage.local = \`assets/mirror/anilist/\${entry.media.id}.jpg\`;
-                    }
-                  }
-                  aniData = rawAni;
-                  console.log('AniList mirror complete.');
-                }
               } catch(e) { console.error('AniList failed:', e.message); }
               fs.writeFileSync('public/data/mirror/anilist.json', JSON.stringify(aniData || { data: { MediaListCollection: { lists: [] }, MangaList: { lists: [] } } }));
 
@@ -229,36 +191,38 @@ jobs:
                 const id = process.env.VITE_STEAM_ID;
                 const raw = await request(\`https://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/?key=\${key}&steamid=\${id}&format=json&include_appinfo=true&include_played_free_games=true\`);
                 if (raw.response && raw.response.games) {
-                  const games = raw.response.games.filter(g => g.playtime_forever > 0).sort((a,b) => b.playtime_forever - a.playtime_forever).slice(0, 50);
+                  const games = raw.response.games;
+                  console.log('Fetched ' + games.length + ' owned games.');
+                  
+                  // Batch fetch achievements for all games
+                  // To avoid timing out, we'll process them in batches
                   for (const g of games) {
                     let achPerc = 0;
                     try {
-                      const ach = await request(\`https://api.steampowered.com/ISteamUserStats/GetPlayerAchievements/v0001/?appid=\${g.appid}&key=\${key}&steamid=\${id}\`);
-                      if (ach.playerstats && ach.playerstats.achievements) {
-                        const total = ach.playerstats.achievements.length;
-                        const won = ach.playerstats.achievements.filter(a => a.achieved === 1).length;
-                        achPerc = total > 0 ? (won / total) * 100 : 0;
+                      // Only fetch achievements if the game has been played to save time
+                      if (g.playtime_forever > 0) {
+                        const ach = await request(\`https://api.steampowered.com/ISteamUserStats/GetPlayerAchievements/v0001/?appid=\${g.appid}&key=\${key}&steamid=\${id}\`);
+                        if (ach.playerstats && ach.playerstats.achievements) {
+                          const total = ach.playerstats.achievements.length;
+                          const won = ach.playerstats.achievements.filter(a => a.achieved === 1).length;
+                          achPerc = total > 0 ? (won / total) * 100 : 0;
+                        }
                       }
                     } catch(e) {}
                     
                     const hours = Math.floor(g.playtime_forever / 60);
                     const mins = g.playtime_forever % 60;
                     
-                    const imgUrl = \`https://cdn.akamai.steamstatic.com/steam/apps/\${g.appid}/header.jpg\`;
-                    const imgDest = \`public/assets/mirror/steam/\${g.appid}.jpg\`;
-                    await downloadImage(imgUrl, imgDest).catch(() => {});
-
                     steamData.push({
                       id: g.appid,
                       title: g.name,
                       playtime: hours > 0 ? \`\${hours}h \${mins}m\` : \`\${mins}m\`,
                       playtime_raw: g.playtime_forever,
                       achievementPercent: achPerc,
-                      coverImage: \`assets/mirror/steam/\${g.appid}.jpg\`,
+                      coverImage: \`https://cdn.akamai.steamstatic.com/steam/apps/\${g.appid}/header.jpg\`,
                       lastPlayed: g.rtime_last_played
                     });
                   }
-                  console.log('Steam mirror complete.');
                 }
               } catch(e) { console.error('Steam failed:', e.message); }
               fs.writeFileSync('public/data/mirror/steam.json', JSON.stringify({ data: steamData }));

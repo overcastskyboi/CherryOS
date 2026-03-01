@@ -36,26 +36,27 @@ export const TYPE_COLORS = {
   dark: '#705746'
 };
 
+export const VERSION_ORDER = {
+  'red-blue': 1, 'yellow': 2,
+  'gold-silver': 3, 'crystal': 4,
+  'ruby-sapphire': 5, 'emerald': 6, 'firered-leafgreen': 7,
+  'diamond-pearl': 8, 'platinum': 9, 'heartgold-soulsilver': 10,
+  'black-white': 11, 'black-2-white-2': 12,
+  'x-y': 13, 'omega-ruby-alpha-sapphire': 14,
+  'sun-moon': 15, 'ultra-sun-ultra-moon': 16,
+  'lets-go-pikachu-lets-go-eevee': 17,
+  'sword-shield': 18, 'brilliant-diamond-shining-pearl': 19, 'legends-arceus': 20,
+  'scarlet-violet': 21
+};
+
 export const ANIME_DATA = {
-  catalogue: [
-    { title: "Berserk", type: "Manga", score: 9.5, progress: "376+ Ch", status: "Reading", coverImage: "https://s4.anilist.co/file/anilistcdn/media/manga/cover/large/bx30002-79997M9AasY6.png" },
-    { title: "Hunter x Hunter (2011)", type: "Anime", score: 10, progress: "148 Eps", status: "Completed", coverImage: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx11061-s9Pj7zPrAl39.png" },
-    { title: "Fullmetal Alchemist: Brotherhood", type: "Anime", score: 10, progress: "64 Eps", status: "Completed", coverImage: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx5114-K9999M9AasY6.png" },
-    { title: "Steins;Gate", type: "Anime", score: 10, progress: "24 Eps", status: "Completed", coverImage: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx9253-89997M9AasY6.png" },
-    { title: "Vinland Saga Season 2", type: "Anime", score: 10, progress: "24 Eps", status: "Completed", coverImage: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx146175-99997M9AasY6.png" },
-    { title: "Monster", type: "Anime", score: 9.5, progress: "74 Eps", status: "Completed", coverImage: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx19-99997M9AasY6.png" }
-  ],
+  catalogue: [], // To be populated by mirror
   covers: {}
 };
 
 export const GAMING_DATA = {
-  steam: { user: "AugustElliott", level: 42, gamesCount: 184 },
-  collection: [
-    { id: 22380, title: "Fallout: New Vegas", platform: "Steam", playtime: "245h", achievementPercent: 100, rating: 10, coverImage: "https://cdn.akamai.steamstatic.com/steam/apps/22380/header.jpg" },
-    { id: 1245620, title: "Elden Ring", platform: "Steam", playtime: "120h", achievementPercent: 85, rating: 10, coverImage: "https://cdn.akamai.steamstatic.com/steam/apps/1245620/header.jpg" },
-    { id: 1091500, title: "Cyberpunk 2077", platform: "Steam", playtime: "65h", achievementPercent: 45, rating: 9, coverImage: "https://cdn.akamai.steamstatic.com/steam/apps/1091500/header.jpg" },
-    { id: 814380, title: "Sekiro: Shadows Die Twice", platform: "Steam", playtime: "35h", achievementPercent: 95, rating: 9.5, coverImage: "https://cdn.akamai.steamstatic.com/steam/apps/814380/header.jpg" }
-  ],
+  steam: { user: "AugustElliott", level: 42 },
+  collection: [], // To be populated by mirror
   covers: {}
 };
 
