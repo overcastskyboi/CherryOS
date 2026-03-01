@@ -3,9 +3,11 @@ import { useNavigate } from 'react-router-dom';
 import { 
   ArrowLeft, Dna, Footprints, BarChart2, 
   BookOpen, RefreshCcw, Sparkles, Box,
-  Info, Ruler, Weight, LayoutGrid, Maximize2
+  Info, Ruler, Weight, LayoutGrid, Maximize2,
+  Zap, Shield, Target, Crosshair
 } from 'lucide-react';
 import LazyImage from '../components/LazyImage';
+import { TYPE_COLORS } from '../data/constants';
 
 const PokedexApp = () => {
   const navigate = useNavigate();
@@ -42,7 +44,11 @@ const PokedexApp = () => {
     setView('details');
     if (pokemon.moves) {
       const versions = Object.keys(pokemon.moves);
-      if (versions.length > 0) setSelectedVersionGroup(versions[0]);
+      if (versions.length > 0) {
+        // Prefer a version that has moves if possible
+        const bestVersion = versions.find(v => pokemon.moves[v].length > 0) || versions[0];
+        setSelectedVersionGroup(bestVersion);
+      }
     }
   };
 
@@ -56,6 +62,25 @@ const PokedexApp = () => {
       speed: 'bg-yellow-500'
     };
     return colors[name] || 'bg-gray-500';
+  };
+
+  const getTypeStyle = (type) => {
+    const color = TYPE_COLORS[type.toLowerCase()] || '#777';
+    return {
+      backgroundColor: `${color}22`,
+      borderColor: `${color}44`,
+      color: color,
+      textShadow: `0 0 10px ${color}44`
+    };
+  };
+
+  const getMoveTypeStyle = (type) => {
+    const color = TYPE_COLORS[type.toLowerCase()] || '#777';
+    return {
+      borderColor: `${color}33`,
+      borderLeftColor: color,
+      borderLeftWidth: '3px'
+    };
   };
 
   if (loading) return (
@@ -85,7 +110,7 @@ const PokedexApp = () => {
           </button>
           <div>
             <h1 className="text-xl font-black tracking-widest uppercase italic leading-none">Pokédex</h1>
-            <p className="text-[8px] text-gray-500 uppercase tracking-[0.4em] font-bold mt-1.5">National_Archive // v2.5.2</p>
+            <p className="text-[8px] text-gray-500 uppercase tracking-[0.4em] font-bold mt-1.5">National_Archive // v2.5.3</p>
           </div>
         </div>
         <div className="flex items-center gap-3">
@@ -109,7 +134,7 @@ const PokedexApp = () => {
                 <div className="w-24 h-24 relative">
                   <div className="absolute inset-0 bg-red-500/10 blur-3xl rounded-full scale-0 group-hover:scale-100 transition-transform duration-700" />
                   <LazyImage 
-                    src={p.artwork || p.sprite}
+                    src={p.sprite}
                     alt={p.name}
                     className="w-full h-full object-contain relative z-10 drop-shadow-[0_0_20px_rgba(255,255,255,0.3)] group-hover:scale-110 transition-transform duration-500"
                     placeholderColor="bg-transparent"
@@ -120,7 +145,7 @@ const PokedexApp = () => {
                   <p className="text-xs font-black uppercase tracking-tight truncate w-28 group-hover:text-red-400 transition-colors italic">{p.name.replace(/-/g, ' ')}</p>
                   <div className="flex justify-center gap-1 mt-2">
                     {p.types.map(t => (
-                      <span key={t} className="text-[6px] font-black uppercase px-1.5 py-0.5 bg-white/5 rounded-full text-gray-500">{t}</span>
+                      <span key={t} className="text-[6px] font-black uppercase px-2 py-0.5 rounded-full border" style={getTypeStyle(t)}>{t}</span>
                     ))}
                   </div>
                 </div>
@@ -161,7 +186,7 @@ const PokedexApp = () => {
 
                     <div className="flex justify-center gap-4 mt-12">
                       {selectedPokemon.types.map(t => (
-                        <span key={t} className="px-8 py-2.5 bg-white/5 border border-white/10 rounded-full text-[11px] font-black uppercase tracking-[0.3em] text-white shadow-xl">{t}</span>
+                        <span key={t} className="px-8 py-2.5 border rounded-full text-[11px] font-black uppercase tracking-[0.3em] shadow-xl" style={getTypeStyle(t)}>{t}</span>
                       ))}
                     </div>
                   </div>
@@ -229,10 +254,31 @@ const PokedexApp = () => {
                         </select>
                         <div className="absolute right-6 top-1/2 -translate-y-1/2 pointer-events-none opacity-20"><Box size={18} /></div>
                       </div>
-                      <div className="bg-black/40 rounded-[3rem] p-10 h-80 overflow-y-auto border border-white/5 scrollbar-hide shadow-inner">
-                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                          {selectedPokemon.moves && selectedPokemon.moves[selectedVersionGroup]?.map(move => (
-                            <span key={move} className="text-[10px] font-black text-gray-600 uppercase tracking-tighter truncate py-3 px-4 bg-white/5 rounded-2xl border border-white/[0.02] hover:text-white hover:bg-white/[0.08] transition-all cursor-default text-center">{move}</span>
+                      <div className="bg-black/40 rounded-[3rem] p-10 h-[32rem] overflow-y-auto border border-white/5 scrollbar-hide shadow-inner">
+                        <div className="grid grid-cols-1 gap-3">
+                          {selectedPokemon.moves && selectedPokemon.moves[selectedVersionGroup]?.map((move, i) => (
+                            <div key={i} className="flex items-center justify-between p-4 bg-white/5 rounded-2xl border border-white/5 transition-all group" style={getMoveTypeStyle(move.type)}>
+                              <div className="flex items-center gap-4">
+                                <div className="flex flex-col items-center justify-center w-10 h-10 bg-black/40 rounded-xl border border-white/5">
+                                  <span className="text-[8px] text-gray-600 font-bold uppercase">{move.method === 'egg' ? 'Egg' : 'Lvl'}</span>
+                                  <span className="text-xs font-black text-rose-500">{move.method === 'egg' ? '—' : move.level}</span>
+                                </div>
+                                <div className="space-y-0.5">
+                                  <p className="text-xs font-black uppercase tracking-tight text-white group-hover:text-rose-400 transition-colors">{move.name}</p>
+                                  <p className="text-[8px] font-black text-gray-600 uppercase tracking-widest" style={{ color: TYPE_COLORS[move.type.toLowerCase()] }}>{move.type}</p>
+                                </div>
+                              </div>
+                              <div className="flex gap-6">
+                                <div className="flex flex-col items-end">
+                                  <span className="text-[7px] text-gray-600 font-black uppercase flex items-center gap-1"><Crosshair size={8} /> Acc</span>
+                                  <span className="text-xs font-black text-gray-300 italic">{move.accuracy ? `${move.accuracy}%` : '—'}</span>
+                                </div>
+                                <div className="flex flex-col items-end">
+                                  <span className="text-[7px] text-gray-600 font-black uppercase flex items-center gap-1"><Zap size={8} /> Pwr</span>
+                                  <span className="text-xs font-black text-gray-300 italic">{move.power || '—'}</span>
+                                </div>
+                              </div>
+                            </div>
                           ))}
                         </div>
                       </div>

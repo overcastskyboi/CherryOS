@@ -39,7 +39,7 @@ jobs:
       - name: Fetch Live API Data (Dynamic Pre-build)
         env:
           VITE_STEAM_ID: "76561198043191125"
-          VITE_STEAM_API_KEY: "534BB5E98C134721FEF217D1CC893949"
+          VITE_STEAM_API_KEY: ${{ secrets.VITE_STEAM_API_KEY }}
           VITE_AL_USERNAME: "AugustElliott"
           VITE_AL_ID: "36296"
         run: |
@@ -81,6 +81,8 @@ jobs:
               // 1. Pokedex Mirror
               console.log('Mirroring Pokedex...');
               const pokedex = [];
+              const moveCache = {};
+
               for (const name of FAVORITES) {
                 try {
                   const data = await request(\`https://pokeapi.co/api/v2/pokemon/\${name}\`);
@@ -88,6 +90,44 @@ jobs:
                   const description = species.flavor_text_entries
                     .find(e => e.language.name === 'en')
                     ?.flavor_text.replace(/[\\n\\f]/g, ' ') || '';
+                  
+                  const pokemonMoves = {};
+                  
+                  for (const m of data.moves) {
+                    const moveName = m.move.name;
+                    if (!moveCache[moveName]) {
+                      try {
+                        const moveData = await request(m.move.url);
+                        moveCache[moveName] = {
+                          name: moveName.replace(/-/g, ' '),
+                          accuracy: moveData.accuracy,
+                          power: moveData.power,
+                          type: moveData.type.name
+                        };
+                      } catch(e) { 
+                        moveCache[moveName] = { name: moveName.replace(/-/g, ' '), accuracy: null, power: null, type: 'normal' };
+                      }
+                    }
+
+                    m.version_group_details.forEach(d => {
+                      const v = d.version_group.name;
+                      if (!pokemonMoves[v]) pokemonMoves[v] = [];
+                      pokemonMoves[v].push({
+                        ...moveCache[moveName],
+                        level: d.level_learned_at,
+                        method: d.move_learn_method.name
+                      });
+                    });
+                  }
+
+                  // Sort moves for each version group
+                  Object.keys(pokemonMoves).forEach(v => {
+                    pokemonMoves[v].sort((a, b) => {
+                      if (a.method === 'egg' && b.method !== 'egg') return -1;
+                      if (a.method !== 'egg' && b.method === 'egg') return 1;
+                      return a.level - b.level;
+                    });
+                  });
                   
                   pokedex.push({
                     id: data.id,
@@ -101,14 +141,7 @@ jobs:
                     shinySprite: \`https://play.pokemonshowdown.com/sprites/gen5ani-shiny/\${data.name.replace(/-disguised|-galar|-shield/g,'')}.gif\`,
                     artwork: \`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/\${data.id}.png\`,
                     footprint: \`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/footprints/\${data.id}.png\`,
-                    moves: data.moves.reduce((acc, m) => {
-                      m.version_group_details.forEach(d => {
-                        const v = d.version_group.name;
-                        if (!acc[v]) acc[v] = [];
-                        acc[v].push(m.move.name.replace(/-/g, ' '));
-                      });
-                      return acc;
-                    }, {})
+                    moves: pokemonMoves
                   });
                 } catch(e) { console.error(\`Failed \${name}:\`, e.message); }
               }
@@ -136,6 +169,7 @@ jobs:
               try {
                 const key = process.env.VITE_STEAM_API_KEY;
                 const id = process.env.VITE_STEAM_ID;
+                if (!key) throw new Error('Steam key missing');
                 const raw = await request(\`https://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/?key=\${key}&steamid=\${id}&format=json&include_appinfo=true&include_played_free_games=true\`);
                 if (raw.response && raw.response.games) {
                   const games = raw.response.games.filter(g => g.playtime_forever > 0).sort((a,b) => b.playtime_forever - a.playtime_forever).slice(0, 50);
@@ -177,6 +211,9 @@ jobs:
           }
           run();
           "
+
+      - name: Verify Mirror Files
+        run: ls -R public/data/mirror
 
       - name: Build Application
         env:

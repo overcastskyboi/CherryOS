@@ -15,6 +15,27 @@ export const DESKTOP_APPS = [
   { id: 'bpm-calculator', name: 'BPM Sync', icon: Calculator, path: '/bpm-calculator', color: 'text-rose-400', desc: 'Production Tool' },
 ];
 
+export const TYPE_COLORS = {
+  normal: '#A8A77A',
+  fire: '#EE8130',
+  water: '#6390F0',
+  electric: '#F7D02C',
+  grass: '#7AC74C',
+  ice: '#96D9D6',
+  fighting: '#C22E28',
+  poison: '#A33EA1',
+  ground: '#E2BF65',
+  flying: '#A98FF3',
+  psychic: '#F95587',
+  bug: '#A6B91A',
+  rock: '#B8A038',
+  ghost: '#705898',
+  dragon: '#6F35FC',
+  steel: '#B7B7CE',
+  fairy: '#D685AD',
+  dark: '#705746'
+};
+
 export const ANIME_DATA = {
   catalogue: [
     { title: "Berserk", type: "Manga", score: 9.5, progress: "376+ Ch", status: "Reading", coverImage: "https://s4.anilist.co/file/anilistcdn/media/manga/cover/large/bx30002-79997M9AasY6.png" },
