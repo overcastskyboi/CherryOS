@@ -7,7 +7,7 @@ import {
 import { 
   TrendingUp, DollarSign, Package, ArrowLeft, RefreshCcw, 
   Search, Filter, Gamepad2, Trophy, Sparkles, Sword, 
-  Cpu, Disc, Smartphone, Tablet, Monitor, Book, 
+  Cpu, Disc, Smartphone, Book, 
   Layers, Zap, Flame, Droplet, Leaf, Ghost, Skull
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -20,9 +20,7 @@ const CATEGORY_MAP = {
   'Other': { color: '#6b7280', icon: Package }
 };
 
-// Granular Icon Mapping
 const SPECIFIC_ICON_MAP = {
-  // Consoles
   'gamecube': Disc,
   'nintendo ds': Smartphone,
   'nintendo 64': Cpu,
@@ -33,9 +31,7 @@ const SPECIFIC_ICON_MAP = {
   'switch': Smartphone,
   'nes': Cpu,
   'snes': Cpu,
-  
-  // Pokemon Sets (Flavor icons)
-  'crown zenith': CrownIcon,
+  'crown zenith': Sparkles,
   'shining fates': Zap,
   'hidden fates': Ghost,
   'silver tempest': Droplet,
@@ -43,39 +39,16 @@ const SPECIFIC_ICON_MAP = {
   'scarlet & violet': Leaf,
   'promo': Sparkles,
   'base set': Layers,
-  
-  // YuGiOh (Flavor icons)
-  'pegasus': WingIcon,
+  'pegasus': Sword,
   'kaiba': Zap,
   'yugi': Sword,
   'joey': Flame,
   'metal raiders': Skull,
   'dark crisis': Skull,
-  
-  // Sports
   'prizm': Trophy,
   'donruss': Trophy,
   'topps': Trophy,
 };
-
-function CrownIcon(props) {
-  return (
-    <svg {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="m2 4 3 12h14l3-12-6 7-4-7-4 7-6-7z" />
-      <path d="M5 20h14" />
-    </svg>
-  );
-}
-
-function WingIcon(props) {
-  return (
-    <svg {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M2 10c0-3.9 3.1-7 7-7 3.9 0 7 3.1 7 7 0 3.9-3.1 7-7 7-3.9 0-7-3.1-7-7z" />
-      <path d="M12 10c0-3.9 3.1-7 7-7 3.9 0 7 3.1 7 7 0 3.9-3.1 7-7 7-3.9 0-7-3.1-7-7z" />
-      <path d="m2 10 7 7 7-7" />
-    </svg>
-  );
-}
 
 const getBroadCategory = (specific) => {
   const s = specific?.toLowerCase() || '';
@@ -114,18 +87,26 @@ export default function CollectionTrackerApp() {
         dynamicTyping: true,
         skipEmptyLines: true,
         complete: (results) => {
-          const processed = results.data.map(row => {
-            const rawSet = row['console-name'] || 'Uncategorized';
-            return {
-              id: row.id,
-              name: row['product-name'],
-              specificSet: cleanSetName(rawSet),
-              broadCategory: getBroadCategory(rawSet),
-              value: (row['price-in-pennies'] || 0) / 100,
-              quantity: row.quantity || 1,
-              date: row['date-entered']
-            };
-          });
+          // De-duplicate by ID
+          const seenIds = new Set();
+          const processed = results.data
+            .filter(row => {
+              if (!row.id || seenIds.has(row.id)) return false;
+              seenIds.add(row.id);
+              return true;
+            })
+            .map(row => {
+              const rawSet = row['console-name'] || 'Uncategorized';
+              return {
+                id: row.id,
+                name: row['product-name'],
+                specificSet: cleanSetName(rawSet),
+                broadCategory: getBroadCategory(rawSet),
+                value: (row['price-in-pennies'] || 0) / 100,
+                quantity: row.quantity || 1,
+                date: row['date-entered']
+              };
+            });
           setData(processed);
           setLoading(false);
         }
@@ -188,10 +169,8 @@ export default function CollectionTrackerApp() {
 
   return (
     <div className="min-h-[100dvh] bg-[#050505] text-slate-100 flex flex-col font-sans pb-20 relative overflow-hidden">
-      {/* Background Decor */}
       <div className="absolute bottom-0 left-0 w-[60%] h-[60%] bg-amber-950/10 blur-[150px] rounded-full pointer-events-none" />
 
-      {/* Header */}
       <header className="glass-header sticky top-0 z-40 px-6 py-6 flex items-center justify-between">
         <div className="flex items-center gap-6">
           <button onClick={() => navigate('/')} className="p-2 bg-white/5 hover:bg-white/10 rounded-xl text-amber-500 transition-all border border-white/5 shadow-xl">
@@ -220,7 +199,6 @@ export default function CollectionTrackerApp() {
       </header>
 
       <main className="flex-1 p-6 md:p-12 relative z-10 space-y-12 max-w-7xl mx-auto w-full">
-        {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="glass-card p-8 rounded-[2rem] space-y-2 relative overflow-hidden">
             <div className="absolute top-0 right-0 p-4 opacity-5 text-amber-500"><DollarSign size={80} /></div>
@@ -257,7 +235,6 @@ export default function CollectionTrackerApp() {
           </div>
         </div>
 
-        {/* Category Filter */}
         <div className="flex gap-2 overflow-x-auto pb-4 scrollbar-hide">
           {categories.map(cat => (
             <button
@@ -275,7 +252,6 @@ export default function CollectionTrackerApp() {
           ))}
         </div>
 
-        {/* Data Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 animate-elegant">
           {filteredAndSorted.map((item) => {
             const broadConfig = CATEGORY_MAP[item.broadCategory] || CATEGORY_MAP['Other'];
@@ -292,7 +268,6 @@ export default function CollectionTrackerApp() {
                 </div>
                 <h3 className="text-xs font-black text-white uppercase italic tracking-tight line-clamp-2 mb-1">{item.name}</h3>
                 <p className="text-[8px] font-black text-gray-600 uppercase tracking-widest">{item.specificSet}</p>
-                
                 <div className="absolute bottom-0 left-6 right-6 h-[1px] bg-gradient-to-r from-transparent via-white/5 to-transparent group-hover:via-white/20 transition-all" />
                 <div 
                   className="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-[2px] transition-all duration-500 group-hover:w-1/2" 
@@ -307,8 +282,8 @@ export default function CollectionTrackerApp() {
       <footer className="mt-auto px-6 py-4 flex justify-between items-center bg-black/40 border-t border-white/5 text-gray-700">
         <span className="text-[8px] font-mono uppercase tracking-widest italic">SECURE_INDEX // {stats.count} Assets Tracked</span>
         <div className="flex gap-1">
-          <div className="w-1 h-1 bg-amber-500" />
-          <div className="w-1 h-1 bg-amber-500 animate-pulse" />
+          <div className={`w-1 h-1 bg-amber-500`} />
+          <div className={`w-1 h-1 bg-amber-500 animate-pulse`} />
         </div>
       </footer>
     </div>

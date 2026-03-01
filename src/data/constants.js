@@ -1,7 +1,9 @@
 import { 
   Clapperboard, Music, Gamepad2, Monitor, 
   Cloud, Package, Calculator,
-  Pocket
+  Pocket, Trophy, Sparkles, Sword, 
+  Cpu, Disc, Smartphone, Book, 
+  Layers, Zap, Flame, Droplet, Leaf, Ghost, Skull
 } from 'lucide-react';
 
 export const DESKTOP_APPS = [
@@ -17,30 +19,23 @@ export const DESKTOP_APPS = [
 
 export const ANIME_DATA = {
   catalogue: [
-    { title: "Berserk", type: "Manga", score: 9.5, progress: "376+ Ch", status: "Reading" },
-    { title: "Hunter x Hunter (2011)", type: "Anime", score: 10, progress: "148 Eps", status: "Completed" },
-    { title: "Fullmetal Alchemist: Brotherhood", type: "Anime", score: 10, progress: "64 Eps", status: "Completed" },
-    { title: "Steins;Gate", type: "Anime", score: 10, progress: "24 Eps", status: "Completed" },
-    { title: "Vinland Saga Season 2", type: "Anime", score: 10, progress: "24 Eps", status: "Completed" },
-    { title: "Monster", type: "Anime", score: 9.5, progress: "74 Eps", status: "Completed" }
+    { title: "Berserk", type: "Manga", score: 9.5, progress: "376+ Ch", status: "Reading", coverImage: "https://s4.anilist.co/file/anilistcdn/media/manga/cover/large/bx30002-79997M9AasY6.png" },
+    { title: "Hunter x Hunter (2011)", type: "Anime", score: 10, progress: "148 Eps", status: "Completed", coverImage: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx11061-s9Pj7zPrAl39.png" },
+    { title: "Fullmetal Alchemist: Brotherhood", type: "Anime", score: 10, progress: "64 Eps", status: "Completed", coverImage: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx5114-K9999M9AasY6.png" },
+    { title: "Steins;Gate", type: "Anime", score: 10, progress: "24 Eps", status: "Completed", coverImage: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx9253-89997M9AasY6.png" },
+    { title: "Vinland Saga Season 2", type: "Anime", score: 10, progress: "24 Eps", status: "Completed", coverImage: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx146175-99997M9AasY6.png" },
+    { title: "Monster", type: "Anime", score: 9.5, progress: "74 Eps", status: "Completed", coverImage: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx19-99997M9AasY6.png" }
   ],
-  covers: {
-    "Berserk": "https://s4.anilist.co/file/anilistcdn/media/manga/cover/large/bx30002-79997M9AasY6.png",
-    "Hunter x Hunter (2011)": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx11061-s9Pj7zPrAl39.png",
-    "Fullmetal Alchemist: Brotherhood": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx5114-K9999M9AasY6.png",
-    "Steins;Gate": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx9253-89997M9AasY6.png",
-    "Vinland Saga Season 2": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx146175-99997M9AasY6.png",
-    "Monster": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx19-99997M9AasY6.png"
-  }
+  covers: {}
 };
 
 export const GAMING_DATA = {
   steam: { user: "AugustElliott", level: 42, gamesCount: 184 },
   collection: [
-    { title: "Fallout: New Vegas", platform: "Steam", playtime: "245h", achievementPercent: 100, rating: 10, id: 22380 },
-    { title: "Elden Ring", platform: "Steam", playtime: "120h", achievementPercent: 85, rating: 10, id: 1245620 },
-    { title: "Cyberpunk 2077", platform: "Steam", playtime: "65h", achievementPercent: 45, rating: 9, id: 1091500 },
-    { title: "Sekiro: Shadows Die Twice", platform: "Steam", playtime: "35h", achievementPercent: 95, rating: 9.5, id: 814380 }
+    { id: 22380, title: "Fallout: New Vegas", platform: "Steam", playtime: "245h", achievementPercent: 100, rating: 10, coverImage: "https://cdn.akamai.steamstatic.com/steam/apps/22380/header.jpg" },
+    { id: 1245620, title: "Elden Ring", platform: "Steam", playtime: "120h", achievementPercent: 85, rating: 10, coverImage: "https://cdn.akamai.steamstatic.com/steam/apps/1245620/header.jpg" },
+    { id: 1091500, title: "Cyberpunk 2077", platform: "Steam", playtime: "65h", achievementPercent: 45, rating: 9, coverImage: "https://cdn.akamai.steamstatic.com/steam/apps/1091500/header.jpg" },
+    { id: 814380, title: "Sekiro: Shadows Die Twice", platform: "Steam", playtime: "35h", achievementPercent: 95, rating: 9.5, coverImage: "https://cdn.akamai.steamstatic.com/steam/apps/814380/header.jpg" }
   ],
   covers: {}
 };
