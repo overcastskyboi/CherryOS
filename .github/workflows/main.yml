@@ -38,7 +38,6 @@ jobs:
 
       - name: Fetch Live API Data (Dynamic Pre-build)
         env:
-          # Using recovered Steam Key and public AniList ID
           VITE_STEAM_ID: "76561198043191125"
           VITE_STEAM_API_KEY: "534BB5E98C134721FEF217D1CC893949"
           VITE_AL_USERNAME: "AugustElliott"
@@ -75,12 +74,11 @@ jobs:
               console.log('Fetching AniList Data for:', process.env.VITE_AL_USERNAME);
               let aniData = null;
               try {
-                // Fetch public list without token to avoid 400 errors
                 aniData = await request('https://graphql.anilist.co', {
                   method: 'POST',
                   headers: { 'Content-Type': 'application/json' },
                   body: JSON.stringify({
-                    query: 'query(\$username:String){MediaListCollection(userName:\$username,type:ANIME){lists{entries{media{id title{english romaji}coverImage{extraLarge}averageScore type status}score(format:POINT_10)progress status}}}MangaList:MediaListCollection(userName:\$username,type:MANGA){lists{entries{media{id title{english romaji}coverImage{extraLarge}averageScore type status}score(format:POINT_10)progress status}}}}',
+                    query: 'query(\$username:String){MediaListCollection(userName:\$username,type:ANIME){lists{name status entries{media{id title{english romaji}coverImage{extraLarge}averageScore type status}score(format:POINT_10)progress status}}}MangaList:MediaListCollection(userName:\$username,type:MANGA){lists{name status entries{media{id title{english romaji}coverImage{extraLarge}averageScore type status}score(format:POINT_10)progress status}}}}',
                     variables: { username: process.env.VITE_AL_USERNAME }
                   })
                 });
@@ -99,16 +97,40 @@ jobs:
                 
                 const rawSteam = await request(url);
                 if (rawSteam.response && rawSteam.response.games) {
-                  steamData = {
-                    data: rawSteam.response.games.map(game => ({
+                  console.log('Fetched ' + rawSteam.response.games.length + ' games. Syncing achievement data...');
+                  
+                  // Fetch achievement stats for top games to get percentage
+                  // To stay within free tier and time limits, we fetch top 20 by playtime
+                  const topGames = rawSteam.response.games
+                    .filter(g => g.playtime_forever > 0)
+                    .sort((a,b) => b.playtime_forever - a.playtime_forever)
+                    .slice(0, 40);
+
+                  const enrichedGames = [];
+                  for (const game of topGames) {
+                    let percent = 0;
+                    try {
+                      const achUrl = \`https://api.steampowered.com/ISteamUserStats/GetPlayerAchievements/v0001/?appid=\${game.appid}&key=\${steamKey}&steamid=\${steamId}\`;
+                      const achRes = await request(achUrl);
+                      if (achRes.playerstats && achRes.playerstats.achievements) {
+                        const total = achRes.playerstats.achievements.length;
+                        const unlocked = achRes.playerstats.achievements.filter(a => a.achieved === 1).length;
+                        percent = total > 0 ? (unlocked / total) * 100 : 0;
+                      }
+                    } catch(e) { /* silent fail for individual game stats */ }
+                    
+                    enrichedGames.push({
                       id: game.appid,
                       title: game.name,
                       playtime: \`\${Math.round(game.playtime_forever / 60)}h\`,
                       coverImage: \`https://cdn.akamai.steamstatic.com/steam/apps/\${game.appid}/header.jpg\`,
-                      achievementPercent: 0
-                    }))
-                  };
-                  console.log('Steam mirror generated.');
+                      achievementPercent: percent,
+                      lastPlayed: game.rtime_last_played
+                    });
+                  }
+                  
+                  steamData = { data: enrichedGames };
+                  console.log('Steam mirror generated with ' + enrichedGames.length + ' enriched entries.');
                 }
               } catch(e) { console.error('Steam fetch failed:', e.message); }
               
@@ -144,29 +166,29 @@ jobs:
           publish_dir: ./dist
           commit_message: 'Automated Deployment via GitHub Actions [skip ci]'
 
-      - name: Install OCI CLI
+      - name: Sync Artifacts to OCI
         env:
           OCI_API_KEY: ${{ secrets.OCI_API_KEY }}
+          OCI_USER_OCID: ${{ secrets.OCI_USER_OCID }}
+          OCI_FINGERPRINT: ${{ secrets.OCI_FINGERPRINT }}
+          OCI_TENANCY_OCID: ${{ secrets.OCI_TENANCY_OCID }}
+          OCI_REGION: ${{ secrets.OCI_REGION }}
+          OCI_NAMESPACE: ${{ secrets.OCI_NAMESPACE }}
         run: |
           mkdir -p ~/.oci
           echo "$OCI_API_KEY" > ~/.oci/oci_api_key.pem
           chmod 600 ~/.oci/oci_api_key.pem
           cat <<EOF > ~/.oci/config
           [DEFAULT]
-          user=${{ secrets.OCI_USER_OCID }}
-          fingerprint=${{ secrets.OCI_FINGERPRINT }}
-          tenancy=${{ secrets.OCI_TENANCY_OCID }}
-          region=${{ secrets.OCI_REGION }}
+          user=$OCI_USER_OCID
+          fingerprint=$OCI_FINGERPRINT
+          tenancy=$OCI_TENANCY_OCID
+          region=$OCI_REGION
           key_file=~/.oci/oci_api_key.pem
           EOF
           chmod 600 ~/.oci/config
           bash -c "$(curl -L https://raw.githubusercontent.com/oracle/oci-cli/master/scripts/install/install.sh)" -- --accept-all-defaults
           echo "/home/runner/bin" >> $GITHUB_PATH
-
-      - name: Sync Artifacts to OCI Object Storage
-        env:
-          OCI_NAMESPACE: ${{ secrets.OCI_NAMESPACE }}
-        run: |
           /home/runner/bin/oci os object bulk-upload -ns $OCI_NAMESPACE -bn cherryos-deploy-prod --src-dir ./dist --overwrite
           /home/runner/bin/oci os object put -ns $OCI_NAMESPACE -bn cherryos-deploy-prod --file healthcheck.txt --name healthcheck.txt --force
 
