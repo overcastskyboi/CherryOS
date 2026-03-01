@@ -1,8 +1,32 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import Papa from 'papaparse';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area } from 'recharts';
-import { TrendingUp, DollarSign, Package, ArrowLeft, RefreshCcw, Search, Filter } from 'lucide-react';
+import { 
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, 
+  ResponsiveContainer, Cell, ReferenceLine 
+} from 'recharts';
+import { 
+  TrendingUp, DollarSign, Package, ArrowLeft, RefreshCcw, 
+  Search, Filter, Gamepad2, Trophy, Sparkles, Sword 
+} from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+
+const CATEGORY_MAP = {
+  'Video Games': { color: '#3b82f6', icon: Gamepad2 },
+  'Basketball Cards': { color: '#f97316', icon: Trophy },
+  'Pokemon Cards': { color: '#ef4444', icon: Sparkles },
+  'YuGiOh Cards': { color: '#8b5cf6', icon: Sword },
+  'Other': { color: '#6b7280', icon: Package }
+};
+
+const getBroadCategory = (specific) => {
+  const s = specific?.toLowerCase() || '';
+  if (s.includes('pokemon')) return 'Pokemon Cards';
+  if (s.includes('yugioh')) return 'YuGiOh Cards';
+  if (s.includes('basketball')) return 'Basketball Cards';
+  const consoles = ['gamecube', 'nintendo ds', 'gameboy advance', 'nintendo 64', 'playstation', 'strategy guide', 'wii', 'switch', 'nes', 'snes', 'xbox'];
+  if (consoles.some(c => s.includes(c))) return 'Video Games';
+  return 'Other';
+};
 
 export default function CollectionTrackerApp() {
   const navigate = useNavigate();
@@ -22,14 +46,18 @@ export default function CollectionTrackerApp() {
         dynamicTyping: true,
         skipEmptyLines: true,
         complete: (results) => {
-          const processed = results.data.map(row => ({
-            id: row.id,
-            name: row['product-name'],
-            category: row['console-name'] || 'Uncategorized',
-            value: (row['price-in-pennies'] || 0) / 100,
-            quantity: row.quantity || 1,
-            date: row['date-entered']
-          }));
+          const processed = results.data.map(row => {
+            const specificSet = row['console-name'] || 'Uncategorized';
+            return {
+              id: row.id,
+              name: row['product-name'],
+              specificSet: specificSet,
+              broadCategory: getBroadCategory(specificSet),
+              value: (row['price-in-pennies'] || 0) / 100,
+              quantity: row.quantity || 1,
+              date: row['date-entered']
+            };
+          });
           setData(processed);
           setLoading(false);
         }
@@ -44,16 +72,13 @@ export default function CollectionTrackerApp() {
     fetchAndParseCSV();
   }, [fetchAndParseCSV]);
 
-  const categories = useMemo(() => {
-    const cats = new Set(data.map(i => i.category));
-    return ['All', ...Array.from(cats).sort()];
-  }, [data]);
+  const categories = useMemo(() => ['All', ...Object.keys(CATEGORY_MAP)], []);
 
   const filteredAndSorted = useMemo(() => {
     return data
       .filter(item => {
         const matchesSearch = item.name?.toLowerCase().includes(searchQuery.toLowerCase());
-        const matchesCat = activeCategory === 'All' || item.category === activeCategory;
+        const matchesCat = activeCategory === 'All' || item.broadCategory === activeCategory;
         return matchesSearch && matchesCat;
       })
       .sort((a, b) => b.value - a.value); // Strict Value Sort: High to Low
@@ -65,13 +90,26 @@ export default function CollectionTrackerApp() {
     return { total, count };
   }, [filteredAndSorted]);
 
-  // Generate chart data based on filtered results
+  // Aggregate values by broad category for the bar chart
   const chartData = useMemo(() => {
-    return filteredAndSorted
-      .slice(0, 20)
-      .reverse()
-      .map(item => ({ name: item.name?.substring(0, 10), value: item.value }));
-  }, [filteredAndSorted]);
+    const aggregates = data.reduce((acc, item) => {
+      const cat = item.broadCategory;
+      if (!acc[cat]) acc[cat] = 0;
+      acc[cat] += (item.value * item.quantity);
+      return acc;
+    }, {});
+
+    return Object.keys(CATEGORY_MAP).map(cat => ({
+      name: cat,
+      value: aggregates[cat] || 0,
+      color: CATEGORY_MAP[cat].color
+    })).sort((a, b) => b.value - a.value);
+  }, [data]);
+
+  const CategoryIcon = ({ category, size = 16, className = "" }) => {
+    const Icon = CATEGORY_MAP[category]?.icon || Package;
+    return <Icon size={size} className={className} />;
+  };
 
   return (
     <div className="min-h-[100dvh] bg-[#050505] text-slate-100 flex flex-col font-sans pb-20 relative overflow-hidden">
@@ -115,18 +153,30 @@ export default function CollectionTrackerApp() {
             <p className="text-4xl font-black text-white tracking-tighter italic">
               ${stats.total.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </p>
+            <p className="text-[9px] text-gray-500 font-bold uppercase tracking-widest">{activeCategory === 'All' ? 'Total Portfolio' : activeCategory}</p>
           </div>
           <div className="md:col-span-2 glass-card rounded-[2rem] p-6 h-48">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={chartData}>
-                <defs>
-                  <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#f59e0b" stopOpacity={0.3}/>
-                    <stop offset="95%" stopColor="#f59e0b" stopOpacity={0}/>
-                  </linearGradient>
-                </defs>
-                <Area type="monotone" dataKey="value" stroke="#f59e0b" fillOpacity={1} fill="url(#colorValue)" strokeWidth={3} />
-              </AreaChart>
+              <BarChart data={chartData}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#ffffff05" vertical={false} />
+                <XAxis 
+                  dataKey="name" 
+                  axisLine={false} 
+                  tickLine={false} 
+                  tick={{ fill: '#6b7280', fontSize: 10, fontWeight: 'bold' }} 
+                />
+                <YAxis hide />
+                <Tooltip 
+                  cursor={{ fill: 'transparent' }}
+                  contentStyle={{ backgroundColor: '#000', border: '1px solid #ffffff10', borderRadius: '12px', fontSize: '10px' }}
+                  itemStyle={{ fontWeight: 'bold' }}
+                />
+                <Bar dataKey="value" radius={[6, 6, 0, 0]}>
+                  {chartData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.color} fillOpacity={0.6} />
+                  ))}
+                </Bar>
+              </BarChart>
             </ResponsiveContainer>
           </div>
         </div>
@@ -137,10 +187,13 @@ export default function CollectionTrackerApp() {
             <button
               key={cat}
               onClick={() => setActiveTab(cat)}
-              className={`px-4 py-2 rounded-full text-[9px] font-black uppercase tracking-widest transition-all border ${
-                activeCategory === cat ? 'bg-amber-500 text-black border-amber-500 shadow-[0_0_20px_rgba(245,158,11,0.3)]' : 'bg-white/5 text-gray-500 border-white/5 hover:text-white'
+              className={`flex items-center gap-2 px-4 py-2 rounded-full text-[9px] font-black uppercase tracking-widest transition-all border ${
+                activeCategory === cat 
+                  ? 'bg-white text-black border-white shadow-[0_0_20px_rgba(255,255,255,0.2)]' 
+                  : 'bg-white/5 text-gray-500 border-white/5 hover:text-white'
               }`}
             >
+              {cat !== 'All' && <CategoryIcon category={cat} size={12} />}
               {cat}
             </button>
           ))}
@@ -148,20 +201,29 @@ export default function CollectionTrackerApp() {
 
         {/* Data Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 animate-elegant">
-          {filteredAndSorted.map((item) => (
-            <div key={item.id} className="glass-card p-6 rounded-2xl group hover:bg-white/[0.05] transition-all relative">
-              <div className="flex justify-between items-start mb-4">
-                <div className="p-2 rounded-lg bg-black/40 text-amber-500 border border-white/5">
-                  <Package size={16} />
+          {filteredAndSorted.map((item) => {
+            const config = CATEGORY_MAP[item.broadCategory] || CATEGORY_MAP['Other'];
+            return (
+              <div key={item.id} className="glass-card p-6 rounded-2xl group hover:bg-white/[0.05] transition-all relative">
+                <div className="flex justify-between items-start mb-4">
+                  <div className="p-2 rounded-lg bg-black/40 border border-white/5 transition-colors" style={{ color: config.color }}>
+                    <CategoryIcon category={item.broadCategory} size={16} />
+                  </div>
+                  <span className="text-[10px] font-mono font-black" style={{ color: config.color }}>
+                    ${item.value.toFixed(2)}
+                  </span>
                 </div>
-                <span className="text-[10px] font-mono font-black text-amber-500">${item.value.toFixed(2)}</span>
+                <h3 className="text-xs font-black text-white uppercase italic tracking-tight line-clamp-2 mb-1">{item.name}</h3>
+                <p className="text-[8px] font-black text-gray-600 uppercase tracking-widest">{item.specificSet}</p>
+                
+                <div className="absolute bottom-0 left-6 right-6 h-[1px] bg-gradient-to-r from-transparent via-white/5 to-transparent group-hover:via-white/20 transition-all" />
+                <div 
+                  className="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-[2px] transition-all duration-500 group-hover:w-1/2" 
+                  style={{ backgroundColor: config.color }} 
+                />
               </div>
-              <h3 className="text-xs font-black text-white uppercase italic tracking-tight line-clamp-2 mb-1">{item.name}</h3>
-              <p className="text-[8px] font-black text-gray-600 uppercase tracking-widest">{item.category}</p>
-              
-              <div className="absolute bottom-0 left-6 right-6 h-[1px] bg-gradient-to-r from-transparent via-amber-500/20 to-transparent group-hover:via-amber-500/50 transition-all" />
-            </div>
-          ))}
+            );
+          })}
         </div>
       </main>
 
