@@ -1,9 +1,7 @@
 import { 
   Clapperboard, Music, Gamepad2, Monitor, 
   Cloud, Package, Calculator,
-  Pocket, Trophy, Sparkles, Sword, 
-  Cpu, Disc, Smartphone, Book, 
-  Layers, Zap, Flame, Droplet, Leaf, Ghost, Skull
+  Pocket
 } from 'lucide-react';
 
 export const DESKTOP_APPS = [
