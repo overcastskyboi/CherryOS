@@ -20,19 +20,23 @@ const GameCenterApp = () => {
     setLoading(true);
     setIsMirror(false);
     try {
+      const baseUrl = import.meta.env.BASE_URL || '/';
+
       // 1. Fetch Metadata
-      const metaRes = await fetch(`${import.meta.env.BASE_URL}data/mirror/metadata.json`).catch(() => null);
+      const metaPath = `${baseUrl}data/mirror/metadata.json`.replace(/\/+/g, '/');
+      const metaRes = await fetch(metaPath).catch(() => null);
       if (metaRes?.ok) {
         const meta = await metaRes.json();
         setLastSynced(meta.lastUpdated);
       }
 
       // 2. Fetch Mirrored Steam Data
-      const response = await fetch(`${import.meta.env.BASE_URL}data/mirror/steam.json`);
-      if (!response.ok) throw new Error("Mirror fetch failed.");
+      const dataPath = `${baseUrl}data/mirror/steam.json`.replace(/\/+/g, '/');
+      const response = await fetch(dataPath);
+      if (!response.ok) throw new Error(`Mirror fetch failed with status: ${response.status}`);
       
       const json = await response.json();
-      if (json.data && Array.isArray(json.data)) {
+      if (json && json.data && Array.isArray(json.data)) {
         const processed = json.data.map(item => ({
           ...item,
           coverImage: item.id ? `https://cdn.akamai.steamstatic.com/steam/apps/${item.id}/header.jpg` : (item.coverImage || GAMING_DATA.covers[item.title])
@@ -44,7 +48,7 @@ const GameCenterApp = () => {
         }
       }
     } catch (err) {
-      console.warn("Mirror Unavailable, using Local Fallback Buffer.");
+      console.error("GameCenterApp Data Sync Error:", err);
       setData(GAMING_DATA.collection);
     } finally {
       setLoading(false);

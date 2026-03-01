@@ -19,19 +19,23 @@ const WatchLogApp = () => {
     setLoading(true);
     setIsMirror(false);
     try {
+      const baseUrl = import.meta.env.BASE_URL || '/';
+      
       // 1. Fetch Metadata
-      const metaRes = await fetch(`${import.meta.env.BASE_URL}data/mirror/metadata.json`).catch(() => null);
+      const metaPath = `${baseUrl}data/mirror/metadata.json`.replace(/\/+/g, '/');
+      const metaRes = await fetch(metaPath).catch(() => null);
       if (metaRes?.ok) {
         const meta = await metaRes.json();
         setLastSynced(meta.lastUpdated);
       }
 
       // 2. Fetch Mirrored AniList Data
-      const response = await fetch(`${import.meta.env.BASE_URL}data/mirror/anilist.json`);
-      if (!response.ok) throw new Error("Mirror fetch failed.");
+      const dataPath = `${baseUrl}data/mirror/anilist.json`.replace(/\/+/g, '/');
+      const response = await fetch(dataPath);
+      if (!response.ok) throw new Error(`Mirror fetch failed with status: ${response.status}`);
       
       const json = await response.json();
-      if (json.data) {
+      if (json && json.data) {
         const allEntries = [
           ...json.data.MediaListCollection.lists.flatMap(l => l.entries),
           ...json.data.MangaList.lists.flatMap(l => l.entries)
@@ -53,7 +57,7 @@ const WatchLogApp = () => {
         }
       }
     } catch (err) {
-      console.warn("Mirror Unavailable, using Local Fallback Buffer.");
+      console.error("WatchLogApp Data Sync Error:", err);
       setData(ANIME_DATA.catalogue);
     } finally {
       setLoading(false);

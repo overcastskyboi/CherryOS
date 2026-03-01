@@ -31,17 +31,20 @@ const MyMusicApp = () => {
     setIsDemoMode(false);
     try {
       const response = await fetch(manifestUrl);
-      if (!response.ok) throw new Error(`HTTP Error: ${response.status}`);
+      if (!response.ok) throw new Error(`HTTP Error: ${response.status} ${response.statusText}`);
 
       const json = await response.json();
       const libraryData = Array.isArray(json.value) ? json.value : (Array.isArray(json) ? json : []);
       const result = MusicManifestSchema.safeParse(libraryData);
       
-      if (!result.success) throw new Error("Invalid schema");
+      if (!result.success) {
+        console.error("Music Manifest Schema Validation Failed:", result.error);
+        throw new Error("Invalid schema");
+      }
 
       setLibrary(result.data.sort((a, b) => new Date(b.releaseDate || 0) - new Date(a.releaseDate || 0)));
     } catch (err) {
-      console.warn("Fetch Failed, entering Demo Mode");
+      console.error("MyMusicApp Fetch Error:", err);
       setIsDemoMode(true);
       setLibrary(DEMO_MUSIC);
     } finally {
@@ -71,7 +74,7 @@ const MyMusicApp = () => {
     if (isPlaying) {
       audio.pause();
     } else {
-      audio.play().catch(e => console.error("Autoplay blocked", e));
+      audio.play().catch(e => console.error("Autoplay blocked or playback error:", e));
     }
     setIsPlaying(!isPlaying);
   };
@@ -101,7 +104,7 @@ const MyMusicApp = () => {
         audio.src = track.url;
       }
       if (isPlaying) {
-        audio.play().catch(() => {});
+        audio.play().catch(e => console.error("Audio play error:", e));
       } else {
         audio.pause();
       }

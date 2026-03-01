@@ -25,10 +25,13 @@ const PokedexApp = () => {
   const fetchPokemonDetails = async (name) => {
     try {
       const res = await fetch(`https://pokeapi.co/api/v2/pokemon/${name}`);
-      if (!res.ok) throw new Error(`PokeAPI error: ${res.status}`);
+      if (!res.ok) {
+        console.error(`PokeAPI error for ${name}:`, res.status, res.statusText);
+        return null;
+      }
       return await res.json();
     } catch (e) {
-      console.error(`Error fetching ${name}:`, e);
+      console.error(`Network error fetching ${name}:`, e);
       return null;
     }
   };
@@ -37,7 +40,6 @@ const PokedexApp = () => {
     setLoading(true);
     setError(null);
     try {
-      // Fetch in batches of 10 to avoid rate limiting or connection drops
       const results = [];
       for (let i = 0; i < FAVORITE_POKEMON.length; i += 10) {
         const batch = FAVORITE_POKEMON.slice(i, i + 10);
@@ -50,13 +52,16 @@ const PokedexApp = () => {
         .map(r => r.value)
         .sort((a, b) => a.id - b.id);
 
-      if (successfulData.length === 0) throw new Error("No data retrieved from PokéAPI.");
+      if (successfulData.length === 0) {
+        throw new Error("No data retrieved from PokéAPI. Check console for network errors.");
+      }
       
       setPokemonData(successfulData);
       if (!selectedPokemon && successfulData.length > 0) {
         handleSelectPokemon(successfulData[0]);
       }
     } catch (e) {
+      console.error("Critical Pokedex fetch error:", e);
       setError(e.message || "Failed to load Pokédex data.");
     } finally {
       setLoading(false);
@@ -69,16 +74,17 @@ const PokedexApp = () => {
     setSelectedVersionGroup('');
     try {
       const speciesRes = await fetch(pokemon.species.url);
+      if (!speciesRes.ok) throw new Error(`Species API error: ${speciesRes.status}`);
       const speciesJson = await speciesRes.json();
       setSpeciesData(speciesJson);
     } catch (e) {
-      console.warn("Species metadata unavailable.");
+      console.error("Species metadata fetch error:", e);
     }
   }, []);
   
   useEffect(() => {
     fetchAllPokemon();
-  }, []); // Only fetch once on mount
+  }, []); 
   
   const flavorText = useMemo(() => {
     if (!speciesData) return "Scanning biological signatures...";
@@ -88,7 +94,7 @@ const PokedexApp = () => {
   
   const movesByVersion = useMemo(() => {
     if (!selectedPokemon) return {};
-    const moves = selectedPokemon.moves.reduce((acc, move) => {
+    return selectedPokemon.moves.reduce((acc, move) => {
       move.version_group_details.forEach(detail => {
         const vg = detail.version_group.name;
         if (!acc[vg]) acc[vg] = [];
@@ -96,12 +102,17 @@ const PokedexApp = () => {
       });
       return acc;
     }, {});
-    
-    if (!selectedVersionGroup && Object.keys(moves).length > 0) {
-      setSelectedVersionGroup(Object.keys(moves)[0]);
+  }, [selectedPokemon]);
+
+  // Handle version group default selection outside of render/memo
+  useEffect(() => {
+    if (selectedPokemon && !selectedVersionGroup) {
+      const versions = Object.keys(movesByVersion);
+      if (versions.length > 0) {
+        setSelectedVersionGroup(versions[0]);
+      }
     }
-    return moves;
-  }, [selectedPokemon, selectedVersionGroup]);
+  }, [selectedPokemon, movesByVersion, selectedVersionGroup]);
 
   const filteredPokemon = useMemo(() => {
     return pokemonData.filter(p => p.name.toLowerCase().includes(searchQuery.toLowerCase()));
@@ -126,7 +137,6 @@ const PokedexApp = () => {
       </header>
 
       <main className="flex-1 flex flex-col md:flex-row p-4 gap-4 overflow-hidden relative z-10">
-        {/* Left Pane: List */}
         <div className="w-full md:w-80 flex flex-col pokedex-screen rounded-2xl p-4 overflow-hidden border border-white/5 shadow-inner">
           <div className="relative mb-4">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" size={14} />
@@ -168,7 +178,6 @@ const PokedexApp = () => {
           </div>
         </div>
 
-        {/* Right Pane: Details */}
         <div className="flex-1 flex flex-col pokedex-screen rounded-2xl p-8 overflow-y-auto relative border border-white/5">
           {selectedPokemon ? (
             <div className="max-w-3xl mx-auto w-full space-y-10 animate-in fade-in duration-700">
