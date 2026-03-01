@@ -71,7 +71,7 @@ jobs:
           publish_dir: ./dist
           user_name: 'github-actions[bot]'
           user_email: 'github-actions[bot]@users.noreply.github.com'
-          cname: cherryos.dev
+          commit_message: 'Automated Deployment via GitHub Actions'
 
   # 3. Cloud Synchronization (OCI)
   sync-oci:

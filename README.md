@@ -4,7 +4,7 @@
 [![React](https://img.shields.io/badge/React-19-blue.svg)](https://react.dev/)
 [![Vite](https://img.shields.io/badge/Vite-7-646CFF.svg)](https://vitejs.dev/)
 [![Tailwind](https://img.shields.io/badge/Tailwind-4-38B2AC.svg)](https://tailwindcss.com/)
-[![Security](https://img.shields.io/badge/Security-OWASP-green)](https://owasp.org/)
+[![GitHub Actions](https://img.shields.io/badge/CI%2FCD-GitHub%20Actions-green)](https://github.com/overcastskyboi/CherryOS/actions)
 [![Quality](https://img.shields.io/badge/Quality-SonarJS-orange)](https://github.com/SonarSource/eslint-plugin-sonarjs)
 
 CherryOS is a high-performance, responsive portfolio operating system built with **React 19** and **Vite 7**. It features a modular architecture designed for a seamless, full-page desktop experience.
@@ -18,11 +18,11 @@ CherryOS is a high-performance, responsive portfolio operating system built with
 
 ## ☁️ Cloud & Infrastructure (OCI)
 
-CherryOS is optimized for **zero-cost, high-security serverless hosting**:
+CherryOS is integrated with **Oracle Cloud Infrastructure (OCI)** for robust asset management:
 
-- **OCI Object Storage**: Production artifacts are synced to a secure, project-isolated OCI compartment.
-- **Serverless Architecture**: All project-specific network infrastructure (VCNs, Gateways) has been decommissioned to eliminate attack surface and unnecessary costs.
-- **Fail-Safe Deployment**: Local Git hooks handle encrypted sync to OCI via a hardened CLI wrapper with proactive existence checks.
+- **OCI Object Storage**: Production artifacts (`dist/`), music manifests, and health checks are automatically synced to OCI.
+- **Always Free Tier**: Leveraging OCI's high-availability storage and container registry within free tier limits.
+- **Automated CI/CD**: A consolidated 4-stage pipeline handles testing, security, Pages deployment, and OCI synchronization.
 
 ## 🛠️ Tech Stack
 
@@ -37,14 +37,14 @@ CherryOS is optimized for **zero-cost, high-security serverless hosting**:
 Detailed technical guides are available in the repository:
 
 - **[Architecture Map](./ARCHITECTURE.md)**: Project hierarchy, component mapping, and developer guides.
-- **[API Specifications](./API_SPEC.md)**: Detailed Zod schemas, data types, and error handling for all external integrations.
+- **[API Specifications](./API_SPEC.md)**: Detailed Zod schemas and OCI integration details.
 - **[Contributing Guide](./CONTRIBUTING.md)**: Local development setup and PR guidelines.
 
 ## 🛡️ Security Posture
 
-- **CSP**: Strict Content Security Policy enforced in `index.html`.
-- **Hardening**: Console logs stripped; Source maps disabled in production.
-- **Validation**: Strict schema validation for all mock and external data via **Zod**.
+- **Secrets Management**: All OCI credentials and API keys are stored securely in GitHub Secrets.
+- **Hardening**: Recursive security scans and `npm audit` gates in CI/CD.
+- **Validation**: Strict schema validation for all external data via **Zod**.
 
 ---
 © 2026 Colin Cherry. Built for the modern web.

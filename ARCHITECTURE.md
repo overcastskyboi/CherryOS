@@ -6,46 +6,40 @@ This document provides a comprehensive guide to the project structure and techni
 
 ```text
 CherryOS-dev/
-â”œâ”€â”€ .github/            # CI/CD Workflows (Security Scans)
-â”œâ”€â”€ src/                # Source Code
-â”‚   â”œâ”€â”€ apps/           # Modular full-page applications
-â”‚   â”œâ”€â”€ components/     # Reusable UI components (DataGrid, LazyImage)
-â”‚   â”œâ”€â”€ context/        # Global State Management (OSContext)
-â”‚   â”œâ”€â”€ data/           # Static assets, schemas (Zod), and constants
-â”‚   â””â”€â”€ test/           # Unit and Integration tests (Vitest)
-â”œâ”€â”€ Dockerfile          # OCI Deployment Configuration
-â””â”€â”€ vite.config.js      # Build & Test Pipeline Config
+├── .github/            # CI/CD Workflows (Consolidated Quality & Deployment)
+├── oci/                # Terraform Infrastructure as Code
+├── src/                # Source Code
+│   ├── apps/           # Modular full-page applications
+│   ├── components/     # Reusable UI components (DataGrid, SystemHealth)
+│   ├── context/        # Global State Management (OSContext)
+│   ├── data/           # Music manifests, schemas (Zod), and constants
+│   └── test/           # Unit and Integration tests (Vitest)
+├── Dockerfile          # Multi-stage Docker build for OCI Registry
+└── vite.config.js      # Vite 7 configuration with Tailwind 4 integration
 ```
 
 ## 2. Component Architecture
 
 ### Core OS Layer
-- **`OSContext.jsx`**: Manages boot state, active windows, and device detection (mobile vs. desktop).
-- **`App.jsx`**: The root router. Uses `basename="/CherryOS"` for GitHub Pages compatibility.
+- **`OSContext.jsx`**: Manages boot state, active windows, and device detection.
+- **`App.jsx`**: Root router using `basename="/CherryOS"` for GitHub Pages compatibility.
+- **`SystemHealth.jsx`**: Real-time connectivity monitor for OCI Object Storage services.
 
 ### Application Layer
 Each app in `src/apps/` is a self-contained environment:
-- **`MySongsApp.jsx`**: High-fidelity music player with async fetching and manifest validation.
-- **`WatchLogApp.jsx`**: Media tracker using the `DataGrid` component for organized visualization.
-- **`GameCenterApp.jsx`**: Portfolio-style game library with card-based layouts.
+- **`MySongsApp.jsx`**: Fetches and validates music data from OCI Object Storage.
+- **`CloudDashboardApp.jsx`**: Visualizes OCI infrastructure health and metrics.
 
-## 3. Guide for Making Changes
+## 3. CI/CD Pipeline
 
-### How to add a new "App":
-1. Create your component in `src/apps/NewApp.jsx`.
-2. Register the route in `src/App.jsx`.
-3. Add the application icon/link to `src/components/Desktop.jsx`.
-4. (Optional) Define a data schema in `src/data/schemas.js` if it fetches external data.
+The project uses a consolidated GitHub Actions workflow (`main.yml`):
+1.  **Quality Gate**: Runs ESLint, Vitest, and `npm audit`.
+2.  **Pages Deployment**: Automatically builds and pushes the static site to the `gh-pages` branch.
+3.  **OCI Sync**: Synchronizes build artifacts and metadata to OCI Object Storage.
+4.  **Container Push**: Builds and pushes a hardened Nginx-based Docker image to OCI Container Registry.
 
-### How to modify UI Scaling:
-- **Desktop**: Edit `src/components/Desktop.jsx`. We use Tailwind utility classes (`gap-24`, `p-10`, etc.) to fill empty space.
-- **Components**: Edit `src/components/DataGrid.jsx` for table/grid layouts.
-
-### How to update Data/APIs:
-- **Static fallback**: Edit `src/data/constants.js`.
-- **Remote Data**: Update `src/data/music_manifest.json` (local copy) or the OCI-hosted version.
-- **Validation**: Update `src/data/schemas.js` to change how the frontend validates incoming JSON.
-
-## 4. OCI & Deployment
-- **Containerization**: The `Dockerfile` uses a multi-stage build (Node -> Nginx).
-- **Sync**: Deployment artifacts are served from the root of the `gh-pages` branch.
+## 4. OCI Integration Details
+- **Region**: `us-ashburn-1` (iad)
+- **Bucket**: `cherryos-deploy-prod` (ObjectRead public access for health checks)
+- **Namespace**: `idg3nfddgypd`
+- **Registry**: `iad.ocir.io/idg3nfddgypd/cherryos`
