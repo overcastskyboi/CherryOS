@@ -476,7 +476,7 @@ const MyMusicApp = () => {
   if (error) return <ErrorState />;
 
   return (
-    <div className="bg-[#0a0a0a] text-white h-full flex flex-col relative overflow-hidden select-none font-sans">
+    <div className="bg-[#0a0a0a] text-white min-h-[100dvh] flex flex-col relative select-none font-sans pb-24">
       <div className="absolute inset-0 bg-gradient-to-br from-blue-950/20 via-black to-yellow-950/20 pointer-events-none" />
 
       {/* Main Viewport */}

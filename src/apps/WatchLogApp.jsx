@@ -118,7 +118,7 @@ const WatchLogApp = () => {
   );
 
   return (
-    <div className="bg-[#0a0a0a] text-gray-100 min-h-screen flex flex-col font-sans overflow-hidden">
+    <div className="bg-[#0a0a0a] text-gray-100 min-h-[100dvh] flex flex-col font-sans">
       {/* Header */}
       <div className="bg-black/60 backdrop-blur-2xl sticky top-0 z-30 border-b border-white/5 px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-6">

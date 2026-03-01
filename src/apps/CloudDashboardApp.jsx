@@ -259,7 +259,7 @@ const CloudDashboardApp = () => {
   );
 
   return (
-    <div className="bg-[#0b0c10] text-gray-100 min-h-screen flex flex-col font-sans overflow-hidden">
+    <div className="bg-[#0b0c10] text-gray-100 min-h-[100dvh] flex flex-col font-sans">
       {/* Header */}
       <div className="bg-[#0f1115]/90 backdrop-blur-xl border-b border-white/5 px-6 py-4 flex items-center justify-between shrink-0 z-30">
         <div className="flex items-center gap-4">

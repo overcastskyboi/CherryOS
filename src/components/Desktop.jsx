@@ -34,10 +34,10 @@ const Desktop = () => {
   ];
 
   return (
-    <div className="h-screen w-screen bg-[#0a0a0a] flex flex-col p-6 md:p-12 overflow-hidden">
+    <div className="min-h-[100dvh] w-screen bg-[#0a0a0a] flex flex-col p-6 md:p-12">
       {showHealth && <SystemHealth onClose={() => setShowHealth(false)} />}
       
-      <div className="flex-1 flex items-center justify-center overflow-y-auto scrollbar-hide py-8">
+      <div className="flex-1 flex items-center justify-center py-8">
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6 md:gap-12 lg:gap-24 w-full max-w-6xl justify-items-center">
           {apps.map((app) => (
             <button
@@ -55,7 +55,7 @@ const Desktop = () => {
           ))}
         </div>
       </div>
-      <div className="mt-auto flex justify-between items-center text-[8px] md:text-[10px] font-mono text-gray-600 uppercase tracking-widest border-t border-gray-900 pt-4 px-2">
+      <div className="mt-auto flex justify-between items-center text-[8px] md:text-[10px] font-mono text-gray-600 uppercase tracking-widest border-t border-gray-900 pt-4 px-2 shrink-0">
         <span>CherryOS 2.0.0</span>
         <span>Stable Build</span>
       </div>
