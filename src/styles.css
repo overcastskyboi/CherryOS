@@ -27,7 +27,6 @@ body,
   overflow-x: hidden;
   color: #fff;
   font-feature-settings: "tnum"; /* Standardize to tabular numbers */
-  cursor: none; /* Hide default cursor */
 }
 
 /* Global Button Depress Effect */
@@ -35,11 +34,6 @@ button:active,
 .glass-card:active {
   transform: scale(0.96);
   transition: transform 0.1s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-/* Ensure interactive elements hide cursor too */
-a, button, input, select, textarea {
-  cursor: none !important;
 }
 
 * {

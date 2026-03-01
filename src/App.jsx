@@ -13,8 +13,6 @@ import CollectionTrackerApp from './apps/CollectionTrackerApp';
 import BPMTimingCalculator from './apps/BPMTimingCalculator';
 import PokedexApp from './apps/PokedexApp';
 import RainBackground from './components/RainBackground';
-import CustomCursor from './components/CustomCursor';
-
 const MainContent = () => {
   const { bootState } = useOS();
 
@@ -24,7 +22,6 @@ const MainContent = () => {
 
   return (
     <>
-      <CustomCursor />
       <RainBackground />
       <div className="relative z-10 min-h-[100dvh] selection:bg-rose-500/30 transition-colors duration-1000">
         <Routes>
