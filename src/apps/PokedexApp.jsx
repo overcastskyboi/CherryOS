@@ -76,8 +76,10 @@ const PokedexApp = () => {
       if (!response.ok) throw new Error("Failed to load database");
       const data = await response.json();
       
-      // Sort by Dex ID
-      const sorted = data.sort((a, b) => a.id - b.id);
+      // Filter and Sort by Dex ID
+      const sorted = data
+        .filter(p => p.name !== 'corsola-galar' && p.name !== 'flamigo')
+        .sort((a, b) => a.id - b.id);
       setPokemonList(sorted);
     } catch (err) {
       console.error('Pokedex Data Load Error:', err);
@@ -257,12 +259,13 @@ const PokedexApp = () => {
                       <p className="text-[9px] font-black text-gray-600 uppercase tracking-widest leading-none">Weight</p>
                       <p className="text-xl font-black italic tracking-tighter text-white">{selectedPokemon.weight / 10}kg</p>
                     </div>
-                    <div className="pokedex-glass p-6 rounded-[2rem] flex items-center justify-center border-white/5 overflow-hidden">
+                    <div className="bg-white p-4 rounded-3xl border-[6px] border-black flex items-center justify-center overflow-hidden shadow-2xl relative group">
+                      <div className="absolute inset-0 bg-gradient-to-tr from-black/5 to-transparent pointer-events-none" />
                       <img 
                         src={selectedPokemon.footprint} 
                         alt="footprint" 
-                        className="h-16 grayscale invert filter brightness-200 opacity-20" 
-                        onError={(e) => e.target.style.display = 'none'}
+                        className="h-16 relative z-10 group-hover:scale-110 transition-transform duration-500" 
+                        onError={(e) => e.target.parentElement.style.display = 'none'}
                       />
                     </div>
                   </div>
@@ -320,34 +323,38 @@ const PokedexApp = () => {
                         <div className="grid grid-cols-1 gap-3">
                           {selectedPokemon.moves && [...(selectedPokemon.moves[selectedVersionGroup] || [])]
                             .sort((a, b) => (a.level || 0) - (b.level || 0))
-                            .map((move, i) => (
-                              <div key={i} className="flex items-center justify-between p-4 bg-white/5 rounded-2xl border border-white/5 transition-all group border-l-4" style={{ borderLeftColor: TYPE_COLORS[move.type?.toLowerCase()] || '#777' }}>
-                                <div className="flex items-center gap-4">
-                                  <div className="flex flex-col items-center justify-center w-10 h-10 bg-black/40 rounded-xl border border-white/5">
-                                    {move.method === 'egg' ? <Sparkles size={14} className="text-yellow-500" /> : (
-                                      <>
-                                        <span className="text-[8px] text-gray-600 font-bold uppercase">Lvl</span>
-                                        <span className="text-xs font-black text-rose-500">{move.level}</span>
-                                      </>
-                                    )}
+                            .map((move, i) => {
+                              const moveType = move.type?.toLowerCase() || 'normal';
+                              const typeColor = TYPE_COLORS[moveType] || '#777';
+                              return (
+                                <div key={i} className="flex items-center justify-between p-4 bg-white/5 rounded-2xl border border-white/5 transition-all group border-l-4" style={{ borderLeftColor: typeColor }}>
+                                  <div className="flex items-center gap-4">
+                                    <div className="flex flex-col items-center justify-center w-10 h-10 bg-black/40 rounded-xl border border-white/5">
+                                      {move.method === 'egg' ? <Sparkles size={14} className="text-yellow-500" /> : (
+                                        <>
+                                          <span className="text-[8px] text-gray-600 font-bold uppercase">Lvl</span>
+                                          <span className="text-xs font-black text-rose-500">{move.level}</span>
+                                        </>
+                                      )}
+                                    </div>
+                                    <div className="space-y-0.5">
+                                      <p className="text-xs font-black uppercase tracking-tight text-white group-hover:text-rose-400 transition-colors">{move.name}</p>
+                                      <p className="text-[8px] font-black uppercase tracking-widest" style={{ color: typeColor }}>{moveType}</p>
+                                    </div>
                                   </div>
-                                  <div className="space-y-0.5">
-                                    <p className="text-xs font-black uppercase tracking-tight text-white group-hover:text-rose-400 transition-colors">{move.name}</p>
-                                    <p className="text-[8px] font-black text-gray-600 uppercase tracking-widest" style={{ color: TYPE_COLORS[move.type?.toLowerCase()] || '#777' }}>{move.type || 'normal'}</p>
+                                  <div className="flex gap-6">
+                                    <div className="flex flex-col items-end">
+                                      <span className="text-[7px] text-gray-600 font-black uppercase flex items-center gap-1"><Crosshair size={8} /> Acc</span>
+                                      <span className="text-xs font-black text-gray-300 italic">{move.accuracy ? `${move.accuracy}%` : '—'}</span>
+                                    </div>
+                                    <div className="flex flex-col items-end">
+                                      <span className="text-[7px] text-gray-600 font-black uppercase flex items-center gap-1"><Zap size={8} /> Pwr</span>
+                                      <span className="text-xs font-black text-gray-300 italic">{move.power || '—'}</span>
+                                    </div>
                                   </div>
                                 </div>
-                                <div className="flex gap-6">
-                                  <div className="flex flex-col items-end">
-                                    <span className="text-[7px] text-gray-600 font-black uppercase flex items-center gap-1"><Crosshair size={8} /> Acc</span>
-                                    <span className="text-xs font-black text-gray-300 italic">{move.accuracy ? `${move.accuracy}%` : '—'}</span>
-                                  </div>
-                                  <div className="flex flex-col items-end">
-                                    <span className="text-[7px] text-gray-600 font-black uppercase flex items-center gap-1"><Zap size={8} /> Pwr</span>
-                                    <span className="text-xs font-black text-gray-300 italic">{move.power || '—'}</span>
-                                  </div>
-                                </div>
-                              </div>
-                            ))}
+                              );
+                            })}
                         </div>
                       </div>
                     </div>
