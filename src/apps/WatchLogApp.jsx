@@ -2,46 +2,91 @@ import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { Clapperboard, ArrowLeft, RefreshCcw, Star, Search, ExternalLink, Clock, AlertCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import LazyImage from '../components/LazyImage';
-import { ANIME_DATA } from '../data/constants';
+
+const ANILIST_USERNAME = "AugustElliott";
 
 const WatchLogApp = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
-  const [data, setData] = useState(ANIME_DATA.catalogue);
+  const [data, setData] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
-  const [lastSynced, setLastSynced] = useState(null);
-  const [isMirror, setIsMirror] = useState(false);
+  const [error, setError] = useState(null);
   
   const [displayCount, setDisplayCount] = useState(12);
   const loaderRef = useRef(null);
 
-  const fetchMirroredData = useCallback(async () => {
+  const fetchAniList = useCallback(async () => {
     setLoading(true);
-    setIsMirror(false);
+    setError(null);
+
+    const query = `
+      query ($username: String) {
+        MediaListCollection(userName: $username, type: ANIME) {
+          lists {
+            entries {
+              media {
+                id
+                title { english romaji }
+                coverImage { extraLarge }
+                averageScore
+                type
+                status
+              }
+              score(format: POINT_10)
+              progress
+              status
+            }
+          }
+        }
+        MangaList: MediaListCollection(userName: $username, type: MANGA) {
+          lists {
+            entries {
+              media {
+                id
+                title { english romaji }
+                coverImage { extraLarge }
+                averageScore
+                type
+                status
+              }
+              score(format: POINT_10)
+              progress
+              status
+            }
+          }
+        }
+      }
+    `;
+
     try {
-      const baseUrl = import.meta.env.BASE_URL || '/';
-      
-      // 1. Fetch Metadata
-      const metaPath = `${baseUrl}data/mirror/metadata.json`.replace(/\/+/g, '/');
-      const metaRes = await fetch(metaPath).catch(() => null);
-      if (metaRes?.ok) {
-        const meta = await metaRes.json();
-        setLastSynced(meta.lastUpdated);
+      const response = await fetch('https://graphql.anilist.co', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: JSON.stringify({
+          query,
+          variables: { username: ANILIST_USERNAME }
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`AniList API responded with status: ${response.status}`);
       }
 
-      // 2. Fetch Mirrored AniList Data
-      const dataPath = `${baseUrl}data/mirror/anilist.json`.replace(/\/+/g, '/');
-      const response = await fetch(dataPath);
-      if (!response.ok) throw new Error(`Mirror fetch failed with status: ${response.status}`);
-      
       const json = await response.json();
-      if (json && json.data) {
-        const allEntries = [
-          ...(json.data.MediaListCollection?.lists?.flatMap(l => l.entries) || []),
-          ...(json.data.MangaList?.lists?.flatMap(l => l.entries) || [])
-        ];
+      
+      if (json.errors) {
+        console.error('AniList GraphQL Errors:', json.errors);
+        throw new Error(json.errors[0].message);
+      }
+
+      if (json.data) {
+        const animeEntries = json.data.MediaListCollection.lists.flatMap(l => l.entries);
+        const mangaEntries = json.data.MangaList.lists.flatMap(l => l.entries);
         
-        const processed = allEntries.map(entry => ({
+        const processed = [...animeEntries, ...mangaEntries].map(entry => ({
           title: entry.media.title.english || entry.media.title.romaji,
           type: entry.media.type,
           score: entry.score || entry.media.averageScore / 10 || 0,
@@ -51,25 +96,19 @@ const WatchLogApp = () => {
           id: entry.media.id
         }));
 
-        if (processed.length > 0) {
-          setData(processed);
-          setIsMirror(true);
-        } else {
-          console.warn("Mirror contains 0 entries, using Local Fallback Buffer.");
-          setData(ANIME_DATA.catalogue);
-        }
+        setData(processed);
       }
     } catch (err) {
-      console.error("WatchLogApp Data Sync Error:", err);
-      setData(ANIME_DATA.catalogue);
+      console.error('API Fetch Error:', err);
+      setError(err.message || "Failed to sync with AniList.");
     } finally {
       setLoading(false);
     }
   }, []);
 
   useEffect(() => {
-    fetchMirroredData();
-  }, [fetchMirroredData]);
+    fetchAniList();
+  }, [fetchAniList]);
 
   useEffect(() => {
     const observer = new IntersectionObserver((entries) => {
@@ -83,8 +122,7 @@ const WatchLogApp = () => {
   }, []);
 
   const filteredAndSortedData = useMemo(() => {
-    const items = data.length > 0 ? data : ANIME_DATA.catalogue;
-    return items
+    return data
       .filter(item =>
         item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         item.type.toLowerCase().includes(searchQuery.toLowerCase())
@@ -98,24 +136,14 @@ const WatchLogApp = () => {
 
   return (
     <div className="bg-[#050505] text-gray-100 min-h-[100dvh] flex flex-col relative overflow-hidden">
-      <header className="glass-header sticky top-0 z-40 px-6 py-6 flex items-center justify-between">
+      <header className="bg-black/60 backdrop-blur-md border-b border-white/10 px-6 py-6 flex items-center justify-between sticky top-0 z-50">
         <div className="flex items-center gap-6">
-          <button onClick={() => navigate('/')} className="p-2 bg-white/5 hover:bg-white/10 rounded-xl text-yellow-500 transition-all border border-white/5">
+          <button onClick={() => navigate('/')} className="p-2 bg-white/5 hover:bg-white/10 rounded-xl text-yellow-500 transition-all border border-white/5 shadow-xl">
             <ArrowLeft size={20} />
           </button>
           <div>
             <h1 className="text-xl font-black tracking-tighter text-white uppercase italic">Activity Log</h1>
-            <div className="flex items-center gap-2 mt-1">
-              <p className={`text-[9px] uppercase tracking-[0.4em] font-bold ${isMirror ? 'text-emerald-500' : 'text-yellow-600'}`}>
-                {isMirror ? 'Cloud Mirror // Active' : 'Local Buffer // Offline'}
-              </p>
-              {lastSynced && (
-                <div className="flex items-center gap-1 text-[8px] text-gray-500 font-mono">
-                  <Clock size={10} />
-                  <span>{new Date(lastSynced).toLocaleString()}</span>
-                </div>
-              )}
-            </div>
+            <p className="text-[9px] text-emerald-500 uppercase tracking-[0.4em] font-bold mt-1">Satellite // Engine Active</p>
           </div>
         </div>
         <div className="flex items-center gap-4">
@@ -129,7 +157,7 @@ const WatchLogApp = () => {
               className="bg-white/5 border border-white/10 rounded-xl py-2 pl-10 pr-4 text-[10px] font-bold text-white focus:outline-none w-48 transition-all"
             />
           </div>
-          <button onClick={fetchMirroredData} className="p-2 bg-white/5 hover:bg-white/10 rounded-xl border border-white/5 transition-all">
+          <button onClick={fetchAniList} className="p-2 bg-white/5 hover:bg-white/10 rounded-xl border border-white/5 transition-all">
             <RefreshCcw size={16} className={loading ? 'animate-spin' : 'text-yellow-500'} />
           </button>
         </div>
@@ -137,18 +165,23 @@ const WatchLogApp = () => {
 
       <main className="flex-1 p-6 md:p-12 relative z-10">
         <div className="max-w-7xl mx-auto space-y-12">
-          {!loading && visibleData.length === 0 && (
-            <div className="flex flex-col items-center justify-center py-20 text-gray-600 space-y-4">
-              <AlertCircle size={48} />
-              <p className="text-sm font-black uppercase tracking-widest">No Library Entries Found</p>
+          {error && (
+            <div className="bg-red-500/10 border border-red-500/20 p-6 rounded-2xl flex items-center gap-4 text-red-400 max-w-2xl mx-auto">
+              <AlertCircle size={24} />
+              <div className="flex-1">
+                <p className="text-xs font-black uppercase tracking-widest">Network Outage</p>
+                <p className="text-[10px] opacity-80">{error}</p>
+              </div>
+              <button onClick={fetchAniList} className="px-4 py-2 bg-red-500/20 hover:bg-red-500/30 rounded-lg text-[9px] font-bold uppercase tracking-widest transition-all">Reconnect</button>
             </div>
           )}
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4 md:gap-6">
+
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4 md:gap-6 animate-elegant">
             {visibleData.map((item, idx) => (
-              <div key={idx} className="group relative glass-card rounded-2xl overflow-hidden hover:bg-white/[0.05] transition-all duration-500 animate-elegant">
+              <div key={idx} className="group relative bg-black/40 rounded-2xl overflow-hidden border border-white/5 hover:border-yellow-500/30 transition-all duration-500">
                 <div className="aspect-[2/3] relative overflow-hidden bg-gray-900">
                   <LazyImage
-                    src={item.coverImage || ANIME_DATA.covers[item.title] || 'https://via.placeholder.com/300x450?text=No+Image'}
+                    src={item.coverImage}
                     alt={item.title}
                     className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
                   />
@@ -184,11 +217,11 @@ const WatchLogApp = () => {
         </div>
       </main>
 
-      <footer className="mt-auto px-6 py-4 flex justify-between items-center border-t border-white/5 text-gray-700 bg-black/40">
-        <span className="text-[8px] font-mono uppercase tracking-widest">Source: {isMirror ? 'Cloud_Mirror' : 'Local_Buffer'}</span>
+      <footer className="mt-auto px-6 py-4 flex justify-between items-center border-t border-white/5 text-gray-700 bg-black/40 sticky bottom-0 z-50">
+        <span className="text-[8px] font-mono uppercase tracking-widest italic">Anilist_Engine: AugustElliott</span>
         <div className="flex gap-1">
-          <div className={`w-1 h-1 ${isMirror ? 'bg-emerald-500' : 'bg-yellow-500'}`} />
-          <div className={`w-1 h-1 ${isMirror ? 'bg-emerald-500' : 'bg-yellow-500'} animate-pulse`} />
+          <div className="w-1 h-1 bg-yellow-500" />
+          <div className="w-1 h-1 bg-yellow-500 animate-pulse" />
         </div>
       </footer>
     </div>
