@@ -3,11 +3,7 @@ name: CherryOS CI/CD Pipeline
 on:
   push:
     branches: [ main ]
-  pull_request:
-    branches: [ main ]
-  schedule:
-    - cron: '0 2,14 * * *'
-  workflow_dispatch: # Allow manual trigger
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -15,8 +11,8 @@ permissions:
   id-token: write
 
 jobs:
-  data-sync:
-    name: Refresh API Data Mirror
+  build-and-deploy:
+    name: Build, Test, & Deploy
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
@@ -26,115 +22,34 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
+          cache: 'npm'
+      
+      - name: Install Dependencies
+        run: npm ci
 
-      - name: Fetch Live API Data
-        env:
-          VITE_STEAM_ID: "76561198043191125"
-          VITE_AL_ID: "36296"
-          VITE_AL_TOKEN: ${{ secrets.ANILIST_TOKEN }}
-          VITE_PROXY_URL: ${{ secrets.VITE_PROXY_URL }}
-        run: |
-          mkdir -p src/data/mirror
-          node -e "
-          const fs = require('fs');
-          const https = require('https');
-          
-          async function request(url, options = {}) {
-            return new Promise((resolve, reject) => {
-              const req = https.request(url, options, (res) => {
-                let body = '';
-                res.on('data', (chunk) => body += chunk);
-                res.on('end', () => {
-                  if (res.statusCode >= 200 && res.statusCode < 300) {
-                    try { resolve(JSON.parse(body)); } catch (e) { reject(new Error('JSON Parse Error: ' + e.message)); }
-                  } else {
-                    reject(new Error(`HTTP Status ${res.statusCode}: ${body}`));
-                  }
-                });
-              });
-              req.on('error', reject);
-              if (options.body) {
-                req.write(options.body);
-              }
-              req.end();
-            });
-          }
+      - name: Run Linter
+        run: npm run lint
+        
+      - name: Run Tests
+        run: npm test
 
-          async function run() {
-            try {
-              const proxyUrl = process.env.VITE_PROXY_URL;
-              if (!proxyUrl) throw new Error('VITE_PROXY_URL secret is missing.');
-
-              console.log('Fetching AniList Data...');
-              const aniData = await request('https://graphql.anilist.co', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + process.env.VITE_AL_TOKEN },
-                body: JSON.stringify({
-                  query: 'query(\$userId:Int){MediaListCollection(userId:\$userId,type:ANIME){lists{entries{media{id title{english romaji}coverImage{extraLarge}averageScore type status}score(format:POINT_10)progress status}}}MangaList:MediaListCollection(userId:\$userId,type:MANGA){lists{entries{media{id title{english romaji}coverImage{extraLarge}averageScore type status}score(format:POINT_10)progress status}}}}',
-                  variables: { userId: Number(process.env.VITE_AL_ID) }
-                })
-              });
-              fs.writeFileSync('src/data/mirror/anilist.json', JSON.stringify(aniData, null, 2));
-
-              console.log('Fetching Steam Data...');
-              const steamData = await request(`${proxyUrl}/steam?steamId=${process.env.VITE_STEAM_ID}`);
-              fs.writeFileSync('src/data/mirror/steam.json', JSON.stringify(steamData, null, 2));
-
-              fs.writeFileSync('src/data/mirror/metadata.json', JSON.stringify({ lastUpdated: new Date().toISOString() }, null, 2));
-              console.log('Data mirror updated successfully.');
-            } catch (err) {
-              console.error('Data fetch failed:', err.message);
-              process.exit(1);
-            }
-          }
-          run();
-          "
-
-      - name: Commit Data Mirror
-        run: |
-          git config --global user.name 'github-actions[bot]'
-          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-          git add src/data/mirror/
-          git diff --staged --quiet || git commit -m "chore: refresh api data mirror [skip ci]"
-          git push origin main
-
-  quality-gate:
-    name: Code Quality & Security
-    needs: data-sync
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with: { ref: main }
-      - uses: actions/setup-node@v4
-        with: { node-version: 20, cache: 'npm' }
-      - run: npm ci
-      - run: npm run lint
-      - run: npm run test
-
-  deploy:
-    name: Build & Deploy
-    needs: quality-gate
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with: { ref: main }
-      - uses: actions/setup-node@v4
-        with: { node-version: 20, cache: 'npm' }
-      - run: npm ci
       - name: Build Application
         env:
           VITE_PROXY_URL: ${{ secrets.VITE_PROXY_URL }}
           VITE_WEATHER_API_KEY: ${{ secrets.VITE_WEATHER_API_KEY }}
           VITE_OCI_NAMESPACE: ${{ secrets.OCI_NAMESPACE }}
         run: npm run build
+
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./dist
           commit_message: 'Automated Deployment via GitHub Actions [skip ci]'
+          
       - name: Install OCI CLI
-        env: { OCI_API_KEY: ${{ secrets.OCI_API_KEY }} }
+        env:
+          OCI_API_KEY: ${{ secrets.OCI_API_KEY }}
         run: |
           mkdir -p ~/.oci
           echo "$OCI_API_KEY" > ~/.oci/oci_api_key.pem
@@ -150,13 +65,19 @@ jobs:
           chmod 600 ~/.oci/config
           bash -c "$(curl -L https://raw.githubusercontent.com/oracle/oci-cli/master/scripts/install/install.sh)" -- --accept-all-defaults
           echo "/home/runner/bin" >> $GITHUB_PATH
-      - name: Sync Artifacts to OCI
-        run: |
-          /home/runner/bin/oci os object bulk-upload -ns ${{ secrets.OCI_NAMESPACE }} -bn cherryos-deploy-prod --src-dir ./dist --overwrite
-          /home/runner/bin/oci os object bulk-upload -ns ${{ secrets.OCI_NAMESPACE }} -bn cherryos-deploy-prod --src-dir src/data/mirror --overwrite
-      - uses: docker/login-action@v3
-        with: { registry: ${{ secrets.OCI_REGISTRY_URL }}, username: ${{ secrets.OCI_USERNAME }}, password: ${{ secrets.OCI_AUTH_TOKEN }} }
-      - uses: docker/build-push-action@v5
+
+      - name: Sync Artifacts to OCI Object Storage
+        run: /home/runner/bin/oci os object bulk-upload -ns ${{ secrets.OCI_NAMESPACE }} -bn cherryos-deploy-prod --src-dir ./dist --overwrite
+
+      - name: Login to OCI Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ secrets.OCI_REGISTRY_URL }}
+          username: ${{ secrets.OCI_USERNAME }}
+          password: ${{ secrets.OCI_AUTH_TOKEN }}
+
+      - name: Build and Push Docker Image
+        uses: docker/build-push-action@v5
         with:
           context: .
           push: true
