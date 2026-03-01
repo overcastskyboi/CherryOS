@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Dna, Footprints, Ruler, Weight, BarChart2, BookOpen, RefreshCcw } from 'lucide-react';
+import { ArrowLeft, Dna, Footprints, Ruler, Weight, BarChart2, BookOpen, RefreshCcw, Search } from 'lucide-react';
 import LazyImage from '../components/LazyImage';
 
 const FAVORITE_POKEMON = [
@@ -20,13 +20,15 @@ const PokedexApp = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedVersionGroup, setSelectedVersionGroup] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
 
   const fetchPokemonDetails = async (name) => {
     try {
       const res = await fetch(`https://pokeapi.co/api/v2/pokemon/${name}`);
-      if (!res.ok) return null;
+      if (!res.ok) throw new Error(`PokeAPI error: ${res.status}`);
       return await res.json();
     } catch (e) {
+      console.error(`Error fetching ${name}:`, e);
       return null;
     }
   };
@@ -35,25 +37,31 @@ const PokedexApp = () => {
     setLoading(true);
     setError(null);
     try {
-      // Use Promise.allSettled for resilience
-      const results = await Promise.allSettled(FAVORITE_POKEMON.map(name => fetchPokemonDetails(name)));
+      // Fetch in batches of 10 to avoid rate limiting or connection drops
+      const results = [];
+      for (let i = 0; i < FAVORITE_POKEMON.length; i += 10) {
+        const batch = FAVORITE_POKEMON.slice(i, i + 10);
+        const batchResults = await Promise.allSettled(batch.map(name => fetchPokemonDetails(name)));
+        results.push(...batchResults);
+      }
+
       const successfulData = results
         .filter(r => r.status === 'fulfilled' && r.value !== null)
         .map(r => r.value)
         .sort((a, b) => a.id - b.id);
 
-      if (successfulData.length === 0) throw new Error("No data retrieved");
+      if (successfulData.length === 0) throw new Error("No data retrieved from PokéAPI.");
       
       setPokemonData(successfulData);
-      if (successfulData.length > 0) {
+      if (!selectedPokemon && successfulData.length > 0) {
         handleSelectPokemon(successfulData[0]);
       }
     } catch (e) {
-      setError("Network error: Failed to reach PokéAPI.");
+      setError(e.message || "Failed to load Pokédex data.");
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [selectedPokemon]);
 
   const handleSelectPokemon = useCallback(async (pokemon) => {
     setSelectedPokemon(pokemon);
@@ -70,7 +78,7 @@ const PokedexApp = () => {
   
   useEffect(() => {
     fetchAllPokemon();
-  }, [fetchAllPokemon]);
+  }, []); // Only fetch once on mount
   
   const flavorText = useMemo(() => {
     if (!speciesData) return "Scanning biological signatures...";
@@ -95,6 +103,10 @@ const PokedexApp = () => {
     return moves;
   }, [selectedPokemon, selectedVersionGroup]);
 
+  const filteredPokemon = useMemo(() => {
+    return pokemonData.filter(p => p.name.toLowerCase().includes(searchQuery.toLowerCase()));
+  }, [pokemonData, searchQuery]);
+
   return (
     <div className="min-h-[100dvh] bg-red-950/40 text-white flex flex-col font-mono animate-elegant">
       <style>{`
@@ -105,7 +117,7 @@ const PokedexApp = () => {
 
       <header className="bg-red-700/80 backdrop-blur-md border-b border-white/10 px-6 py-4 flex items-center justify-between shadow-2xl">
         <div className="flex items-center gap-4">
-          <button onClick={() => navigate('/')} className="p-2 hover:bg-white/10 rounded-full text-white transition-colors">
+          <button onClick={() => navigate('/')} className="p-2 hover:bg-white/10 rounded-xl text-white transition-colors border border-white/5 bg-white/5 shadow-inner">
             <ArrowLeft size={20} />
           </button>
           <h1 className="text-xl font-black tracking-widest uppercase italic">Pokédex</h1>
@@ -115,34 +127,45 @@ const PokedexApp = () => {
 
       <main className="flex-1 flex flex-col md:flex-row p-4 gap-4 overflow-hidden relative z-10">
         {/* Left Pane: List */}
-        <div className="w-full md:w-80 flex flex-col pokedex-screen rounded-2xl p-2 overflow-y-auto border border-white/5 shadow-inner">
-          {loading ? (
-            <div className="flex flex-col items-center justify-center h-full gap-4 opacity-50">
-              <RefreshCcw className="animate-spin" size={24} />
-              <span className="text-[10px] font-bold tracking-widest uppercase">Syncing Database</span>
-            </div>
-          ) : error ? (
-            <div className="p-8 text-center space-y-4">
-              <p className="text-xs font-bold text-red-400 uppercase leading-relaxed">{error}</p>
-              <button onClick={fetchAllPokemon} className="px-4 py-2 bg-red-600 rounded-lg text-[10px] font-bold uppercase tracking-widest">Retry</button>
-            </div>
-          ) : (
-            <div className="space-y-1">
-              {pokemonData.map(p => (
+        <div className="w-full md:w-80 flex flex-col pokedex-screen rounded-2xl p-4 overflow-hidden border border-white/5 shadow-inner">
+          <div className="relative mb-4">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" size={14} />
+            <input
+              type="text"
+              placeholder="Search index..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full bg-white/5 border border-white/10 rounded-xl py-2 pl-10 pr-4 text-[10px] font-black uppercase text-white focus:outline-none focus:border-red-500 transition-all"
+            />
+          </div>
+
+          <div className="flex-1 overflow-y-auto space-y-1 pr-2 scrollbar-hide">
+            {loading ? (
+              <div className="flex flex-col items-center justify-center h-full gap-4 opacity-50">
+                <RefreshCcw className="animate-spin text-red-500" size={24} />
+                <span className="text-[10px] font-bold tracking-widest uppercase">Syncing Database</span>
+              </div>
+            ) : error ? (
+              <div className="p-8 text-center space-y-4">
+                <p className="text-xs font-bold text-red-400 uppercase leading-relaxed">{error}</p>
+                <button onClick={fetchAllPokemon} className="px-4 py-2 bg-red-600 rounded-lg text-[10px] font-bold uppercase tracking-widest">Retry</button>
+              </div>
+            ) : (
+              filteredPokemon.map(p => (
                 <button
                   key={p.id}
                   onClick={() => handleSelectPokemon(p)}
-                  className={`w-full flex items-center gap-4 p-3 rounded-xl transition-all ${selectedPokemon?.id === p.id ? 'bg-red-600/40 border border-white/20' : 'hover:bg-white/5 border border-transparent'}`}
+                  className={`w-full flex items-center gap-4 p-3 rounded-xl transition-all ${selectedPokemon?.id === p.id ? 'bg-red-600/40 border border-white/20 shadow-lg' : 'hover:bg-white/5 border border-transparent'}`}
                 >
-                  <img src={p.sprites.front_default} alt={p.name} className="w-10 h-10" />
+                  <img src={p.sprites.front_default} alt={p.name} className="w-10 h-10 drop-shadow-lg" />
                   <div className="text-left">
                     <p className="text-[8px] font-bold text-red-400">#{String(p.id).padStart(3, '0')}</p>
                     <p className="text-[10px] font-black uppercase tracking-tight">{p.name.replace('-disguised', '')}</p>
                   </div>
                 </button>
-              ))}
-            </div>
-          )}
+              ))
+            )}
+          </div>
         </div>
 
         {/* Right Pane: Details */}
@@ -156,7 +179,7 @@ const PokedexApp = () => {
                     <img 
                       src={`https://play.pokemonshowdown.com/sprites/gen5ani/${selectedPokemon.name.replace(/-galar|-shield/g,'')}.gif`}
                       alt={selectedPokemon.name}
-                      className="w-28 h-28 object-contain"
+                      className="w-28 h-28 object-contain drop-shadow-[0_0_10px_rgba(255,255,255,0.3)]"
                     />
                   </div>
                 </div>
@@ -175,12 +198,12 @@ const PokedexApp = () => {
               
               <div className="grid grid-cols-3 gap-4">
                 <div className="bg-white/5 p-4 rounded-2xl border border-white/5 space-y-1">
-                  <p className="text-[8px] font-bold text-gray-500 uppercase tracking-widest">Dimension</p>
-                  <p className="text-sm font-black italic tracking-tighter">{selectedPokemon.height / 10}m</p>
+                  <p className="text-[8px] font-bold text-gray-500 uppercase tracking-widest text-center">Dimension</p>
+                  <p className="text-sm font-black italic tracking-tighter text-center">{selectedPokemon.height / 10}m</p>
                 </div>
                 <div className="bg-white/5 p-4 rounded-2xl border border-white/5 space-y-1">
-                  <p className="text-[8px] font-bold text-gray-500 uppercase tracking-widest">Mass</p>
-                  <p className="text-sm font-black italic tracking-tighter">{selectedPokemon.weight / 10}kg</p>
+                  <p className="text-[8px] font-bold text-gray-500 uppercase tracking-widest text-center">Mass</p>
+                  <p className="text-sm font-black italic tracking-tighter text-center">{selectedPokemon.weight / 10}kg</p>
                 </div>
                 <div className="bg-white/5 p-2 rounded-2xl border border-white/5 flex items-center justify-center">
                   <img src={`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/footprints/${selectedPokemon.id}.png`} alt="footprint" className="h-10 opacity-40 grayscale invert" />
@@ -192,7 +215,7 @@ const PokedexApp = () => {
                   <BookOpen size={14} className="text-red-500" />
                   <h3 className="text-xs font-black uppercase tracking-[0.3em]">Species Log</h3>
                 </div>
-                <p className="text-xs leading-relaxed text-gray-300 font-medium uppercase italic">{flavorText}</p>
+                <p className="text-xs leading-relaxed text-gray-300 font-medium uppercase italic bg-black/20 p-4 rounded-xl border border-white/5">{flavorText}</p>
               </div>
 
               <div className="space-y-6">
@@ -208,7 +231,7 @@ const PokedexApp = () => {
                         <span className="text-white">{s.base_stat}</span>
                       </div>
                       <div className="stat-bar">
-                        <div style={{ width: `${(s.base_stat / 200) * 100}%` }} className="stat-fill bg-gradient-to-r from-red-600 to-yellow-500" />
+                        <div style={{ width: `${(s.base_stat / 200) * 100}%` }} className="stat-fill bg-gradient-to-r from-red-600 to-yellow-500 shadow-[0_0_10px_rgba(239,68,68,0.3)]" />
                       </div>
                     </div>
                   ))}
@@ -224,11 +247,11 @@ const PokedexApp = () => {
                   <select 
                     onChange={(e) => setSelectedVersionGroup(e.target.value)} 
                     value={selectedVersionGroup} 
-                    className="w-full bg-white/5 border border-white/10 p-3 rounded-xl font-mono text-[10px] font-black uppercase tracking-widest focus:outline-none focus:border-red-500 transition-colors"
+                    className="w-full bg-black border border-white/10 p-3 rounded-xl font-mono text-[10px] font-black uppercase tracking-widest focus:outline-none focus:border-red-500 transition-colors"
                   >
                     {Object.keys(movesByVersion).map(vg => (<option key={vg} value={vg}>{vg}</option>))}
                   </select>
-                  <div className="bg-black/40 rounded-2xl p-4 max-h-48 overflow-y-auto border border-white/5">
+                  <div className="bg-black/40 rounded-2xl p-4 max-h-48 overflow-y-auto border border-white/5 scrollbar-hide">
                     <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                       {movesByVersion[selectedVersionGroup]?.map(move => (
                         <span key={move} className="text-[9px] font-bold text-gray-500 uppercase tracking-tighter truncate">{move.replace(/-/g, ' ')}</span>
