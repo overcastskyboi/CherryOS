@@ -1,37 +1,40 @@
 # CherryOS Architecture Map
 
-## 1. Project Hierarchy & Structure
+## 1. Core Engine
 
-```text
-CherryOS-dev/
-├── .github/workflows/  # 4-Stage CI/CD Pipeline (Quality -> Pages -> OCI -> Docker)
-├── oci/                # Terraform (Infrastructure as Code)
-├── src/
-│   ├── apps/           # Modular OS Applications (Music, Games, Watch, Studio)
-│   ├── components/
-│   │   ├── Desktop.jsx # Glassmorphic core interface
-│   │   ├── RainBackground.jsx # HTML5 Canvas atmospheric layer (z-[-10])
-│   │   └── PixelIcons.jsx # Centralized handcrafted SVG icon library
-│   ├── context/        # Global state (OSContext) including isMobile detection
-│   └── data/           # Strict schemas (Zod) and internal CSV buffers
-```
+### OSContext (`src/context/OSContext.jsx`)
+The brain of CherryOS. It manages:
+-   **Boot State**: Transitions from `booting` ⮕ `locked` ⮕ `idle`.
+-   **Device Detection**: Real-time `isMobile` state for responsive layout switching.
+-   **Window Management**: Tracks active and minimized application states.
 
-## 2. Layering & UI Strategy
+### Routing Background (`src/components/RainBackground.jsx`)
+An optimized HTML5 Canvas layer rendering a graceful, slow-motion pixel art rain effect. Targeted at `z-index: -10` to ensure no interference with application logic.
 
-CherryOS uses a strict **z-index stacking model** to ensure visual clarity:
-- **Atmospheric Layer (`z-[-10]`)**: The dynamic rain canvas.
-- **Desktop Layer (`z-0`)**: Icons and background decor.
-- **Application Layer (`z-10`)**: The active route content.
-- **Overlay Layer (`z-40+`)**: Sticky headers, mini-players, and system modals.
+## 2. Application Layer
 
-## 3. Data Flow & Synchronization
+Every app in `src/apps/` is a high-order React component designed to function as a standalone environment.
 
-1.  **Direct API Access**: Apps fetch live data from AniList (GraphQL) and Steam (REST) using injected build-time secrets.
-2.  **OCI Mirroring**: A dedicated OCI sync job ensures that the `collection.csv` and `music_manifest.json` are mirrored across GitHub and Oracle Cloud for redundancy.
-3.  **Resilient Fallbacks**: If API connectivity is interrupted, apps gracefully transition to high-fidelity local data buffers (`src/data/constants.js`).
+| App | Data Source | Technology |
+| :--- | :--- | :--- |
+| **WatchLog** | AniList GraphQL | Infinite Scroll + rating-sorted grid |
+| **MyMusic** | OCI Object Storage | Persistent Audio + `crossOrigin` streaming |
+| **GameCenter** | Steam API | ID-based dynamic CDN imagery |
+| **Vault** | OCI CSV | PapaParse + Recharts area visualization |
+| **CloudCast** | OpenWeather | Dynamic condition-based theme switching |
 
-## 4. Performance Optimization
+## 3. Deployment Pipeline (`main.yml`)
 
-- **Infinite Scroll**: Intersection Observer API implementation in `GameCenterApp` and `WatchLogApp` to handle large datasets without UI lag.
-- **Manual Chunking**: Strategic `rollupOptions` in `vite.config.js` to separate vendor libraries from application logic.
-- **Lazy Loading**: Integrated `LazyImage` component for deferred loading of high-resolution media covers.
+The repository utilizes a 4-stage pipeline:
+
+1.  **Quality Gate**: Parallel Node 20/22 runs for Linting and Vitest coverage.
+2.  **Pages Deployment**: Build artifacts pushed to `gh-pages` with automated cache busting.
+3.  **OCI Sync**: Direct synchronization of `collection.csv`, `music_manifest.json`, and `healthcheck.txt` to the OCI production bucket.
+4.  **Docker Push**: Construction of a minimal Alpine-Nginx image for the OCI Registry.
+
+## 4. UI/UX Specifications
+
+-   **Design System**: Modern Glassmorphism (8% opacity, 12px blur).
+-   **Typography**: 'Inter' for UI, 'Mono' for system metadata.
+-   **Iconography**: Detailed 2.5D Pixel Art (SVG-based for scaling).
+-   **Mobile Scaling**: 100dvh layouts with safe-area padding and 1-column grid snapping.

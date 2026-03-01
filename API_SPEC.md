@@ -1,34 +1,35 @@
 # CherryOS API Specifications
 
-## 1. Steam Achievement Sync (Live)
+## 1. Steam Integration (Game Center)
 
-**Pattern**: ACHIEVEMENT_SORTED_ASC (Highest % First)
-- **Endpoint**: `${VITE_PROXY_URL}/steam?steamId=${VITE_STEAM_ID}`
-- **Sorting**: Data is sorted by `achievementPercent` descending before rendering.
-- **Infinite Scroll**: Initial fetch loads 12 items; observer triggers subsequent batches of 12.
+-   **User**: `AugustElliott`
+-   **SteamID**: `76561198043191125`
+-   **Pattern**: REST fetch via `VITE_PROXY_URL`.
+-   **Image Logic**: `https://cdn.akamai.steamstatic.com/steam/apps/${id}/header.jpg`.
+-   **Sorting**: `(a, b) => b.achievementPercent - a.achievementPercent`.
 
-## 2. AniList GraphQL Integration (Live)
+## 2. AniList Integration (Watch List)
 
-**Pattern**: RATING_DESC (Highest Score First)
-- **API**: `https://graphql.anilist.co`
-- **Auth**: Bearer Token injected at build-time.
-- **Query**: Combined Anime/Manga list retrieval including `MediaListCollection` metadata.
+-   **Type**: GraphQL (v2)
+-   **Auth**: Bearer Token injected as `VITE_AL_TOKEN`.
+-   **Sorting**: `(a, b) => b.score - a.score`.
+-   **Batching**: 12 items initial, triggered via `displayCount` increments.
 
-## 3. Music Manifest API (Cloud)
+## 3. OCI Integration (The Backbone)
 
-**Source**: `https://objectstorage.us-ashburn-1.oraclecloud.com/n/idg3nfddgypd/b/cherryos-deploy-prod/o/music_manifest.json`
-- **Schema**: Strictly validated via `MusicManifestSchema` (Zod).
-- **CORS**: Requires `crossOrigin = 'anonymous'` for browser-level audio streaming.
+-   **Namespace**: `idg3nfddgypd`
+-   **Region**: `us-ashburn-1`
+-   **Endpoints**:
+    -   Manifest: `.../o/music_manifest.json`
+    -   Collection: `.../o/collection.csv`
+    -   Health: `.../o/healthcheck.txt`
 
-## 4. Collection Tracker (The Vault)
+## 4. Environment Secrets
 
-**Source**: `src/data/collection.csv` (Synced to OCI)
-- **Parser**: PapaParse with dynamic typing enabled.
-- **Fields**: Supports price-in-pennies conversion, category breakdown, and market value projection.
-
-## 5. Security Protocol
-
-**Zero-Exposure Policy**:
-- All `VITE_` variables are securely handled via GitHub Environment Secrets.
-- API tokens are never exposed in the client-side source code post-build.
-- `404.html` SPA routing ensures sub-paths are protected and correctly redirected to the main engine.
+| Variable | Usage | Source |
+| :--- | :--- | :--- |
+| `VITE_PROXY_URL` | Steam/Weather Proxy | GH Secret |
+| `VITE_AL_TOKEN` | AniList GraphQL | GH Secret |
+| `VITE_WEATHER_API` | OpenWeather Maps | GH Secret |
+| `VITE_AL_ID` | User Identification | Build Var |
+| `VITE_STEAM_ID` | User Identification | Build Var |
