@@ -39,7 +39,9 @@ jobs:
       - name: Fetch Live API Data (Dynamic Pre-build)
         env:
           VITE_STEAM_ID: "76561198043191125"
-          VITE_AL_ID: ${{ secrets.ANILIST_ID }}
+          VITE_STEAM_API_KEY: "534BB5E98C134721FEF217D1CC893949"
+          VITE_AL_ID: "36296"
+          VITE_AL_USERNAME: "AugustElliott"
           VITE_AL_TOKEN: ${{ secrets.ANILIST_TOKEN }}
           VITE_PROXY_URL: ${{ secrets.VITE_PROXY_URL }}
         run: |
@@ -71,30 +73,21 @@ jobs:
 
           async function run() {
             try {
-              const proxyUrl = process.env.VITE_PROXY_URL;
-              const alId = process.env.VITE_AL_ID || '36296';
-              const alToken = process.env.VITE_AL_TOKEN;
-              
-              console.log('Fetching AniList Data for ID:', alId);
+              console.log('Fetching AniList Data for Username:', process.env.VITE_AL_USERNAME);
               let aniData = null;
               try {
-                const headers = { 'Content-Type': 'application/json' };
-                if (alToken && alToken.trim() !== '') {
-                  headers['Authorization'] = 'Bearer ' + alToken;
-                }
-                
+                // Try fetching WITHOUT token first for public access if token is invalid
                 aniData = await request('https://graphql.anilist.co', {
                   method: 'POST',
-                  headers: headers,
+                  headers: { 'Content-Type': 'application/json' },
                   body: JSON.stringify({
-                    query: 'query(\$userId:Int){MediaListCollection(userId:\$userId,type:ANIME){lists{entries{media{id title{english romaji}coverImage{extraLarge}averageScore type status}score(format:POINT_10)progress status}}}MangaList:MediaListCollection(userId:\$userId,type:MANGA){lists{entries{media{id title{english romaji}coverImage{extraLarge}averageScore type status}score(format:POINT_10)progress status}}}}',
-                    variables: { userId: Number(alId) }
+                    query: 'query(\$username:String){MediaListCollection(userName:\$username,type:ANIME){lists{entries{media{id title{english romaji}coverImage{extraLarge}averageScore type status}score(format:POINT_10)progress status}}}MangaList:MediaListCollection(userName:\$username,type:MANGA){lists{entries{media{id title{english romaji}coverImage{extraLarge}averageScore type status}score(format:POINT_10)progress status}}}}',
+                    variables: { username: process.env.VITE_AL_USERNAME }
                   })
                 });
-                console.log('AniList mirror generated.');
+                console.log('AniList mirror generated successfully.');
               } catch(e) { 
                 console.error('AniList fetch failed:', e.message);
-                // Fallback to empty structure to prevent build failure
                 aniData = { data: { MediaListCollection: { lists: [] }, MangaList: { lists: [] } } };
               }
               fs.writeFileSync('public/data/mirror/anilist.json', JSON.stringify(aniData));
@@ -102,12 +95,23 @@ jobs:
               console.log('Fetching Steam Data...');
               let steamData = null;
               try {
-                if(proxyUrl && proxyUrl.trim() !== '') {
-                  const sUrl = proxyUrl.endsWith('/') ? proxyUrl : proxyUrl + '/';
-                  steamData = await request(\`\${sUrl}steam?steamId=\${process.env.VITE_STEAM_ID}\`);
-                  console.log('Steam mirror generated.');
-                } else {
-                  console.warn('VITE_PROXY_URL is empty, skipping Steam fetch.');
+                // Call Steam API directly (Runner has no CORS restrictions)
+                const steamKey = process.env.VITE_STEAM_API_KEY;
+                const steamId = process.env.VITE_STEAM_ID;
+                const url = \`https://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/?key=\${steamKey}&steamid=\${steamId}&format=json&include_appinfo=true&include_played_free_games=true\`;
+                
+                const rawSteam = await request(url);
+                if (rawSteam.response && rawSteam.response.games) {
+                  steamData = {
+                    data: rawSteam.response.games.map(game => ({
+                      id: game.appid,
+                      title: game.name,
+                      playtime: \`\${Math.round(game.playtime_forever / 60)}h\`,
+                      coverImage: \`https://cdn.akamai.steamstatic.com/steam/apps/\${game.appid}/header.jpg\`,
+                      achievementPercent: 0
+                    }))
+                  };
+                  console.log('Steam mirror generated successfully.');
                 }
               } catch(e) { 
                 console.error('Steam fetch failed:', e.message);
@@ -135,6 +139,7 @@ jobs:
           VITE_OCI_REGION: ${{ secrets.OCI_REGION }}
           VITE_AL_ID: ${{ secrets.ANILIST_ID }}
           VITE_STEAM_ID: "76561198043191125"
+          VITE_STEAM_API_KEY: "534BB5E98C134721FEF217D1CC893949"
         run: npm run build
 
       - name: Deploy to GitHub Pages
