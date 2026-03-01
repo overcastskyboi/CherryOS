@@ -76,10 +76,8 @@ const PokedexApp = () => {
       if (!response.ok) throw new Error("Failed to load database");
       const data = await response.json();
       
-      // Filter and Sort by Dex ID
-      const sorted = data
-        .filter(p => p.name !== 'corsola-galar' && p.name !== 'flamigo')
-        .sort((a, b) => a.id - b.id);
+      // Sort by Dex ID (Filtering handled at mirror level now)
+      const sorted = data.sort((a, b) => a.id - b.id);
       setPokemonList(sorted);
     } catch (err) {
       console.error('Pokedex Data Load Error:', err);

@@ -71,15 +71,17 @@ jobs:
             'gengar', 'mimikyu-disguised', 'scizor', 'chimecho', 'meganium', 'shuckle', 
             'jirachi', 'celebi', 'swampert', 'tyranitar', 'snorlax', 'mienshao', 'raikou', 
             'zapdos', 'regice', 'lugia', 'espeon', 'altaria', 'skarmory', 'heracross', 
-            'cofagrigus', 'corsola-galar', 'kabutops', 'genesect', 'ampharos', 'politoed', 
+            'cofagrigus', 'kabutops', 'genesect', 'ampharos', 'politoed', 
             'hitmontop', 'cradily', 'milotic', 'metagross', 'latias', 'magnezone', 
-            'togekiss', 'rotom', 'gliscor', 'aegislash-shield', 'goodra', 'flamigo'
+            'togekiss', 'rotom', 'gliscor', 'aegislash-shield', 'goodra'
           ];
 
           async function run() {
             try {
               // 1. Pokedex Mirror (Concurrent)
               console.log('Mirroring Pokedex...');
+              const moveCache = new Map(); // Cache move types to avoid redundant requests
+
               const pokedex = await Promise.all(FAVORITES.map(async (name) => {
                 try {
                   const data = await request(\`https://pokeapi.co/api/v2/pokemon/\${name}\`);
@@ -89,17 +91,33 @@ jobs:
                     ?.flavor_text.replace(/[\\n\\f]/g, ' ') || '';
                   
                   const pokemonMoves = {};
-                  // Use a small selection of moves to keep build fast
-                  const relevantMoves = data.moves.slice(0, 100); 
-                  for (const m of relevantMoves) {
+                  // Use a selection of level-up moves to keep build fast and relevant
+                  const levelUpMoves = data.moves.filter(m => 
+                    m.version_group_details.some(d => d.move_learn_method.name === 'level-up')
+                  ).slice(0, 50); 
+
+                  for (const m of levelUpMoves) {
+                    // Resolve move type (cached)
+                    let moveType = 'normal';
+                    if (moveCache.has(m.move.name)) {
+                      moveType = moveCache.get(m.move.name);
+                    } else {
+                      try {
+                        const moveDetails = await request(m.move.url);
+                        moveType = moveDetails.type.name;
+                        moveCache.set(m.move.name, moveType);
+                      } catch(e) {}
+                    }
+
                     m.version_group_details.forEach(d => {
+                      if (d.move_learn_method.name !== 'level-up') return;
                       const v = d.version_group.name;
                       if (!pokemonMoves[v]) pokemonMoves[v] = [];
                       pokemonMoves[v].push({
                         name: m.move.name.replace(/-/g, ' '),
                         level: d.level_learned_at,
                         method: d.move_learn_method.name,
-                        url: m.move.url // We will resolve these details at runtime or fetch them if needed
+                        type: moveType
                       });
                     });
                   }
