@@ -246,7 +246,7 @@ const PokedexApp = () => {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-3 gap-4 md:gap-6">
+                  <div className="grid grid-cols-2 gap-4 md:gap-6">
                     <div className="pokedex-glass p-4 md:p-8 rounded-[1.5rem] md:rounded-[2rem] space-y-1 md:space-y-2 text-center border-white/5">
                       <Ruler size={12} className="mx-auto text-gray-600 mb-1 md:mb-2" />
                       <p className="text-[8px] md:text-[9px] font-black text-gray-600 uppercase tracking-widest leading-none">Height</p>
@@ -256,15 +256,6 @@ const PokedexApp = () => {
                       <Weight size={12} className="mx-auto text-gray-600 mb-1 md:mb-2" />
                       <p className="text-[8px] md:text-[9px] font-black text-gray-600 uppercase tracking-widest leading-none">Weight</p>
                       <p className="text-lg md:text-xl font-black italic tracking-tighter text-white">{selectedPokemon.weight / 10}kg</p>
-                    </div>
-                    <div className="bg-white p-3 md:p-4 rounded-2xl md:rounded-3xl border-[4px] md:border-[6px] border-black flex items-center justify-center overflow-hidden shadow-2xl relative group">
-                      <div className="absolute inset-0 bg-gradient-to-tr from-black/5 to-transparent pointer-events-none" />
-                      <img 
-                        src={selectedPokemon.footprint} 
-                        alt="footprint" 
-                        className="h-10 md:h-16 relative z-10 group-hover:scale-110 transition-transform duration-500" 
-                        onError={(e) => e.target.parentElement.style.display = 'none'}
-                      />
                     </div>
                   </div>
                 </div>
