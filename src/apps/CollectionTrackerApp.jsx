@@ -226,32 +226,36 @@ export default function CollectionTrackerApp() {
             <div className="absolute top-0 right-0 p-4 opacity-5 text-amber-500"><DollarSign size={isMobile ? 60 : 80} /></div>
             <p className="text-[8px] md:text-[10px] font-black text-amber-500 uppercase tracking-widest">Market Value</p>
             <p className="text-3xl md:text-4xl font-black text-white tracking-tighter italic leading-none">
-              ${stats.total.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              ${(stats?.total || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </p>
             <p className="text-[8px] md:text-[9px] text-gray-500 font-bold uppercase tracking-widest leading-none">{activeCategory === 'All' ? 'Total Portfolio' : activeCategory}</p>
           </div>
-          <div className="md:col-span-2 glass-card rounded-2xl md:rounded-[2rem] p-4 md:p-6 h-40 md:h-48">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#ffffff05" vertical={false} />
-                <XAxis 
-                  dataKey="name" 
-                  axisLine={false} 
-                  tickLine={false} 
-                  tick={{ fill: '#6b7280', fontSize: isMobile ? 8 : 10, fontWeight: 'bold' }} 
-                />
-                <YAxis hide />
-                <Tooltip 
-                  cursor={{ fill: 'rgba(255,255,255,0.05)' }}
-                  content={<CustomTooltip />}
-                />
-                <Bar dataKey="value" radius={[4, 4, 0, 0]} barSize={isMobile ? 24 : 40}>
-                  {chartData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} fillOpacity={0.6} />
-                  ))}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
+          <div className="md:col-span-2 glass-card rounded-2xl md:rounded-[2rem] p-4 md:p-6 h-40 md:h-48 overflow-hidden">
+            {chartData && chartData.length > 0 ? (
+              <ResponsiveContainer width="100%" height="100%" debounce={100}>
+                <BarChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#ffffff05" vertical={false} />
+                  <XAxis 
+                    dataKey="name" 
+                    axisLine={false} 
+                    tickLine={false} 
+                    tick={{ fill: '#6b7280', fontSize: isMobile ? 8 : 10, fontWeight: 'bold' }} 
+                  />
+                  <YAxis hide />
+                  <Tooltip 
+                    cursor={{ fill: 'rgba(255,255,255,0.05)' }}
+                    content={<CustomTooltip />}
+                  />
+                  <Bar dataKey="value" radius={[4, 4, 0, 0]} barSize={isMobile ? 24 : 40}>
+                    {chartData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry?.color || '#777'} fillOpacity={0.6} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="w-full h-full flex items-center justify-center text-[10px] font-black uppercase text-gray-800 tracking-widest italic">Initializing Matrix...</div>
+            )}
           </div>
         </div>
 
