@@ -96,9 +96,11 @@ jobs:
         run: npm run build
 
       - name: Install OCI CLI
+        env:
+          OCI_API_KEY: ${{ secrets.OCI_API_KEY }}
         run: |
           mkdir -p ~/.oci
-          echo "${{ secrets.OCI_API_KEY }}" > ~/.oci/oci_api_key.pem
+          echo "$OCI_API_KEY" > ~/.oci/oci_api_key.pem
           chmod 600 ~/.oci/oci_api_key.pem
           cat <<EOF > ~/.oci/config
           [DEFAULT]
@@ -108,6 +110,7 @@ jobs:
           region=${{ secrets.OCI_REGION }}
           key_file=~/.oci/oci_api_key.pem
           EOF
+          chmod 600 ~/.oci/config
           bash -c "$(curl -L https://raw.githubusercontent.com/oracle/oci-cli/master/scripts/install/install.sh)" -- --accept-all-defaults
           echo "/home/runner/bin" >> $GITHUB_PATH
 
