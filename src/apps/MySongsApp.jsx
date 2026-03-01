@@ -73,7 +73,8 @@ const MyMusicApp = () => {
       if (!response.ok) throw new Error(`HTTP Error: ${response.status}`);
 
       const json = await response.json();
-      const result = MusicManifestSchema.safeParse(json);
+      const libraryData = Array.isArray(json.value) ? json.value : (Array.isArray(json) ? json : []);
+      const result = MusicManifestSchema.safeParse(libraryData);
       
       if (!result.success) {
         console.error("Schema Validation Failed:", result.error);

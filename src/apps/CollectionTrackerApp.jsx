@@ -48,9 +48,7 @@ export default function CollectionTrackerApp() {
   const fetchAndParseCSV = useCallback(async () => {
     setIsProcessing(true);
     try {
-      // Fetch from local source (which is synced to OCI/GitHub)
-      // Note: We use the raw path that works in dev and prod
-      const response = await fetch('src/data/collection.csv');
+      const response = await fetch('https://objectstorage.us-ashburn-1.oraclecloud.com/n/idg3nfddgypd/b/cherryos-deploy-prod/o/collection.csv');
       const csvText = await response.text();
 
       Papa.parse(csvText, {
