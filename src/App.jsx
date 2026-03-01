@@ -17,7 +17,8 @@ import RainBackground from './components/RainBackground';
 const MainContent = () => {
   const { bootState } = useOS();
 
-  if (bootState === 'off') return <BootScreen />;
+  // Corrected to match OSContext.jsx initial state
+  if (bootState === 'booting') return <BootScreen />;
   if (bootState === 'locked') return <LockScreen />;
 
   return (

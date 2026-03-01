@@ -9,6 +9,9 @@ const BPMTimingCalculator = () => {
 
   const results = useMemo(() => calculateProductionValues(bpm), [bpm]);
 
+  // Robust check to prevent crashes if results is an empty object
+  const hasResults = results && results.delays;
+
   return (
     <div className="min-h-[100dvh] bg-[#050505] text-gray-100 flex flex-col font-sans pb-20 relative overflow-hidden">
       {/* Background Decor */}
@@ -32,6 +35,7 @@ const BPMTimingCalculator = () => {
       </header>
 
       <main className="flex-1 p-6 md:p-12 relative z-10 max-w-6xl mx-auto w-full space-y-12">
+        {/* BPM Input Section */}
         <section className="flex flex-col items-center gap-6 py-8 glass-card rounded-[2.5rem] p-12 border-rose-500/10 shadow-[0_0_50px_rgba(244,63,94,0.05)]">
           <label className="text-[10px] font-black uppercase tracking-[0.5em] text-rose-500/80">Global Tempo Control</label>
           <div className="flex items-end gap-4">
@@ -45,8 +49,9 @@ const BPMTimingCalculator = () => {
           </div>
         </section>
 
-        {results && (
+        {hasResults ? (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 animate-elegant">
+            {/* Delays Table */}
             <div className="space-y-6">
               <div className="flex items-center gap-3 border-l-2 border-rose-500 pl-4">
                 <Music size={16} className="text-rose-500" />
@@ -75,6 +80,7 @@ const BPMTimingCalculator = () => {
               </div>
             </div>
 
+            {/* Frequencies & Production */}
             <div className="space-y-12">
               <div className="space-y-6">
                 <div className="flex items-center gap-3 border-l-2 border-rose-500 pl-4">
@@ -82,7 +88,7 @@ const BPMTimingCalculator = () => {
                   <h2 className="text-sm font-black text-white uppercase tracking-widest leading-none">LFO & Rate Sync</h2>
                 </div>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                  {Object.entries(results.frequencies).map(([note, hz]) => (
+                  {Object.entries(results.lfoHz).map(([note, hz]) => (
                     <div key={note} className="glass-card p-4 rounded-2xl text-center space-y-1">
                       <p className="text-[8px] font-black text-gray-600 uppercase">{note}</p>
                       <p className="text-xs font-black text-rose-400">{hz}Hz</p>
@@ -99,36 +105,24 @@ const BPMTimingCalculator = () => {
                 <div className="grid grid-cols-2 gap-3">
                   <div className="glass-card p-4 rounded-2xl flex justify-between items-center">
                     <span className="text-[9px] font-black text-gray-500 uppercase tracking-widest">Tight Pre</span>
-                    <span className="text-xs font-black text-white tracking-tighter italic">{results.production.preDelayTight}ms</span>
+                    <span className="text-xs font-black text-white tracking-tighter italic">{results.reverb.preDelayTightMs}ms</span>
                   </div>
                   <div className="glass-card p-4 rounded-2xl flex justify-between items-center">
                     <span className="text-[9px] font-black text-gray-500 uppercase tracking-widest">Snap Att</span>
-                    <span className="text-xs font-black text-white tracking-tighter italic">{results.production.snapAttack}ms</span>
+                    <span className="text-xs font-black text-white tracking-tighter italic">{results.compressor.attackSnapMs}ms</span>
                   </div>
                   <div className="glass-card p-4 rounded-2xl flex justify-between items-center col-span-2">
-                    <span className="text-[9px] font-black text-gray-500 uppercase tracking-widest">Tail Decay (1.5 Bar)</span>
-                    <span className="text-xs font-black text-white tracking-tighter italic">{results.production.tailDecay}ms</span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="space-y-6">
-                <div className="flex items-center gap-3 border-l-2 border-rose-500 pl-4">
-                  <Clock size={16} className="text-rose-500" />
-                  <h2 className="text-sm font-black text-white uppercase tracking-widest leading-none">Sample Duration</h2>
-                </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="bg-rose-500/5 border border-rose-500/10 p-4 rounded-2xl">
-                    <p className="text-[8px] font-black text-rose-500/60 uppercase mb-1">1 Bar Loop</p>
-                    <p className="text-xl font-black text-white italic tracking-tighter">{results.utilities.sampleLength1Bar}s</p>
-                  </div>
-                  <div className="bg-rose-500/5 border border-rose-500/10 p-4 rounded-2xl">
-                    <p className="text-[8px] font-black text-rose-500/60 uppercase mb-1">4 Bar Loop</p>
-                    <p className="text-xl font-black text-white italic tracking-tighter">{results.utilities.sampleLength4Bars}s</p>
+                    <span className="text-[9px] font-black text-gray-500 uppercase tracking-widest">Tail Decay</span>
+                    <span className="text-xs font-black text-white tracking-tighter italic">{results.reverb.tailDecayMs}ms</span>
                   </div>
                 </div>
               </div>
             </div>
+          </div>
+        ) : (
+          <div className="flex flex-col items-center justify-center py-20 text-gray-700">
+            <Activity size={48} className="mb-4 opacity-20" />
+            <p className="text-sm font-black uppercase tracking-widest">Awaiting Valid Tempo Input</p>
           </div>
         )}
       </main>

@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Dna, Footprints, Ruler, Weight, BarChart2, BookOpen } from 'lucide-react';
+import { ArrowLeft, Dna, Footprints, Ruler, Weight, BarChart2, BookOpen, RefreshCcw } from 'lucide-react';
 import LazyImage from '../components/LazyImage';
 
 const FAVORITE_POKEMON = [
@@ -21,20 +21,35 @@ const PokedexApp = () => {
   const [error, setError] = useState(null);
   const [selectedVersionGroup, setSelectedVersionGroup] = useState('');
 
+  const fetchPokemonDetails = async (name) => {
+    try {
+      const res = await fetch(`https://pokeapi.co/api/v2/pokemon/${name}`);
+      if (!res.ok) return null;
+      return await res.json();
+    } catch (e) {
+      return null;
+    }
+  };
+
   const fetchAllPokemon = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      const promises = FAVORITE_POKEMON.map(name => 
-        fetch(`https://pokeapi.co/api/v2/pokemon/${name}`).then(res => res.json())
-      );
-      const results = await Promise.all(promises);
-      setPokemonData(results.sort((a, b) => a.id - b.id));
-      if (results.length > 0) {
-        handleSelectPokemon(results[0]);
+      // Use Promise.allSettled for resilience
+      const results = await Promise.allSettled(FAVORITE_POKEMON.map(name => fetchPokemonDetails(name)));
+      const successfulData = results
+        .filter(r => r.status === 'fulfilled' && r.value !== null)
+        .map(r => r.value)
+        .sort((a, b) => a.id - b.id);
+
+      if (successfulData.length === 0) throw new Error("No data retrieved");
+      
+      setPokemonData(successfulData);
+      if (successfulData.length > 0) {
+        handleSelectPokemon(successfulData[0]);
       }
     } catch (e) {
-      setError("Failed to load Pokédex data.");
+      setError("Network error: Failed to reach PokéAPI.");
     } finally {
       setLoading(false);
     }
@@ -49,7 +64,7 @@ const PokedexApp = () => {
       const speciesJson = await speciesRes.json();
       setSpeciesData(speciesJson);
     } catch (e) {
-      // species fetch fail
+      console.warn("Species metadata unavailable.");
     }
   }, []);
   
@@ -58,9 +73,9 @@ const PokedexApp = () => {
   }, [fetchAllPokemon]);
   
   const flavorText = useMemo(() => {
-    if (!speciesData) return "No description available.";
+    if (!speciesData) return "Scanning biological signatures...";
     const englishEntry = speciesData.flavor_text_entries.find(entry => entry.language.name === 'en');
-    return englishEntry ? englishEntry.flavor_text.replace(/\f/g, ' ') : "No description available.";
+    return englishEntry ? englishEntry.flavor_text.replace(/\f/g, ' ').replace(/\n/g, ' ') : "No classification data found.";
   }, [speciesData]);
   
   const movesByVersion = useMemo(() => {
@@ -81,88 +96,154 @@ const PokedexApp = () => {
   }, [selectedPokemon, selectedVersionGroup]);
 
   return (
-    <div className="min-h-[100dvh] bg-red-900/90 text-white flex flex-col font-mono">
+    <div className="min-h-[100dvh] bg-red-950/40 text-white flex flex-col font-mono animate-elegant">
       <style>{`
-        .pokedex-screen { background: #222; border: 4px solid #444; box-shadow: inset 0 0 15px rgba(0,0,0,0.5); }
-        .stat-bar > div { transition: width 0.5s ease-out; }
+        .pokedex-screen { background: rgba(10, 10, 10, 0.8); border: 2px solid rgba(255,255,255,0.1); backdrop-filter: blur(10px); }
+        .stat-bar { background: rgba(255,255,255,0.05); height: 6px; border-radius: 3px; overflow: hidden; }
+        .stat-fill { height: 100%; transition: width 1s cubic-bezier(0.16, 1, 0.3, 1); }
       `}</style>
 
-      <header className="bg-red-700 border-b-4 border-red-800 px-6 py-4 flex items-center justify-between shadow-lg">
-        <button onClick={() => navigate('/')} className="p-2 bg-red-800 hover:bg-red-900 rounded-full text-white transition-colors">
-          <ArrowLeft size={20} />
-        </button>
-        <h1 className="text-xl font-bold tracking-wider uppercase">Pokédex</h1>
-        <div className="w-10 h-10 bg-blue-400 rounded-full border-4 border-white animate-pulse" />
+      <header className="bg-red-700/80 backdrop-blur-md border-b border-white/10 px-6 py-4 flex items-center justify-between shadow-2xl">
+        <div className="flex items-center gap-4">
+          <button onClick={() => navigate('/')} className="p-2 hover:bg-white/10 rounded-full text-white transition-colors">
+            <ArrowLeft size={20} />
+          </button>
+          <h1 className="text-xl font-black tracking-widest uppercase italic">Pokédex</h1>
+        </div>
+        <div className="w-8 h-8 bg-blue-400 rounded-full border-2 border-white shadow-[0_0_15px_rgba(96,165,250,0.8)] animate-pulse" />
       </header>
 
-      <main className="flex-1 flex flex-col md:flex-row p-4 gap-4 overflow-hidden">
-        <div className="w-full md:w-1/3 flex flex-col pokedex-screen rounded-lg p-2 overflow-y-auto">
-          {loading && <p>Loading Pokémon...</p>}
-          {error && <p className="text-red-400">{error}</p>}
-          {pokemonData.map(p => (
-            <button key={p.id} onClick={() => handleSelectPokemon(p)}
-              className={`flex items-center gap-4 p-2 rounded-md hover:bg-red-600 transition-colors ${selectedPokemon?.id === p.id ? 'bg-red-700' : ''}`}>
-              <img src={p.sprites.front_default} alt={p.name} className="w-12 h-12" />
-              <span className="capitalize font-bold text-sm">#{String(p.id).padStart(3, '0')} {p.name.replace('-disguised', '')}</span>
-            </button>
-          ))}
+      <main className="flex-1 flex flex-col md:flex-row p-4 gap-4 overflow-hidden relative z-10">
+        {/* Left Pane: List */}
+        <div className="w-full md:w-80 flex flex-col pokedex-screen rounded-2xl p-2 overflow-y-auto border border-white/5 shadow-inner">
+          {loading ? (
+            <div className="flex flex-col items-center justify-center h-full gap-4 opacity-50">
+              <RefreshCcw className="animate-spin" size={24} />
+              <span className="text-[10px] font-bold tracking-widest uppercase">Syncing Database</span>
+            </div>
+          ) : error ? (
+            <div className="p-8 text-center space-y-4">
+              <p className="text-xs font-bold text-red-400 uppercase leading-relaxed">{error}</p>
+              <button onClick={fetchAllPokemon} className="px-4 py-2 bg-red-600 rounded-lg text-[10px] font-bold uppercase tracking-widest">Retry</button>
+            </div>
+          ) : (
+            <div className="space-y-1">
+              {pokemonData.map(p => (
+                <button
+                  key={p.id}
+                  onClick={() => handleSelectPokemon(p)}
+                  className={`w-full flex items-center gap-4 p-3 rounded-xl transition-all ${selectedPokemon?.id === p.id ? 'bg-red-600/40 border border-white/20' : 'hover:bg-white/5 border border-transparent'}`}
+                >
+                  <img src={p.sprites.front_default} alt={p.name} className="w-10 h-10" />
+                  <div className="text-left">
+                    <p className="text-[8px] font-bold text-red-400">#{String(p.id).padStart(3, '0')}</p>
+                    <p className="text-[10px] font-black uppercase tracking-tight">{p.name.replace('-disguised', '')}</p>
+                  </div>
+                </button>
+              ))}
+            </div>
+          )}
         </div>
 
-        <div className="flex-1 flex flex-col pokedex-screen rounded-lg p-6 overflow-y-auto">
+        {/* Right Pane: Details */}
+        <div className="flex-1 flex flex-col pokedex-screen rounded-2xl p-8 overflow-y-auto relative border border-white/5">
           {selectedPokemon ? (
-            <div className="space-y-6">
-              <div className="flex flex-col sm:flex-row items-center gap-6">
-                <div className="bg-black/20 p-4 rounded-lg border-2 border-gray-600 flex items-center justify-center">
-                  <img src={`https://play.pokemonshowdown.com/sprites/gen5ani/${selectedPokemon.name.replace(/-galar|-shield/g,'')}.gif`} alt={selectedPokemon.name} className="w-24 h-24" />
+            <div className="max-w-3xl mx-auto w-full space-y-10 animate-in fade-in duration-700">
+              <div className="flex flex-col sm:flex-row items-center gap-10">
+                <div className="relative group">
+                  <div className="absolute inset-0 bg-red-500/20 blur-3xl rounded-full animate-pulse" />
+                  <div className="relative w-40 h-40 bg-black/40 rounded-full border-4 border-white/10 flex items-center justify-center p-4 backdrop-blur-3xl">
+                    <img 
+                      src={`https://play.pokemonshowdown.com/sprites/gen5ani/${selectedPokemon.name.replace(/-galar|-shield/g,'')}.gif`}
+                      alt={selectedPokemon.name}
+                      className="w-28 h-28 object-contain"
+                    />
+                  </div>
                 </div>
-                <div className="flex-1">
-                  <h2 className="text-3xl font-bold capitalize tracking-wider">{selectedPokemon.name.replace(/-disguised|-galar|-shield/g, ' ')}</h2>
-                  <div className="flex gap-2 mt-2">
+                <div className="flex-1 text-center sm:text-left space-y-4">
+                  <div className="space-y-1">
+                    <span className="text-[10px] font-black text-red-500 tracking-[0.5em] uppercase">Identification</span>
+                    <h2 className="text-5xl font-black uppercase italic tracking-tighter leading-none">{selectedPokemon.name.replace(/-disguised|-galar|-shield/g, ' ')}</h2>
+                  </div>
+                  <div className="flex justify-center sm:justify-start gap-2">
                     {selectedPokemon.types.map(t => (
-                      <span key={t.type.name} className="px-3 py-1 bg-gray-600 text-xs rounded-full uppercase font-bold">{t.type.name}</span>
+                      <span key={t.type.name} className="px-4 py-1 bg-white/10 border border-white/10 rounded-full text-[9px] font-black uppercase tracking-widest">{t.type.name}</span>
                     ))}
                   </div>
                 </div>
               </div>
               
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
-                <div className="bg-black/20 p-3 rounded-lg"><p className="text-xs text-gray-400">Height</p><p className="font-bold">{selectedPokemon.height / 10} m</p></div>
-                <div className="bg-black/20 p-3 rounded-lg"><p className="text-xs text-gray-400">Weight</p><p className="font-bold">{selectedPokemon.weight / 10} kg</p></div>
-                <div className="bg-black/20 p-3 rounded-lg col-span-2 md:col-span-1"><p className="text-xs text-gray-400">Footprint</p><img src={`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/footprints/${selectedPokemon.id}.png`} alt="footprint" className="mx-auto mt-1" /></div>
+              <div className="grid grid-cols-3 gap-4">
+                <div className="bg-white/5 p-4 rounded-2xl border border-white/5 space-y-1">
+                  <p className="text-[8px] font-bold text-gray-500 uppercase tracking-widest">Dimension</p>
+                  <p className="text-sm font-black italic tracking-tighter">{selectedPokemon.height / 10}m</p>
+                </div>
+                <div className="bg-white/5 p-4 rounded-2xl border border-white/5 space-y-1">
+                  <p className="text-[8px] font-bold text-gray-500 uppercase tracking-widest">Mass</p>
+                  <p className="text-sm font-black italic tracking-tighter">{selectedPokemon.weight / 10}kg</p>
+                </div>
+                <div className="bg-white/5 p-2 rounded-2xl border border-white/5 flex items-center justify-center">
+                  <img src={`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/footprints/${selectedPokemon.id}.png`} alt="footprint" className="h-10 opacity-40 grayscale invert" />
+                </div>
               </div>
 
-              <div>
-                <h3 className="font-bold text-lg mb-2 flex items-center gap-2"><BookOpen size={16}/> Pokédex Entry</h3>
-                <p className="text-sm leading-relaxed">{flavorText}</p>
+              <div className="space-y-3">
+                <div className="flex items-center gap-2 border-l-2 border-red-500 pl-4">
+                  <BookOpen size={14} className="text-red-500" />
+                  <h3 className="text-xs font-black uppercase tracking-[0.3em]">Species Log</h3>
+                </div>
+                <p className="text-xs leading-relaxed text-gray-300 font-medium uppercase italic">{flavorText}</p>
               </div>
 
-              <div>
-                <h3 className="font-bold text-lg mb-2 flex items-center gap-2"><BarChart2 size={16}/> Base Stats</h3>
-                <div className="space-y-2">
+              <div className="space-y-6">
+                <div className="flex items-center gap-2 border-l-2 border-red-500 pl-4">
+                  <BarChart2 size={14} className="text-red-500" />
+                  <h3 className="text-xs font-black uppercase tracking-[0.3em]">Performance Matrix</h3>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-12 gap-y-4">
                   {selectedPokemon.stats.map(s => (
-                    <div key={s.stat.name} className="grid grid-cols-3 items-center">
-                      <span className="text-xs uppercase col-span-1">{s.stat.name.replace('special-', 'sp.')}</span>
-                      <div className="col-span-2 stat-bar rounded-full bg-gray-700">
-                        <div style={{ width: `${(s.base_stat / 255) * 100}%` }} className="h-4 bg-gradient-to-r from-red-500 to-yellow-500 rounded-full text-right pr-2 text-black text-xs font-bold">{s.base_stat}</div>
+                    <div key={s.stat.name} className="space-y-1">
+                      <div className="flex justify-between text-[8px] font-black uppercase tracking-widest text-gray-500">
+                        <span>{s.stat.name.replace('special-', 'sp.')}</span>
+                        <span className="text-white">{s.base_stat}</span>
+                      </div>
+                      <div className="stat-bar">
+                        <div style={{ width: `${(s.base_stat / 200) * 100}%` }} className="stat-fill bg-gradient-to-r from-red-600 to-yellow-500" />
                       </div>
                     </div>
                   ))}
                 </div>
               </div>
 
-              <div>
-                <h3 className="font-bold text-lg mb-2 flex items-center gap-2"><Dna size={16}/> Moveset</h3>
-                <select onChange={(e) => setSelectedVersionGroup(e.target.value)} value={selectedVersionGroup} className="w-full bg-gray-700 p-2 rounded-md font-mono">
-                  {Object.keys(movesByVersion).map(vg => (<option key={vg} value={vg}>{vg}</option>))}
-                </select>
-                <div className="pokedex-screen mt-2 p-2 rounded-md max-h-48 overflow-y-auto">
-                  <p className="text-xs grid grid-cols-2 sm:grid-cols-3 gap-1">
-                    {movesByVersion[selectedVersionGroup]?.map(move => (<span key={move}>{move}</span>))}
-                  </p>
+              <div className="space-y-4">
+                <div className="flex items-center gap-2 border-l-2 border-red-500 pl-4">
+                  <Dna size={14} className="text-red-500" />
+                  <h3 className="text-xs font-black uppercase tracking-[0.3em]">Available Moves</h3>
+                </div>
+                <div className="space-y-4">
+                  <select 
+                    onChange={(e) => setSelectedVersionGroup(e.target.value)} 
+                    value={selectedVersionGroup} 
+                    className="w-full bg-white/5 border border-white/10 p-3 rounded-xl font-mono text-[10px] font-black uppercase tracking-widest focus:outline-none focus:border-red-500 transition-colors"
+                  >
+                    {Object.keys(movesByVersion).map(vg => (<option key={vg} value={vg}>{vg}</option>))}
+                  </select>
+                  <div className="bg-black/40 rounded-2xl p-4 max-h-48 overflow-y-auto border border-white/5">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                      {movesByVersion[selectedVersionGroup]?.map(move => (
+                        <span key={move} className="text-[9px] font-bold text-gray-500 uppercase tracking-tighter truncate">{move.replace(/-/g, ' ')}</span>
+                      ))}
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
-          ) : (<p>Select a Pokémon from the list.</p>)}
+          ) : (
+            <div className="flex flex-col items-center justify-center h-full text-gray-600 opacity-20">
+              <Dna size={80} />
+              <p className="text-sm font-black uppercase tracking-[0.5em] mt-4">Database Standby</p>
+            </div>
+          )}
         </div>
       </main>
     </div>
