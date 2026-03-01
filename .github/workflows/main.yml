@@ -69,7 +69,8 @@ jobs:
 
           async function run() {
             try {
-              if (!process.env.VITE_PROXY_URL) throw new Error('VITE_PROXY_URL is missing from environment.');
+              const proxy = process.env.VITE_PROXY_URL;
+              if (!proxy) throw new Error('VITE_PROXY_URL is missing from environment.');
               
               // 1. AniList
               console.log('Fetching AniList...');
@@ -85,7 +86,7 @@ jobs:
 
               // 2. Steam
               console.log('Fetching Steam...');
-              const steamUrl = process.env.VITE_PROXY_URL.endsWith('/') ? process.env.VITE_PROXY_URL : process.env.VITE_PROXY_URL + '/';
+              const steamUrl = proxy.endsWith('/') ? proxy : proxy + '/';
               const steamData = await get(steamUrl + 'steam?steamId=' + process.env.VITE_STEAM_ID);
               fs.writeFileSync('src/data/mirror/steam.json', JSON.stringify(steamData));
 
