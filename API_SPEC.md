@@ -1,17 +1,17 @@
 # CherryOS API & Data Specifications
 
-CherryOS Version 2.3 uses a **Hybrid Cloud Data Strategy** to ensure high performance, zero CORS issues, and real-time synchronization.
+CherryOS Version 2.5 uses a **Build-Time Data Mirroring** strategy to ensure maximum performance, zero CORS issues, and free-tier compatibility.
 
-## 1. Automated Data Mirroring (New)
+## 1. Automated Data Mirroring
 
-The system utilizes a GitHub Actions workflow (`Refresh API Data Mirror`) that runs hourly to fetch live data from external providers and save it as static JSON artifacts within the repository.
+The system utilizes a GitHub Actions workflow that runs on every push and twice daily via `cron`. This workflow fetches live data from external providers and generates static JSON artifacts *before* the build process. These artifacts are then bundled directly into the production build.
 
-### **Endpoints**
--   **Metadata**: `https://overcastskyboi.github.io/CherryOS/src/data/mirror/metadata.json`
-    -   Contains: `lastUpdated` (UTC Timestamp)
--   **Steam Sync**: `https://overcastskyboi.github.io/CherryOS/src/data/mirror/steam.json`
+### **Internal Data Endpoints (Bundled)**
+-   **Metadata**: `/data/mirror/metadata.json`
+    -   Contains: `lastUpdated` (ISO Timestamp)
+-   **Steam Sync**: `/data/mirror/steam.json`
     -   Contains: Full user library, playtime, and achievement data for `AugustElliott`.
--   **AniList Sync**: `https://overcastskyboi.github.io/CherryOS/src/data/mirror/anilist.json`
+-   **AniList Sync**: `/data/mirror/anilist.json`
     -   Contains: GraphQL response for combined Anime/Manga collections.
 
 ## 2. Infrastructure Endpoints (OCI)
@@ -19,11 +19,12 @@ The system utilizes a GitHub Actions workflow (`Refresh API Data Mirror`) that r
 -   **Music Manifest**: `https://objectstorage.us-ashburn-1.oraclecloud.com/n/idg3nfddgypd/b/cherryos-deploy-prod/o/music_manifest.json`
 -   **Collection Database**: `https://objectstorage.us-ashburn-1.oraclecloud.com/n/idg3nfddgypd/b/cherryos-deploy-prod/o/collection.csv`
 
-## 3. Data Flow Diagram
+## 3. Deployment Flow
 
-1.  **GitHub Action** ⮕ Fetches **Steam/AniList** ⮕ Commits to **`src/data/mirror/`**.
-2.  **App** ⮕ Fetches **Static Mirror JSON** (Fast, No CORS).
-3.  **App UI** ⮕ Displays **Last Updated** timestamp from metadata.
+1.  **GitHub Action** ⮕ Fetches **Steam/AniList** API data.
+2.  **Pre-build** ⮕ Writes data to `public/data/mirror/`.
+3.  **Build** ⮕ Vite bundles these files as static assets.
+4.  **Runtime** ⮕ Apps fetch from their own local path (e.g., `import.meta.env.BASE_URL + 'data/mirror/...'`).
 
 ---
 © 2026 CherryOS Core. All data validated via Zod.
