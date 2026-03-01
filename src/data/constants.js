@@ -120,22 +120,22 @@ export const calculateProductionValues = (bpm) => {
     },
     reverb: {
       preDelayTightMs: Number((quarterNote / 32).toFixed(2)),
-      preDelayLooseMs: Number((quarterNote / 64).toFixed(2)),
-      tailDecayMs: Number(((quarterNote * 4) + (quarterNote * 2)).toFixed(2))
+      preDelayMediumMs: Number((quarterNote / 16).toFixed(2)),
+      tailDecayMs: Number((quarterNote * 4).toFixed(2))
     },
     compressor: {
       releaseFastMs: Number((quarterNote / 16).toFixed(2)),
       releaseMediumMs: Number((quarterNote / 8).toFixed(2)),
       releaseSlowMs: Number((quarterNote / 4).toFixed(2)),
-      attackSnapMs: Number(((quarterNote / 32) / 2).toFixed(2))
+      attackSnapMs: Number((quarterNote / 64).toFixed(2))
     },
     lfoHz: {
-      '1/1': Number((1 / (quarterNote * 4)).toFixed(2)),
-      '1/2': Number((1 / (quarterNote * 2)).toFixed(2)),
-      '1/4': Number((1 / quarterNote).toFixed(2)),
-      '1/8': Number((1 / (quarterNote / 2)).toFixed(2)),
-      '1/16': Number((1 / (quarterNote / 4)).toFixed(2)),
-      '1/32': Number((1 / (quarterNote / 8)).toFixed(2))
+      '1/1': Number((1000 / (quarterNote * 4)).toFixed(3)),
+      '1/2': Number((1000 / (quarterNote * 2)).toFixed(3)),
+      '1/4': Number((1000 / quarterNote).toFixed(3)),
+      '1/8': Number((1000 / (quarterNote / 2)).toFixed(3)),
+      '1/16': Number((1000 / (quarterNote / 4)).toFixed(3)),
+      '1/32': Number((1000 / (quarterNote / 8)).toFixed(3))
     }
   };
 };

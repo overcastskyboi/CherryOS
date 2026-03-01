@@ -21,12 +21,17 @@ const CloudDashboardApp = () => {
 
   const API_ENDPOINTS = useMemo(() => {
     const baseUrl = import.meta.env.BASE_URL || '/';
-    const normalize = (path) => path.replace(/\/+/g, '/');
+    // Robust path joining that preserves the protocol
+    const getTargetUrl = (target) => {
+      const origin = window.location.origin;
+      const combined = `${origin}${baseUrl}${target}`.replace(/([^:]\/)\/+/g, "$1");
+      return combined;
+    };
     
     return {
       oci: "https://objectstorage.us-ashburn-1.oraclecloud.com/n/idg3nfddgypd/b/cherryos-deploy-prod/o/healthcheck.txt",
-      steam: normalize(`${window.location.origin}${baseUrl}/data/mirror/steam.json`),
-      anilist: normalize(`${window.location.origin}${baseUrl}/data/mirror/anilist.json`),
+      steam: getTargetUrl("data/mirror/steam.json"),
+      anilist: getTargetUrl("data/mirror/anilist.json"),
       pokeapi: "https://pokeapi.co/api/v2/pokemon/pikachu",
     };
   }, []);
@@ -38,15 +43,23 @@ const CloudDashboardApp = () => {
     for (const [name, url] of Object.entries(API_ENDPOINTS)) {
       const startTime = Date.now();
       try {
-        const response = await fetch(url, { method: 'GET', mode: 'cors' });
+        // Use GET for pokeapi as it often blocks HEAD requests
+        const method = name === 'pokeapi' ? 'GET' : 'GET';
+        const response = await fetch(url, { 
+          method, 
+          mode: 'cors',
+          cache: 'no-cache'
+        });
         const latency = Date.now() - startTime;
         
         if (response.ok) {
           statuses[name] = { status: 'healthy', latency };
         } else {
+          console.warn(`Health check failed for ${name} (${url}): ${response.status}`);
           statuses[name] = { status: 'degraded', latency: 0 };
         }
       } catch (error) {
+        console.error(`Health check error for ${name}:`, error);
         statuses[name] = { status: 'down', latency: 0 };
       }
     }
@@ -99,7 +112,7 @@ const CloudDashboardApp = () => {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {Object.entries(apiStatus).map(([name, data]) => (
-          <div key={name} className="glass-card p-6 rounded-[2rem] space-y-4">
+          <div key={name} className="glass-card p-6 rounded-[2rem] space-y-4 group hover:bg-white/[0.02] transition-all">
             <div className="flex items-center justify-between">
               <span className="text-sm font-black text-white uppercase tracking-widest">{name} API</span>
               <StatusIndicator status={data.status} />
@@ -156,7 +169,7 @@ const CloudDashboardApp = () => {
           </button>
           <div>
             <h1 className="text-xl font-black tracking-tighter text-white uppercase italic">OCI Console</h1>
-            <p className="text-[9px] text-gray-500 uppercase tracking-[0.4em] font-bold mt-1">Infrastructure Hub // v2.5.1</p>
+            <p className="text-[9px] text-gray-500 uppercase tracking-[0.4em] font-bold mt-1">Infrastructure Hub // v2.5.2</p>
           </div>
         </div>
         
