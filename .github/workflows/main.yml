@@ -3,9 +3,7 @@ name: CherryOS CI/CD Pipeline
 on:
   push:
     branches: [ main ]
-  pull_request:
-    branches: [ main ]
-  workflow_dispatch: # Allow manual trigger
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -13,61 +11,34 @@ permissions:
   id-token: write
 
 jobs:
-  test:
-    name: Test & Lint
+  build-and-deploy:
+    name: Build, Test, & Deploy
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'npm'
+      
       - name: Install Dependencies
         run: npm ci
+
       - name: Run Linter
         run: npm run lint
+        
       - name: Run Tests
         run: npm test
 
-  build:
-    name: Build Application
-    needs: test
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'npm'
-      - name: Install Dependencies
-        run: npm ci
       - name: Build Application
         env:
           VITE_PROXY_URL: ${{ secrets.VITE_PROXY_URL }}
           VITE_WEATHER_API_KEY: ${{ secrets.VITE_WEATHER_API_KEY }}
           VITE_OCI_NAMESPACE: ${{ secrets.OCI_NAMESPACE }}
         run: npm run build
-      - name: Upload Build Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: dist-artifact
-          path: dist
-
-  deploy:
-    name: Deploy to Cloud
-    needs: build
-    if: github.ref == 'refs/heads/main'
-    runs-on: ubuntu-latest
-    steps:
-      - name: Download Build Artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: dist-artifact
-          path: dist
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
@@ -75,7 +46,7 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./dist
           commit_message: 'Automated Deployment via GitHub Actions [skip ci]'
-      
+          
       - name: Install OCI CLI
         env: { OCI_API_KEY: ${{ secrets.OCI_API_KEY }} }
         run: |
