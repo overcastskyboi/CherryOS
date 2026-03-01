@@ -51,14 +51,20 @@ const GameCenterApp = () => {
   useEffect(() => {
     fetchData();
   }, [fetchData]);
-
-  const filteredData = useMemo(() => {
-    return data.filter(item =>
+const filteredAndSortedData = useMemo(() => {
+  return data
+    .filter(item =>
       item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       item.platform.toLowerCase().includes(searchQuery.toLowerCase())
-    ).sort((a, b) => (b.rating || 0) - (a.rating || 0));
-  }, [data, searchQuery]);
-
+    )
+    .sort((a, b) => {
+      // Sort by achievement completion % if available, then by rating
+      const aComp = a.achievementPercent || 0;
+      const bComp = b.achievementPercent || 0;
+      if (bComp !== aComp) return bComp - aComp;
+      return (b.rating || 0) - (a.rating || 0);
+    });
+}, [data, searchQuery]);
   const GameCard = ({ item }) => (
     <div className="group relative glass-card rounded-2xl overflow-hidden hover:bg-white/[0.05] transition-all duration-500 animate-elegant">
       <div className="aspect-square relative overflow-hidden">

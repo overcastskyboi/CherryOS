@@ -30,7 +30,11 @@ const MyMusicApp = () => {
   const [autoplayBlocked, setAutoplayBlocked] = useState(false);
 
   // Persistent Audio Element
-  const audio = useMemo(() => new Audio(), []);
+  const audio = useMemo(() => {
+    const a = new Audio();
+    a.crossOrigin = 'anonymous';
+    return a;
+  }, []);
   const seekTimeout = useRef(null);
 
   const manifestUrl = "https://objectstorage.us-ashburn-1.oraclecloud.com/n/idg3nfddgypd/b/cherryos-deploy-prod/o/music_manifest.json";
