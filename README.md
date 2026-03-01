@@ -1,4 +1,4 @@
-# 🍒 CherryOS 2.3
+# 🍒 CherryOS 2.5.1
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![React](https://img.shields.io/badge/React-19-blue.svg)](https://react.dev/)
@@ -6,47 +6,47 @@
 [![Tailwind](https://img.shields.io/badge/Tailwind-4-38B2AC.svg)](https://tailwindcss.com/)
 [![GitHub Actions](https://img.shields.io/badge/CI%2FCD-GitHub%20Actions-green)](https://github.com/overcastskyboi/CherryOS/actions)
 
-CherryOS is a premium, high-performance portfolio operating system. Version 2.3 represents a comprehensive overhaul, featuring advanced cloud integration, sophisticated data visualizations, and a modern glassmorphic design.
+CherryOS is a high-fidelity, high-performance portfolio operating system. Version 2.5.1 features a comprehensive **Cyber-Glass** aesthetic overhaul, dynamic atmospheric theming, and deep cloud integration with Steam, AniList, and Oracle Cloud Infrastructure (OCI).
 
-## 🚀 Active Applications
+## 🚀 Experience the Mesh
 
--   **Watch List**: Real-time synchronization with **AniList**. Features GraphQL-powered data fetching, rating-based sorting, and official cover art.
--   **My Music**: High-fidelity audio player streaming directly from **Oracle Cloud Infrastructure (OCI)**. Supports WAV, MP3, and FLAC with a persistent background engine.
--   **Game Center**: Full **Steam API** integration for user `AugustElliott`. Synchronizes entire libraries and achievement data, sorted by completion percentage.
--   **Studio Rack**: Visual gallery of production VST suites. Interactive modals showcase actual DAW interfaces and detailed technical blurbs.
--   **OCI Console**: Infrastructure command center. Monitor real-time system metrics and verify data integrity across OCI Object Storage.
--   **The Vault**: Advanced collection tracker populated by automated CSV sync. Searchable, sortable, and features market value projection graphs.
--   **BPM Sync**: Precision tool for music production. Calculates delay times, LFO rates, and sample loop durations with glacial accuracy.
--   **CloudCast**: Dynamic weather station targeted at **Indianapolis, IN**. Features animated backgrounds and regional satellite links.
+-   **Activity Log**: Advanced tracking for media history. Real-time synchronization with **AniList** featuring GraphQL-powered fetching and official artifact cover art.
+-   **My Music**: Ultra-low latency audio engine streaming directly from **OCI Object Storage**. Includes dynamic reactive glows and background persistence.
+-   **Game Center**: Deep **Steam API** integration. Synchronizes full libraries and achievement telemetry, visualized through "Neural Mastery" progress metrics.
+-   **Pokédex**: Interactive biological archive. Features pixel-perfect animated sprite rendering, type-reactive atmospheres, and tactical moveset data.
+-   **Studio Rack**: Visual showcase of production DSP tools. High-resolution interface previews and detailed technical analysis of VST plugin suites.
+-   **OCI Console**: Real-time infrastructure monitoring. Verifies satellite node integrity and mirrors storage availability across the Ashburn region.
+-   **The Vault**: Multi-asset collection tracker. Populated via automated cloud CSV sync with integrated market value projection and sector visualization.
+-   **BPM Sync**: Precision synchronization tool for audio engineering. Calculates mission-critical delay, LFO, and reverb timings with absolute accuracy.
+-   **CloudCast**: Dynamic meteorological station. Real-time data targeting regional coordinates with satellite-linked atmospheric rendering.
 
 ## 🛠️ Project Structure
 
 ```text
 CherryOS-dev/
-├── .github/workflows/  # CI/CD (Quality -> Pages -> OCI -> Docker)
-├── oci/                # Terraform (Infrastructure as Code)
+├── .github/workflows/  # Automated CI/CD & Data Mirroring
+├── oci/                # Terraform Infrastructure (IaC)
 ├── src/
-│   ├── apps/           # Modular, self-contained OS applications
-│   ├── components/     # Global UI (Glassmorphic cards, Rain, PixelIcons)
-│   ├── context/        # State Management (boot, lock, device detection)
-│   ├── data/           # Strict schemas, CSV buffers, and constants
-│   └── test/           # Unit, integration, and E2E (Playwright) tests
-├── Dockerfile          # Production Nginx image configuration
-└── vite.config.js      # Build engine with Tailwind 4 & code-splitting
+│   ├── apps/           # Modular, code-split OS applications
+│   ├── components/     # High-fidelity UI primitives (Glass, Rain, Sprites)
+│   ├── context/        # Global Mesh State (Dynamic Theming, Boot, Lock)
+│   ├── data/           # Strict schemas (Zod), time logic, and constants
+│   └── test/           # Integrity verification (Vitest, Playwright)
+└── vite.config.js      # High-performance build engine
 ```
 
 ## ☁️ Cloud Strategy
 
-CherryOS uses a dual-redundancy model:
-1.  **Frontend**: Static assets served via **GitHub Pages Edge**.
-2.  **Storage**: Large media files and database CSVs hosted on **OCI Object Storage** (Ashburn region).
-3.  **Containers**: Hardened Docker images available in the **OCI Container Registry**.
+CherryOS utilizes a triple-redundant architecture:
+1.  **Edge Compute**: Frontend delivery via **GitHub Pages Global CDN**.
+2.  **Telemetry Storage**: Large media assets and telemetry databases hosted on **Oracle Cloud Infrastructure**.
+3.  **Data Mirroring**: Automated GitHub Actions periodically mirror external APIs (Steam, AniList) to ensure offline availability and extreme performance.
 
-## 🛡️ Security & Quality
+## 🛡️ Security & Performance
 
--   **Zero-Exposure**: All API tokens and OCIDs are handled via GitHub Secrets.
--   **Strict Schema**: All external data is validated through **Zod** before reaching the UI.
--   **Performance**: Infinite scroll and lazy loading ensure < 2s LCP on all devices.
+-   **Encrypted Secrets**: Mission-critical tokens are managed exclusively through GitHub Secrets.
+-   **Neural Logic**: Centralized time conversion and data normalization for consistent cross-app telemetry.
+-   **LCP Optimized**: Aggressive lazy loading and asset compression achieve < 2.0s LCP targets.
 
 ---
-© 2026 Colin Cherry. Developed for the Modern Web.
+© 2026 August Elliott. Developed for the Modern Web.

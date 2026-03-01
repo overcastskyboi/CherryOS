@@ -243,9 +243,13 @@ const WatchLogApp = () => {
             </div>
           )}
           
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4 md:gap-6 animate-elegant">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4 md:gap-6">
             {visibleData.map((item, idx) => (
-              <div key={idx} className="group relative bg-black/40 rounded-2xl overflow-hidden border border-white/5 hover:border-yellow-500/30 transition-all duration-500 shadow-2xl flex flex-col">
+              <div 
+                key={idx} 
+                className="group relative bg-black/40 rounded-2xl overflow-hidden border border-white/5 hover:border-yellow-500/30 transition-all duration-500 shadow-2xl flex flex-col animate-elegant"
+                style={{ animationDelay: `${idx * 50}ms` }}
+              >
                 <div className="aspect-[2/3] relative overflow-hidden bg-gray-900 shrink-0">
                   <LazyImage
                     src={item.coverImage}

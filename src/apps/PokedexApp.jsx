@@ -181,12 +181,13 @@ const PokedexApp = () => {
 
       <main className="flex-1 p-6 lg:p-12 relative z-10 max-w-7xl mx-auto w-full">
         {view === 'gallery' ? (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6 animate-in fade-in duration-700">
-            {pokemonList.map(p => (
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
+            {pokemonList.map((p, i) => (
               <button
                 key={p.id}
                 onClick={() => handleOpenDetails(p)}
-                className="group pokedex-glass p-6 rounded-[2.5rem] flex flex-col items-center gap-6 hover:bg-white/[0.05] transition-all hover:-translate-y-2 active:scale-95 shadow-2xl border-white/5 overflow-visible"
+                className="group pokedex-glass p-6 rounded-[2.5rem] flex flex-col items-center gap-6 hover:bg-white/[0.05] transition-all hover:-translate-y-2 active:scale-95 shadow-2xl border-white/5 overflow-visible animate-elegant"
+                style={{ animationDelay: `${i * 50}ms` }}
               >
                 <div className="w-28 h-28 relative flex items-center justify-center overflow-visible">
                   <SpriteImage 

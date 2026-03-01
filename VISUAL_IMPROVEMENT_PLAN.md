@@ -1,69 +1,61 @@
-# CherryOS Visual Improvement Plan
+# CherryOS Visual & Documentation Improvement Plan
 
-This document outlines proposed UI/UX enhancements to elevate the CherryOS desktop experience to a modern, pixel-perfect, and cohesive aesthetic.
+This document outlines proposed UI/UX enhancements and documentation updates to elevate the CherryOS desktop experience to a modern, pixel-perfect, and cohesive aesthetic.
 
 ## 1. Global & Core Systems
 
 ### High Priority
-- **Theme Unification**: [IMPLEMENTED] Transition from scattered color palettes (`green-500` in Boot, `yellow-500` in Lock, `blue-950` in Desktop) to a core "Cherry" brand identity using a primary palette of Deep Crimson, Electric Pink, and Cyber Cyan.
-- **Dynamic Backgrounds**: [IMPLEMENTED] Enhance `RainBackground` to react to the current app's theme color (e.g., red rain in Pokédex, emerald in Game Center).
-- **Glassmorphism Refinement**: [IMPLEMENTED] Standardize `glass-card` and `glass-header` with consistent `backdrop-filter` (blur/saturate), border-widths, and `box-shadow` depth.
+- **Theme Unification**: [IMPLEMENTED] Transition from scattered color palettes to a core "Cherry" brand identity.
+- **Dynamic Backgrounds**: [IMPLEMENTED] Enhance `RainBackground` to react to the current app's theme color.
+- **Glassmorphism Refinement**: [IMPLEMENTED] Standardize `glass-card` and `glass-header` with consistent effects.
 
 ### Medium Priority
-- **Custom Cursor**: Implement a custom hardware-accelerated pointer that changes state on hover/active.
-- **Global Typography**: [IMPLEMENTED] Ensure `Inter` is properly weighted across all components; use `tabular-nums` for all stats and counters to prevent layout shift during updates.
+- **Custom Cursor**: [IMPLEMENTED] Implement a hardware-accelerated "Cyber-Pointer" that reacts to interactive elements.
+- **Global Typography**: [IMPLEMENTED] Ensure `Inter` is properly weighted; use `tabular-nums` for data.
+- **Interactive Feedback**: [IMPLEMENTED] Add a subtle "click ripple" and "button depress" effect to all primary glass buttons.
 
 ---
 
 ## 2. Components
 
 ### High Priority
-- **Desktop Grid**: [IMPLEMENTED] Improve responsive behavior for the app grid. On ultra-wide screens, use a more balanced layout; on mobile, ensure touch targets are optimal.
-- **Boot & Lock Screens**: [IMPLEMENTED] Redesign the `BootScreen` and `LockScreen` to feel more like an integrated OS part rather than static pages. Add subtle glitch effects or scanning lines to the mascot image.
+- **Desktop Grid**: [IMPLEMENTED] Improve responsive behavior for the app grid.
+- **Boot & Lock Screens**: [IMPLEMENTED] Redesign for integrated OS feel.
 
 ### Medium Priority
-- **LazyImage Transitions**: Standardize the "pop-in" effect. Use a consistent scale-up and fade-in animation across all apps (Songs, Games, Pokedex).
-- **PixelIcons**: Audit all `PixelIcon` usage to ensure they match the stroke weight of Lucide icons when used in the same context.
+- **Staggered Entry Animations**: [IMPLEMENTED] Use staggered motion for gallery items (Pokedex, Game Center, Activity Log) to create a premium "loading" feel.
+- **LazyImage Transitions**: [IMPLEMENTED] Standardized scale-up and fade-in.
+- **PixelIcons Stroke Weight**: [IMPLEMENTED] Audit `PixelIcons` to match Lucide stroke weights (1.5 - 2.0).
 
 ---
 
 ## 3. Application Specifics
 
-### My Music (Pink/Yellow Theme)
-- **Visualizer**: Add a subtle CSS-based frequency visualizer in the bottom player bar when music is playing.
-- **Album Art Glow**: [IMPLEMENTED] Apply a dynamic colored drop-shadow to the currently playing album art that matches its primary color.
+### My Music
+- **Visualizer**: Add a subtle CSS-based frequency visualizer in the player bar.
+- **Album Art Glow**: [IMPLEMENTED] Apply dynamic colored glow to playing art.
 
-### Game Center (Emerald/Cyan Theme)
-- **Neural Mastery Bars**: [IMPLEMENTED] Enhance the progress bars with a "pulse" animation when they reach 100%.
-- **Hover States**: [IMPLEMENTED] Add a "holographic" overlay effect on game cards during hover.
-
-### Pokédex (Red/Bio Theme)
-- **Bio-Archive Aesthetics**: [IMPLEMENTED] Replace the flat red background with a bio-mechanical textured pattern or a scanline overlay.
-- **Stat Bars**: Animate the "Neural Matrix" bars on entry with a staggered delay for a "loading" feel.
-
-### OCI Console (Cyan Theme)
-- **Chart Realism**: [IMPLEMENTED] Enhance Recharts with custom `dot` components that look like glowing nodes and smoother `monotone` curves.
-- **Status Indicators**: [IMPLEMENTED] Improve the "Neural Sync" pulse to feel more organic.
-
-### Studio Rack (Brutalist/Industrial Theme)
-- **Consistency Check**: [IMPLEMENTED] This app uses a "box-shadow" based brutalist style which differs from the "glass-card" style. Align the borders and shadows to be more consistent with the rest of the OS while keeping the "hardware" feel.
+### Game Center
+- **Neural Mastery Bars**: [IMPLEMENTED] Enhanced progress bars with dual-color gradients.
+- **Hover States**: [IMPLEMENTED] Added holographic overlay effects.
 
 ---
 
-## 4. Animations & Transitions
+## 4. Documentation (High Priority)
 
-### High Priority
-- **Page Transitions**: [IMPLEMENTED] Implement `framer-motion` or standard CSS view transitions for moving between the Desktop and Apps to eliminate "flash of black" or abrupt cuts. (Implemented via `RainBackground` persistence and CSS view-transition prep).
-- **Interactive Feedback**: Add a global "click ripple" or "button depress" animation to all primary interactive elements.
-
-### Medium Priority
-- **Staggered Entry**: Use staggered animation for lists (DataGrid, Pokedex gallery, Game cards) so they don't all appear at once.
-- **Layout Morphing**: If possible, animate the "expanding" of cards when opening details (e.g., in Studio Rack or Pokedex).
+- **GEMINI.md Update**: [IMPLEMENTED]
+    - Sync application list with reality (remove CodeFlow/Scratchpad).
+    - Update versioning to v2.5.1.
+    - Document new `time_utils.js` logic and dynamic `themeColor` system.
+- **README.md Update**: [IMPLEMENTED]
+    - Update versioning to v2.5.1.
+    - Refresh application descriptions to match current "Cyber-Glass" naming and features.
+    - Update "Cloud Strategy" section if needed.
 
 ---
 
 ## 5. Responsive & Accessibility
 
-- **Safe Areas**: Ensure padding accounts for mobile notches and home indicators.
-- **Contrast Audit**: Verify that `gray-500` text on `black/40` backgrounds meets WCAG AA standards in all apps.
-- **Focus States**: Add high-visibility focus rings for keyboard navigation to satisfy the "Desktop OS" feel.
+- **Safe Areas**: [IMPLEMENTED] Ensured padding for mobile notches.
+- **Contrast Audit**: [IMPLEMENTED] Verified text legibility on glass backgrounds.
+- **Focus States**: Add high-visibility cyan/pink focus rings for keyboard navigation.

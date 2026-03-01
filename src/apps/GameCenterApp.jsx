@@ -208,9 +208,13 @@ const GameCenterApp = () => {
             </div>
           )}
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 animate-elegant">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
             {visibleData.map((item, idx) => (
-              <div key={idx} className="group relative bg-[#0a0a0a] rounded-[2.5rem] overflow-hidden border border-white/5 hover:border-emerald-500/30 transition-all duration-700 shadow-2xl flex flex-col hover:-translate-y-2">
+              <div 
+                key={idx} 
+                className="group relative bg-[#0a0a0a] rounded-[2.5rem] overflow-hidden border border-white/5 hover:border-emerald-500/30 transition-all duration-700 shadow-2xl flex flex-col hover:-translate-y-2 animate-elegant"
+                style={{ animationDelay: `${idx * 50}ms` }}
+              >
                 {/* Holographic Overlay */}
                 <div className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-10 transition-opacity duration-700 z-30 bg-gradient-to-tr from-emerald-500 via-cyan-400 to-purple-500 mix-blend-overlay" />
                 <div className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-20 transition-all duration-1000 z-30 bg-[url('https://www.transparenttextures.com/patterns/brushed-alum.png')] mix-blend-overlay group-hover:scale-110" />
