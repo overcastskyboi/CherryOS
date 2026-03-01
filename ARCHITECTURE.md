@@ -1,45 +1,37 @@
 # CherryOS Architecture Map
 
-This document provides a comprehensive guide to the project structure and technical implementation of CherryOS.
-
-## 1. Project Hierarchy
+## 1. Project Hierarchy & Structure
 
 ```text
 CherryOS-dev/
-├── .github/            # CI/CD Workflows (Consolidated Quality & Deployment)
-├── oci/                # Terraform Infrastructure as Code
-├── src/                # Source Code
-│   ├── apps/           # Modular full-page applications
-│   ├── components/     # Reusable UI components (DataGrid, SystemHealth)
-│   ├── context/        # Global State Management (OSContext)
-│   ├── data/           # Music manifests, schemas (Zod), and constants
-│   └── test/           # Unit and Integration tests (Vitest)
-├── Dockerfile          # Multi-stage Docker build for OCI Registry
-└── vite.config.js      # Vite 7 configuration with Tailwind 4 integration
+├── .github/workflows/  # 4-Stage CI/CD Pipeline (Quality -> Pages -> OCI -> Docker)
+├── oci/                # Terraform (Infrastructure as Code)
+├── src/
+│   ├── apps/           # Modular OS Applications (Music, Games, Watch, Studio)
+│   ├── components/
+│   │   ├── Desktop.jsx # Glassmorphic core interface
+│   │   ├── RainBackground.jsx # HTML5 Canvas atmospheric layer (z-[-10])
+│   │   └── PixelIcons.jsx # Centralized handcrafted SVG icon library
+│   ├── context/        # Global state (OSContext) including isMobile detection
+│   └── data/           # Strict schemas (Zod) and internal CSV buffers
 ```
 
-## 2. Component Architecture
+## 2. Layering & UI Strategy
 
-### Core OS Layer
-- **`OSContext.jsx`**: Manages boot state, active windows, and device detection.
-- **`App.jsx`**: Root router using `basename="/CherryOS"` for GitHub Pages compatibility.
-- **`SystemHealth.jsx`**: Real-time connectivity monitor for OCI Object Storage services.
+CherryOS uses a strict **z-index stacking model** to ensure visual clarity:
+- **Atmospheric Layer (`z-[-10]`)**: The dynamic rain canvas.
+- **Desktop Layer (`z-0`)**: Icons and background decor.
+- **Application Layer (`z-10`)**: The active route content.
+- **Overlay Layer (`z-40+`)**: Sticky headers, mini-players, and system modals.
 
-### Application Layer
-Each app in `src/apps/` is a self-contained environment:
-- **`MySongsApp.jsx`**: Fetches and validates music data from OCI Object Storage.
-- **`CloudDashboardApp.jsx`**: Visualizes OCI infrastructure health and metrics.
+## 3. Data Flow & Synchronization
 
-## 3. CI/CD Pipeline
+1.  **Direct API Access**: Apps fetch live data from AniList (GraphQL) and Steam (REST) using injected build-time secrets.
+2.  **OCI Mirroring**: A dedicated OCI sync job ensures that the `collection.csv` and `music_manifest.json` are mirrored across GitHub and Oracle Cloud for redundancy.
+3.  **Resilient Fallbacks**: If API connectivity is interrupted, apps gracefully transition to high-fidelity local data buffers (`src/data/constants.js`).
 
-The project uses a consolidated GitHub Actions workflow (`main.yml`):
-1.  **Quality Gate**: Runs ESLint, Vitest, and `npm audit`.
-2.  **Pages Deployment**: Automatically builds and pushes the static site to the `gh-pages` branch.
-3.  **OCI Sync**: Synchronizes build artifacts and metadata to OCI Object Storage.
-4.  **Container Push**: Builds and pushes a hardened Nginx-based Docker image to OCI Container Registry.
+## 4. Performance Optimization
 
-## 4. OCI Integration Details
-- **Region**: `us-ashburn-1` (iad)
-- **Bucket**: `cherryos-deploy-prod` (ObjectRead public access for health checks)
-- **Namespace**: `idg3nfddgypd`
-- **Registry**: `iad.ocir.io/idg3nfddgypd/cherryos`
+- **Infinite Scroll**: Intersection Observer API implementation in `GameCenterApp` and `WatchLogApp` to handle large datasets without UI lag.
+- **Manual Chunking**: Strategic `rollupOptions` in `vite.config.js` to separate vendor libraries from application logic.
+- **Lazy Loading**: Integrated `LazyImage` component for deferred loading of high-resolution media covers.
