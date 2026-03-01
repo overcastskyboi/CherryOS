@@ -38,12 +38,11 @@ jobs:
 
       - name: Fetch Live API Data (Dynamic Pre-build)
         env:
+          # Using recovered Steam Key and public AniList ID
           VITE_STEAM_ID: "76561198043191125"
           VITE_STEAM_API_KEY: "534BB5E98C134721FEF217D1CC893949"
-          VITE_AL_ID: "36296"
           VITE_AL_USERNAME: "AugustElliott"
-          VITE_AL_TOKEN: ${{ secrets.ANILIST_TOKEN }}
-          VITE_PROXY_URL: ${{ secrets.VITE_PROXY_URL }}
+          VITE_AL_ID: "36296"
         run: |
           mkdir -p public/data/mirror
           node -e "
@@ -73,10 +72,10 @@ jobs:
 
           async function run() {
             try {
-              console.log('Fetching AniList Data for Username:', process.env.VITE_AL_USERNAME);
+              console.log('Fetching AniList Data for:', process.env.VITE_AL_USERNAME);
               let aniData = null;
               try {
-                // Try fetching WITHOUT token first for public access if token is invalid
+                // Fetch public list without token to avoid 400 errors
                 aniData = await request('https://graphql.anilist.co', {
                   method: 'POST',
                   headers: { 'Content-Type': 'application/json' },
@@ -85,17 +84,15 @@ jobs:
                     variables: { username: process.env.VITE_AL_USERNAME }
                   })
                 });
-                console.log('AniList mirror generated successfully.');
-              } catch(e) { 
-                console.error('AniList fetch failed:', e.message);
-                aniData = { data: { MediaListCollection: { lists: [] }, MangaList: { lists: [] } } };
-              }
+                console.log('AniList mirror generated.');
+              } catch(e) { console.error('AniList fetch failed:', e.message); }
+              
+              if (!aniData) aniData = { data: { MediaListCollection: { lists: [] }, MangaList: { lists: [] } } };
               fs.writeFileSync('public/data/mirror/anilist.json', JSON.stringify(aniData));
 
               console.log('Fetching Steam Data...');
               let steamData = null;
               try {
-                // Call Steam API directly (Runner has no CORS restrictions)
                 const steamKey = process.env.VITE_STEAM_API_KEY;
                 const steamId = process.env.VITE_STEAM_ID;
                 const url = \`https://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/?key=\${steamKey}&steamid=\${steamId}&format=json&include_appinfo=true&include_played_free_games=true\`;
@@ -111,12 +108,9 @@ jobs:
                       achievementPercent: 0
                     }))
                   };
-                  console.log('Steam mirror generated successfully.');
+                  console.log('Steam mirror generated.');
                 }
-              } catch(e) { 
-                console.error('Steam fetch failed:', e.message);
-                steamData = { data: [] };
-              }
+              } catch(e) { console.error('Steam fetch failed:', e.message); }
               
               if (!steamData) steamData = { data: [] };
               fs.writeFileSync('public/data/mirror/steam.json', JSON.stringify(steamData));
@@ -131,15 +125,16 @@ jobs:
           run();
           "
 
+      - name: Verify Mirror Files
+        run: ls -R public/data/mirror
+
       - name: Build Application
         env:
-          VITE_PROXY_URL: ${{ secrets.VITE_PROXY_URL }}
           VITE_WEATHER_API_KEY: ${{ secrets.VITE_WEATHER_API_KEY }}
           VITE_OCI_NAMESPACE: ${{ secrets.OCI_NAMESPACE }}
           VITE_OCI_REGION: ${{ secrets.OCI_REGION }}
-          VITE_AL_ID: ${{ secrets.ANILIST_ID }}
+          VITE_AL_ID: "36296"
           VITE_STEAM_ID: "76561198043191125"
-          VITE_STEAM_API_KEY: "534BB5E98C134721FEF217D1CC893949"
         run: npm run build
 
       - name: Deploy to GitHub Pages
@@ -189,9 +184,8 @@ jobs:
           push: true
           tags: ${{ secrets.OCI_REGISTRY_URL }}/${{ secrets.OCI_NAMESPACE }}/cherryos:latest
           build-args: |
-            VITE_PROXY_URL=${{ secrets.VITE_PROXY_URL }}
             VITE_WEATHER_API_KEY=${{ secrets.VITE_WEATHER_API_KEY }}
             VITE_OCI_NAMESPACE=${{ secrets.OCI_NAMESPACE }}
             VITE_OCI_REGION=${{ secrets.OCI_REGION }}
             VITE_STEAM_ID=76561198043191125
-            VITE_AL_ID=${{ secrets.ANILIST_ID }}
+            VITE_AL_ID=36296
