@@ -11,6 +11,7 @@ import CloudDashboardApp from './apps/CloudDashboardApp';
 import CloudCastApp from './apps/CloudCastApp';
 import CollectionTrackerApp from './apps/CollectionTrackerApp';
 import BPMTimingCalculator from './apps/BPMTimingCalculator';
+import RainBackground from './components/RainBackground';
 
 const MainContent = () => {
   const { bootState } = useOS();
@@ -19,18 +20,21 @@ const MainContent = () => {
   if (bootState === 'locked') return <LockScreen />;
 
   return (
-    <Routes>
-      <Route path="/" element={<Desktop />} />
-      <Route path="/songs" element={<div className="bg-black"><MySongsApp /></div>} />  
-      <Route path="/watch" element={<div className="bg-black"><WatchLogApp /></div>} /> 
-      <Route path="/games" element={<div className="bg-black"><GameCenterApp /></div>} />
-      <Route path="/studio" element={<div className="bg-black"><StudioRackApp /></div>} />
-      <Route path="/cloud" element={<div className="bg-black"><CloudDashboardApp /></div>} />
-      <Route path="/cloudcast" element={<div className="bg-blue-900"><CloudCastApp /></div>} />
-      <Route path="/collection-tracker" element={<div className="bg-slate-900"><CollectionTrackerApp /></div>} />
-      <Route path="/bpm-calculator" element={<div className="bg-gray-900"><BPMTimingCalculator /></div>} />
-      <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
+    <>
+      <RainBackground />
+      <Routes>
+        <Route path="/" element={<Desktop />} />
+        <Route path="/songs" element={<div className="bg-black/40"><MySongsApp /></div>} />  
+        <Route path="/watch" element={<div className="bg-black/40"><WatchLogApp /></div>} /> 
+        <Route path="/games" element={<div className="bg-black/40"><GameCenterApp /></div>} />
+        <Route path="/studio" element={<div className="bg-black/40"><StudioRackApp /></div>} />
+        <Route path="/cloud" element={<div className="bg-black/40"><CloudDashboardApp /></div>} />
+        <Route path="/cloudcast" element={<div className="bg-blue-900/40"><CloudCastApp /></div>} />
+        <Route path="/collection-tracker" element={<div className="bg-slate-900/40"><CollectionTrackerApp /></div>} />
+        <Route path="/bpm-calculator" element={<div className="bg-gray-900/40"><BPMTimingCalculator /></div>} />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </>
   );
 };
 

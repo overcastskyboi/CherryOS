@@ -119,6 +119,7 @@ jobs:
           /home/runner/bin/oci os object bulk-upload -ns ${{ secrets.OCI_NAMESPACE }} -bn cherryos-deploy-prod --src-dir ./dist --overwrite --content-type auto
           /home/runner/bin/oci os object put -ns ${{ secrets.OCI_NAMESPACE }} -bn cherryos-deploy-prod --file healthcheck.txt --name healthcheck.txt --force --content-type text/plain
           /home/runner/bin/oci os object put -ns ${{ secrets.OCI_NAMESPACE }} -bn cherryos-deploy-prod --file src/data/music_manifest.json --name music_manifest.json --force --content-type application/json
+          /home/runner/bin/oci os object put -ns ${{ secrets.OCI_NAMESPACE }} -bn cherryos-deploy-prod --file src/data/collection.csv --name collection.csv --force --content-type text/csv
 
   # 4. Container Deployment
   deploy-container:
