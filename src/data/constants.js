@@ -15,7 +15,7 @@ export const ANIME_DATA = {
       status: "Completed"
     },
     {
-      title: "Fullmetal Alchemist: B",
+      title: "Fullmetal Alchemist: Brotherhood",
       type: "Anime",
       score: 10,
       progress: "64 Eps",
@@ -34,14 +34,38 @@ export const ANIME_DATA = {
       score: 10,
       progress: "24 Eps",
       status: "Completed"
+    },
+    {
+      title: "Monster",
+      type: "Anime",
+      score: 9.5,
+      progress: "74 Eps",
+      status: "Completed"
+    },
+    {
+      title: "Vagabond",
+      type: "Manga",
+      score: 10,
+      progress: "327 Ch",
+      status: "Hiatus"
+    },
+    {
+      title: "Chainsaw Man",
+      type: "Manga",
+      score: 9,
+      progress: "170+ Ch",
+      status: "Reading"
     }
   ],
   covers: {
-    "Berserk": "https://via.placeholder.com/300x450?text=Berserk+Cover",
-    "Hunter x Hunter (2011)": "https://via.placeholder.com/300x450?text=HxH+Cover",
-    "Fullmetal Alchemist: B": "https://via.placeholder.com/300x450?text=FMA+Cover",
-    "Steins;Gate": "https://via.placeholder.com/300x450?text=SteinsGate+Cover",
-    "Vinland Saga Season 2": "https://via.placeholder.com/300x450?text=Vinland+Saga+Cover"
+    "Berserk": "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=1000&auto=format&fit=crop",
+    "Hunter x Hunter (2011)": "https://images.unsplash.com/photo-1541562232579-512a21360020?q=80&w=1000&auto=format&fit=crop",
+    "Fullmetal Alchemist: Brotherhood": "https://images.unsplash.com/photo-1618336753974-aae8e04506aa?q=80&w=1000&auto=format&fit=crop",
+    "Steins;Gate": "https://images.unsplash.com/photo-1501139083538-0139583c060f?q=80&w=1000&auto=format&fit=crop",
+    "Vinland Saga Season 2": "https://images.unsplash.com/photo-1533107862482-0e6974b06ec4?q=80&w=1000&auto=format&fit=crop",
+    "Monster": "https://images.unsplash.com/photo-1509248961158-e54f6934749c?q=80&w=1000&auto=format&fit=crop",
+    "Vagabond": "https://images.unsplash.com/photo-1524413845077-123b6637130a?q=80&w=1000&auto=format&fit=crop",
+    "Chainsaw Man": "https://images.unsplash.com/photo-1534423861386-85a16f5d13fd?q=80&w=1000&auto=format&fit=crop"
   }
 };
 
@@ -58,14 +82,20 @@ export const GAMING_DATA = {
     { title: "Elden Ring", platform: "Steam", playtime: "120h", status: "Playing", rating: 10 },
     { title: "Metal Gear Solid", platform: "Retro", playtime: "20h", status: "Completed", rating: 9.5 },
     { title: "Silent Hill 2", platform: "Retro", playtime: "12h", status: "Completed", rating: 10 },
-    { title: "Cyberpunk 2077", platform: "Steam", playtime: "65h", status: "Completed", rating: 9 }
+    { title: "Cyberpunk 2077", platform: "Steam", playtime: "65h", status: "Completed", rating: 9 },
+    { title: "Bloodborne", platform: "PS4", playtime: "45h", status: "Mastered", rating: 10 },
+    { title: "Sekiro: Shadows Die Twice", platform: "Steam", playtime: "35h", status: "Completed", rating: 9.5 },
+    { title: "The Witcher 3: Wild Hunt", platform: "Steam", playtime: "150h", status: "Completed", rating: 10 }
   ],
   covers: {
-    "Final Fantasy VII": "https://via.placeholder.com/400x400?text=FF7+Cover",
-    "Elden Ring": "https://via.placeholder.com/400x400?text=EldenRing+Cover",
-    "Metal Gear Solid": "https://via.placeholder.com/400x400?text=MGS+Cover",
-    "Silent Hill 2": "https://via.placeholder.com/400x400?text=SH2+Cover",
-    "Cyberpunk 2077": "https://via.placeholder.com/400x400?text=CP2077+Cover"
+    "Final Fantasy VII": "https://images.unsplash.com/photo-1542751371-adc38448a05e?q=80&w=1000&auto=format&fit=crop",
+    "Elden Ring": "https://images.unsplash.com/photo-1612287230202-1ff1d85d1bdf?q=80&w=1000&auto=format&fit=crop",
+    "Metal Gear Solid": "https://images.unsplash.com/photo-1585338107529-13afc5f02586?q=80&w=1000&auto=format&fit=crop",
+    "Silent Hill 2": "https://images.unsplash.com/photo-1505630285033-a37d80568c08?q=80&w=1000&auto=format&fit=crop",
+    "Cyberpunk 2077": "https://images.unsplash.com/photo-1605810230434-7631ac76ec81?q=80&w=1000&auto=format&fit=crop",
+    "Bloodborne": "https://images.unsplash.com/photo-1511512578047-dfb367046420?q=80&w=1000&auto=format&fit=crop",
+    "Sekiro: Shadows Die Twice": "https://images.unsplash.com/photo-1552820728-8b83bb6b773f?q=80&w=1000&auto=format&fit=crop",
+    "The Witcher 3: Wild Hunt": "https://images.unsplash.com/photo-1538481199705-c710c4e965fc?q=80&w=1000&auto=format&fit=crop"
   }
 };
 

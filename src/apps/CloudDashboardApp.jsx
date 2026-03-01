@@ -271,7 +271,7 @@ const CloudDashboardApp = () => {
               <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
               OCI Console
             </h1>
-            <p className="text-[10px] font-mono text-gray-500 tracking-widest">US-ASHBURN-1 â€¢ {metrics.status.toUpperCase()}</p>
+            <p className="text-[10px] font-mono text-gray-500 tracking-widest">US-ASHBURN-1 • {metrics.status.toUpperCase()}</p>
           </div>
         </div>
         <div className="flex gap-2">
