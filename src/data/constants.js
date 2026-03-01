@@ -13,6 +13,17 @@ export const DEMO_MUSIC = [
   }
 ];
 
+export const ANIME_DATA = {
+  catalogue: [],
+  covers: {}
+};
+
+export const GAMING_DATA = {
+  steam: {},
+  collection: [],
+  covers: {}
+};
+
 export const VST_DETAILS = [
   {
     id: "waves-r",
