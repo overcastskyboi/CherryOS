@@ -72,7 +72,6 @@ const PokedexApp = () => {
         .scrollbar-hide::-webkit-scrollbar { display: none; }
       `}</style>
 
-      {/* Header */}
       <header className="bg-red-700/10 backdrop-blur-md border-b border-white/5 px-6 py-6 flex items-center justify-between sticky top-0 z-50">
         <div className="flex items-center gap-6">
           <button 
@@ -104,12 +103,13 @@ const PokedexApp = () => {
                 onClick={() => handleOpenDetails(p)}
                 className="group pokedex-glass p-6 rounded-[2.5rem] flex flex-col items-center gap-6 hover:bg-white/[0.05] transition-all hover:-translate-y-2 active:scale-95 shadow-2xl border-white/5"
               >
-                <div className="relative">
+                <div className="w-24 h-24 relative">
                   <div className="absolute inset-0 bg-red-500/10 blur-3xl rounded-full scale-0 group-hover:scale-100 transition-transform duration-700" />
-                  <img 
+                  <LazyImage 
                     src={p.sprite}
                     alt={p.name}
-                    className="w-24 h-24 object-contain relative z-10 drop-shadow-[0_0_20px_rgba(255,255,255,0.3)] group-hover:scale-110 transition-transform duration-500"
+                    className="w-full h-full object-contain relative z-10 drop-shadow-[0_0_20px_rgba(255,255,255,0.3)] group-hover:scale-110 transition-transform duration-500"
+                    placeholderColor="bg-transparent"
                   />
                 </div>
                 <div className="text-center space-y-1">
@@ -128,7 +128,6 @@ const PokedexApp = () => {
           <div className="animate-in slide-in-from-bottom-8 duration-700">
             {selectedPokemon && (
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
-                {/* Visual Module */}
                 <div className="lg:col-span-5 space-y-8">
                   <div className="pokedex-glass rounded-[3.5rem] p-12 relative overflow-hidden group border-white/10 shadow-[0_0_100px_rgba(239,68,68,0.05)]">
                     <div className="absolute inset-0 bg-gradient-to-b from-red-500/5 to-transparent pointer-events-none" />
@@ -148,10 +147,11 @@ const PokedexApp = () => {
 
                     <div className="relative h-80 flex items-center justify-center">
                       <div className="absolute inset-0 bg-red-500/10 blur-[100px] rounded-full animate-pulse" />
-                      <img 
+                      <LazyImage 
                         src={isShiny ? selectedPokemon.shinySprite : selectedPokemon.sprite}
                         alt={selectedPokemon.name}
                         className="w-64 h-64 object-contain relative z-10 drop-shadow-[0_0_50px_rgba(255,255,255,0.2)]"
+                        placeholderColor="bg-transparent"
                       />
                     </div>
 
@@ -174,12 +174,11 @@ const PokedexApp = () => {
                       <p className="text-xl font-black italic tracking-tighter text-white">{selectedPokemon.weight / 10}kg</p>
                     </div>
                     <div className="pokedex-glass p-6 rounded-[2rem] flex items-center justify-center group border-white/5 hover:bg-white/[0.02] transition-all">
-                      <img src={selectedPokemon.footprint} alt="footprint" className="h-16 opacity-20 group-hover:opacity-80 transition-opacity grayscale invert filter brightness-200" />
+                      <LazyImage src={selectedPokemon.footprint} alt="footprint" className="h-16 grayscale invert filter brightness-200 opacity-20 group-hover:opacity-80 transition-opacity" placeholderColor="bg-transparent" />
                     </div>
                   </div>
                 </div>
 
-                {/* Data Module */}
                 <div className="lg:col-span-7 space-y-12">
                   <div className="space-y-6">
                     <div className="flex items-center gap-4 border-l-2 border-red-500 pl-6">
@@ -241,7 +240,6 @@ const PokedexApp = () => {
         )}
       </main>
 
-      {/* Footer Meta */}
       <footer className="fixed bottom-0 left-0 right-0 px-8 py-5 flex justify-between items-center bg-black/80 backdrop-blur-3xl border-t border-white/5 text-gray-700 z-50">
         <div className="flex items-center gap-6">
           <span className="text-[9px] font-mono uppercase tracking-widest italic flex items-center gap-2">

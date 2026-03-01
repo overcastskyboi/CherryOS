@@ -39,7 +39,7 @@ jobs:
       - name: Fetch Live API Data (Dynamic Pre-build)
         env:
           VITE_STEAM_ID: "76561198043191125"
-          VITE_STEAM_API_KEY: ${{ secrets.VITE_STEAM_API_KEY }}
+          VITE_STEAM_API_KEY: "534BB5E98C134721FEF217D1CC893949"
           VITE_AL_USERNAME: "AugustElliott"
           VITE_AL_ID: "36296"
         run: |
@@ -99,6 +99,7 @@ jobs:
                     description,
                     sprite: \`https://play.pokemonshowdown.com/sprites/gen5ani/\${data.name.replace(/-disguised|-galar|-shield/g,'')}.gif\`,
                     shinySprite: \`https://play.pokemonshowdown.com/sprites/gen5ani-shiny/\${data.name.replace(/-disguised|-galar|-shield/g,'')}.gif\`,
+                    artwork: \`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/\${data.id}.png\`,
                     footprint: \`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/footprints/\${data.id}.png\`,
                     moves: data.moves.reduce((acc, m) => {
                       m.version_group_details.forEach(d => {
@@ -114,7 +115,7 @@ jobs:
               fs.writeFileSync('public/data/mirror/pokedex.json', JSON.stringify(pokedex));
 
               // 2. AniList Mirror
-              console.log('Mirroring AniList...');
+              console.log('Mirroring AniList for user AugustElliott...');
               let aniData = null;
               try {
                 aniData = await request('https://graphql.anilist.co', {
@@ -122,9 +123,10 @@ jobs:
                   headers: { 'Content-Type': 'application/json' },
                   body: JSON.stringify({
                     query: 'query(\$username:String){MediaListCollection(userName:\$username,type:ANIME){lists{name status entries{updatedAt media{id duration episodes genres title{english romaji}coverImage{extraLarge}averageScore type status}score(format:POINT_10)progress status}}}MangaList:MediaListCollection(userName:\$username,type:MANGA){lists{name status entries{updatedAt media{id duration episodes genres title{english romaji}coverImage{extraLarge}averageScore type status}score(format:POINT_10)progress status}}}}',
-                    variables: { username: process.env.VITE_AL_USERNAME }
+                    variables: { username: 'AugustElliott' }
                   })
                 });
+                if (aniData && aniData.data) console.log('AniList sync successful.');
               } catch(e) { console.error('AniList failed:', e.message); }
               fs.writeFileSync('public/data/mirror/anilist.json', JSON.stringify(aniData || { data: { MediaListCollection: { lists: [] }, MangaList: { lists: [] } } }));
 
@@ -134,7 +136,6 @@ jobs:
               try {
                 const key = process.env.VITE_STEAM_API_KEY;
                 const id = process.env.VITE_STEAM_ID;
-                if (!key) throw new Error('Steam key missing');
                 const raw = await request(\`https://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/?key=\${key}&steamid=\${id}&format=json&include_appinfo=true&include_played_free_games=true\`);
                 if (raw.response && raw.response.games) {
                   const games = raw.response.games.filter(g => g.playtime_forever > 0).sort((a,b) => b.playtime_forever - a.playtime_forever).slice(0, 50);
@@ -162,6 +163,7 @@ jobs:
                       lastPlayed: g.rtime_last_played
                     });
                   }
+                  console.log('Steam sync successful.');
                 }
               } catch(e) { console.error('Steam failed:', e.message); }
               fs.writeFileSync('public/data/mirror/steam.json', JSON.stringify({ data: steamData }));
