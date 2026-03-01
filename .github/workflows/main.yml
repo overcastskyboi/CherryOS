@@ -115,7 +115,7 @@ jobs:
         run: npm run build
 
       - name: Setup OCI CLI
-        uses: oracle-actions/setup-oci-cli@v1.3.2
+        uses: oracle-actions/setup-oci-cli@v1
         with:
           user: ${{ secrets.OCI_USER_OCID }}
           fingerprint: ${{ secrets.OCI_FINGERPRINT }}
