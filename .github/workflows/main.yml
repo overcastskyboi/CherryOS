@@ -145,6 +145,6 @@ jobs:
         with:
           context: .
           push: true
-          tags: ${{ secrets.OCI_REGISTRY_URL }}/cherryos:latest
+          tags: ${{ secrets.OCI_REGISTRY_URL }}/${{ secrets.OCI_NAMESPACE }}/cherryos:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
