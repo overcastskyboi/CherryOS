@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { ArrowLeft, CloudRain, Sun, Cloud as CloudIcon, Thermometer, MapPin, Wind, Droplet, Gauge } from 'lucide-react';
+import { ArrowLeft, CloudRain, Sun, Cloud as CloudIcon, Thermometer, MapPin, Wind, Droplet, RefreshCcw } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { z } from 'zod';
+import { PixelIcon } from '../components/PixelIcons';
 
 const CloudCastApp = () => {
   const navigate = useNavigate();
-  const [location, setLocation] = useState('London');
+  const [location, setLocation] = useState('Indianapolis, IN');
   const [weatherData, setWeatherData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -13,240 +14,142 @@ const CloudCastApp = () => {
   const WEATHER_API_KEY = import.meta.env.VITE_WEATHER_API_KEY;
 
   const weatherSchema = z.object({
-    coord: z.object({
-      lon: z.number(),
-      lat: z.number()
-    }),
-    weather: z.array(
-      z.object({
-        id: z.number(),
-        main: z.string(),
-        description: z.string(),
-        icon: z.string()
-      })
-    ),
-    base: z.string(),
+    weather: z.array(z.object({ description: z.string(), icon: z.string() })),
     main: z.object({
       temp: z.number(),
       feels_like: z.number(),
-      temp_min: z.number(),
-      temp_max: z.number(),
-      pressure: z.number(),
       humidity: z.number()
     }),
-    visibility: z.number(),
-    wind: z.object({
-      speed: z.number(),
-      deg: z.number()
-    }),
-    clouds: z.object({
-      all: z.number()
-    }),
-    dt: z.number(),
-    sys: z.object({
-      type: z.number(),
-      id: z.number(),
-      country: z.string(),
-      sunrise: z.number(),
-      sunset: z.number()
-    }),
-    timezone: z.number(),
-    id: z.number(),
+    wind: z.object({ speed: z.number() }),
     name: z.string(),
-    cod: z.number()
+    sys: z.object({ country: z.string() })
   });
-
-  const abortController = useRef(null);
 
   const fetchWeather = useCallback(async () => {
     if (!WEATHER_API_KEY) {
-      setError('Weather API key not configured. Please set VITE_WEATHER_API_KEY in .env');
-      return;
-    }
-    if (!location) {
-      setError('Please enter a city name');
-      return;
-    }
-    if (location.length < 2) {
-      setError('City name must be at least 2 characters');
-      return;
-    }
-    if (!/^[a-zA-Z\s\-,]+$/.test(location)) {
-      setError('City name can only contain letters, spaces, hyphens, and commas');
+      // Mock data for demo if no key
+      setWeatherData({
+        name: 'Indianapolis',
+        sys: { country: 'US' },
+        main: { temp: 22, feels_like: 21, humidity: 45 },
+        weather: [{ description: 'Pixel Perfect Skies', icon: '01d' }],
+        wind: { speed: 4.2 }
+      });
       return;
     }
 
     try {
-      // Abort any previous request
-      if (abortController.current) {
-        abortController.current.abort();
-      }
-
-      abortController.current = new AbortController();
-      const signal = abortController.current.signal;
-
-      // Set timeout for API request
-      const timeout = new Promise((_, reject) => {
-        setTimeout(() => reject(new Error('Request timed out. Please try again.')), 10000);
-      });
-
       setLoading(true);
       setError('');
-      setWeatherData(null);
-
-      const response = await Promise.race([
-        fetch(`https://api.openweathermap.org/data/2.5/weather?q=${location}&appid=${WEATHER_API_KEY}&units=metric`, { signal }),
-        timeout
-      ]);
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`API Error: ${response.status} - ${errorText || response.statusText}`);
-      }
-
+      const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${location}&appid=${WEATHER_API_KEY}&units=imperial`);
+      if (!response.ok) throw new Error('Location not found');
       const data = await response.json();
-
-      // Validate response data
-      try {
-        const validatedData = weatherSchema.parse(data);
-        setWeatherData(validatedData);
-      } catch (validationError) {
-        console.error('Data validation failed:', validationError);
-        throw new Error('Received invalid data from weather service.');
-      }
+      setWeatherData(weatherSchema.parse(data));
     } catch (err) {
-      if (err.name === 'AbortError') {
-        console.log('Weather request aborted');
-        return;
-      }
-
-      if (err.message.includes('Failed to fetch')) {
-        setError('Network error. Please check your internet connection.');
-      } else if (err.message.includes('404')) {
-        setError(`City not found: "${location}". Please check the spelling and try again.`);
-      } else if (err.message.includes('401')) {
-        setError('Invalid API key. Please check your configuration.');
-      } else if (err.message.includes('429')) {
-        setError('Too many requests. Please try again later.');
-      } else if (err.message.includes('Request timed out')) {
-        setError('Request timed out. Please check your connection and try again.');
-      } else {
-        setError(err.message || 'Failed to fetch weather data. Please try again.');
-      }
+      setError(err.message);
     } finally {
       setLoading(false);
-      // Clean up abort controller
-      abortController.current = null;
     }
-  }, [location, WEATHER_API_KEY, weatherSchema]);
+  }, [location, WEATHER_API_KEY]);
 
   useEffect(() => {
     fetchWeather();
-  }, [fetchWeather]);
-
-  // Cleanup function to abort any pending requests
-  useEffect(() => {
-    return () => {
-      if (abortController.current) {
-        abortController.current.abort();
-      }
-    };
   }, []);
 
-  const getWeatherIcon = (iconCode) => {
-    switch (iconCode) {
-      case '01d':
-      case '01n':
-        return <Sun size={24} />;
-      case '02d':
-      case '02n':
-      case '03d':
-      case '03n':
-      case '04d':
-      case '04n':
-        return <CloudIcon size={24} />;
-      case '09d':
-      case '09n':
-      case '10d':
-      case '10n':
-        return <CloudRain size={24} />;
-      default:
-        return <CloudIcon size={24} />;
-    }
-  };
-
   return (
-    <div className="flex flex-col h-full bg-blue-900 text-white font-sans">
-      {/* Header */}
-      <div className="flex items-center justify-between p-3 bg-blue-950 border-b border-blue-800 shrink-0">
-        <div className="flex items-center gap-2">
-          <button onClick={() => navigate('/')} className="p-1 hover:bg-blue-800 rounded text-blue-300">
-            <ArrowLeft size={20} />
-          </button>
-          <CloudIcon size={20} className="text-blue-400" />
-          <span className="text-sm font-bold">CloudCast</span>
-        </div>
-        <form onSubmit={(e) => { e.preventDefault(); fetchWeather(); }} className="flex gap-2">
-          <input
-            type="text"
-            value={location}
-            onChange={(e) => setLocation(e.target.value)}
-            placeholder="Enter city..."
-            className="bg-blue-800 text-white text-xs p-1 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 w-32"
-          />
-          <button type="submit" className="bg-blue-700 hover:bg-blue-600 text-white text-xs px-2 py-1 rounded">
-            Fetch
-          </button>
-        </form>
+    <div className="min-h-[100dvh] bg-[#0a0a0a] flex flex-col text-white font-sans relative overflow-hidden">
+      {/* Background Image */}
+      <div className="absolute inset-0 opacity-20 pointer-events-none">
+        <img 
+          src="https://images.unsplash.com/photo-1501139083538-0139583c060f?q=80&w=2000&auto=format&fit=crop" 
+          className="w-full h-full object-cover"
+          alt=""
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent to-[#0a0a0a]" />
       </div>
 
-      {/* Content */}
-      <div className="flex-grow p-4 overflow-y-auto flex flex-col items-center justify-center">
-        {loading && <p className="text-blue-300 animate-pulse">Fetching weather...</p>}
-        {error && (
-          <div className="flex flex-col items-center justify-center space-y-2">
-            <p className="text-red-400 font-medium">{error}</p>
-            <button
+      {/* Header */}
+      <div className="bg-black border-b-4 border-[#111] px-6 py-6 flex items-center justify-between sticky top-0 z-40">
+        <div className="flex items-center gap-6">
+          <button 
+            onClick={() => navigate('/')}
+            className="p-2 bg-[#111] border-2 border-[#333] text-indigo-400 hover:border-white transition-all shadow-[2px_2px_0_#000]"
+          >
+            <ArrowLeft size={24} />
+          </button>
+          <div>
+            <h1 className="text-2xl font-black tracking-tighter text-white uppercase italic">CloudCast</h1>
+            <p className="text-[10px] text-gray-600 uppercase tracking-[0.4em] font-bold mt-1">SATELLITE_LINK // ACTIVE</p>
+          </div>
+        </div>
+      </div>
+
+      <main className="flex-1 p-6 md:p-12 flex flex-col items-center justify-center relative z-10">
+        <div className="w-full max-w-lg bg-[#111] border-4 border-white shadow-[8px_8px_0_#000] p-8 md:p-12 space-y-8 animate-in zoom-in-95 duration-300">
+          <div className="flex justify-between items-start">
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 text-indigo-400">
+                <MapPin size={14} />
+                <span className="text-[10px] font-black uppercase tracking-widest">{location}</span>
+              </div>
+              <h2 className="text-4xl font-black tracking-tighter uppercase italic leading-none">
+                {weatherData?.name || '---'}
+              </h2>
+            </div>
+            <button 
               onClick={fetchWeather}
-              className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm font-medium"
+              className="p-2 bg-white text-black hover:bg-indigo-500 hover:text-white transition-all"
             >
-              Try Again
+              <RefreshCcw size={20} className={loading ? 'animate-spin' : ''} />
             </button>
           </div>
-        )}
 
-        {weatherData && !loading && !error && (
-          <div className="flex flex-col items-center text-center space-y-4">
-            <h2 className="text-4xl font-bold flex items-center gap-2">
-              <MapPin size={32} /> {weatherData.name}, {weatherData.sys.country}
-            </h2>
-            <div className="flex items-center gap-4 text-6xl font-extrabold">
-              {getWeatherIcon(weatherData.weather[0].icon)}
-              <span>{Math.round(weatherData.main.temp)}°C</span>
-            </div>
-            <p className="text-xl capitalize">{weatherData.weather[0].description}</p>
-            <div className="grid grid-cols-2 gap-4 text-sm mt-4">
-              <div className="flex items-center gap-2">
-                <Thermometer size={16} /> Feels like: {Math.round(weatherData.main.feels_like)}°C
+          {weatherData && (
+            <div className="space-y-8">
+              <div className="flex items-center gap-8">
+                <div className="p-6 bg-black border-2 border-[#333] text-white">
+                  <PixelIcon name="rain" size={64} color="currentColor" />
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-6xl font-black tracking-tighter italic">
+                    {Math.round(weatherData.main.temp)}°F
+                  </span>
+                  <span className="text-xs font-bold text-gray-500 uppercase tracking-widest">
+                    {weatherData.weather[0].description}
+                  </span>
+                </div>
               </div>
-              <div className="flex items-center gap-2">
-                <Wind size={16} /> Wind: {weatherData.wind.speed} m/s
-              </div>
-              <div className="flex items-center gap-2">
-                <Droplet size={16} /> Humidity: {weatherData.main.humidity}%
-              </div>
-              <div className="flex items-center gap-2">
-                <Gauge size={16} /> Pressure: {weatherData.main.pressure} hPa
-              </div>
-            </div>
-          </div>
-        )}
 
-        {!weatherData && !loading && !error && (
-          <div className="text-center">
-            <p className="text-blue-300">Enter a city name and click &ldquo;Fetch&rdquo; to see the weather.</p>
-          </div>
-        )}
+              <div className="grid grid-cols-2 gap-4">
+                <div className="bg-black/40 border-2 border-[#222] p-4 flex flex-col gap-1">
+                  <div className="flex items-center gap-2 text-gray-600">
+                    <Thermometer size={12} />
+                    <span className="text-[8px] font-black uppercase tracking-widest">Feels Like</span>
+                  </div>
+                  <span className="text-lg font-black italic">{Math.round(weatherData.main.feels_like)}°F</span>
+                </div>
+                <div className="bg-black/40 border-2 border-[#222] p-4 flex flex-col gap-1">
+                  <div className="flex items-center gap-2 text-gray-600">
+                    <Droplet size={12} />
+                    <span className="text-[8px] font-black uppercase tracking-widest">Humidity</span>
+                  </div>
+                  <span className="text-lg font-black italic">{weatherData.main.humidity}%</span>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {error && <p className="text-red-500 text-[10px] font-black uppercase text-center">{error}</p>}
+        </div>
+      </main>
+
+      {/* Footer Decor */}
+      <div className="mt-auto px-6 py-4 flex justify-between items-center bg-black border-t-4 border-[#111]">
+        <span className="text-[8px] font-mono text-gray-700 uppercase tracking-tighter">DATA_SOURCE: OPENWEATHER_API</span>
+        <div className="flex gap-1">
+          <div className="w-1.5 h-1.5 bg-indigo-500 animate-pulse" />
+          <div className="w-1.5 h-1.5 bg-indigo-500" />
+        </div>
       </div>
     </div>
   );

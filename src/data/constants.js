@@ -1,61 +1,13 @@
 export const ANIME_DATA = {
   catalogue: [
-    {
-      title: "Berserk",
-      type: "Manga",
-      score: 9.5,
-      progress: "376+ Ch",
-      status: "Reading"
-    },
-    {
-      title: "Hunter x Hunter (2011)",
-      type: "Anime",
-      score: 10,
-      progress: "148 Eps",
-      status: "Completed"
-    },
-    {
-      title: "Fullmetal Alchemist: Brotherhood",
-      type: "Anime",
-      score: 10,
-      progress: "64 Eps",
-      status: "Completed"
-    },
-    {
-      title: "Steins;Gate",
-      type: "Anime",
-      score: 10,
-      progress: "24 Eps",
-      status: "Completed"
-    },
-    {
-      title: "Vinland Saga Season 2",
-      type: "Anime",
-      score: 10,
-      progress: "24 Eps",
-      status: "Completed"
-    },
-    {
-      title: "Monster",
-      type: "Anime",
-      score: 9.5,
-      progress: "74 Eps",
-      status: "Completed"
-    },
-    {
-      title: "Vagabond",
-      type: "Manga",
-      score: 10,
-      progress: "327 Ch",
-      status: "Hiatus"
-    },
-    {
-      title: "Chainsaw Man",
-      type: "Manga",
-      score: 9,
-      progress: "170+ Ch",
-      status: "Reading"
-    }
+    { title: "Berserk", type: "Manga", score: 9.5, progress: "376+ Ch", status: "Reading" },
+    { title: "Hunter x Hunter (2011)", type: "Anime", score: 10, progress: "148 Eps", status: "Completed" },
+    { title: "Fullmetal Alchemist: Brotherhood", type: "Anime", score: 10, progress: "64 Eps", status: "Completed" },
+    { title: "Steins;Gate", type: "Anime", score: 10, progress: "24 Eps", status: "Completed" },
+    { title: "Vinland Saga Season 2", type: "Anime", score: 10, progress: "24 Eps", status: "Completed" },
+    { title: "Monster", type: "Anime", score: 9.5, progress: "74 Eps", status: "Completed" },
+    { title: "Vagabond", type: "Manga", score: 10, progress: "327 Ch", status: "Hiatus" },
+    { title: "Chainsaw Man", type: "Manga", score: 9, progress: "170+ Ch", status: "Reading" }
   ],
   covers: {
     "Berserk": "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=1000&auto=format&fit=crop",
@@ -101,78 +53,71 @@ export const GAMING_DATA = {
 
 export const VST_LIST = {
   "Dynamics & Mixing": [
-    "Waves Renaissance Bundle: RChannel, RCompressor, RVox",
-    "Kilohearts (kHs) Essentials: kHs Dynamics, kHs Limiter, kHs Transient Shaper, kHs Gain, kHs Gate",
-    "Tokyo Dawn Labs: TDR Nova",
-    "TBProAudio: dEQ6V4, dpMeter5, dpMeterXT3, DSEQ3, DynaRide2, Euphonia3, FinalLoud3, GainRider3, LAxLimit4, mvMeter2, SLM2V2",
-    "Individual: CLA-2A, ClipShifter, CS5501V2, Fresh Air, MJUCjr, OTT, Soothe2, Vocal Rider"
-  ],
-  "EQ & Filters": [
-    "Waves Renaissance EQ: REQ 2, REQ 4, REQ 6",
-    "Kilohearts (kHs) Filters: kHs 3-Band EQ, kHs Filter, kHs Ladder Filter, kHs Formant Filter",
-    "TBProAudio: gEQ12V4, sTiltV2"
+    "Waves Renaissance Bundle",
+    "Kilohearts Essentials",
+    "Tokyo Dawn Labs TDR Nova",
+    "Soothe2",
+    "TBProAudio Bundle"
   ],
   "Reverb & Delay": [
-    "Valhalla Suite: Valhalla Delay, Valhalla Shimmer, Valhalla SpaceModulator, Valhalla Supermassive, Valhalla UberMod, Valhalla VintageVerb",
-    "Kilohearts (kHs) Time-Based Effects: kHs Chorus, kHs Ensemble, kHs Flanger, kHs Phaser, kHs Delay, kHs Dual Delay, kHs Frequency Shifter, kHs Phase Distortion, kHs Ring Mod, kHs Reverb",
-    "Waves Reverb: IR-L (Efficient/Full), RVerb",
-    "Individual: Clarity Vx DeReverb, SparkVerb, TAL Reverb 4"
+    "Valhalla Supermassive",
+    "Valhalla Delay",
+    "Valhalla VintageVerb"
   ],
-  "Vocal & Utility": [
-    "Waves Vocal Tools: Clarity Vx, Silk Vocal, Waves Tune LT, RDeEsser",
-    "Antares: Auto-Tune",
-    "Kilohearts (kHs) Pitch/Utility: kHs Pitch Shifter, kHs Tape Stop, kHs Haas, kHs Stereo",
-    "Individual: Curves Equator, HoRNetSongKeyMK2, ABLM2, AMM2, ISOL8"
-  ],
-  "Saturation, Tone & Instruments": [
-    "Kilohearts (kHs) Creative/Synth: kHs Bitcrush, kHs Distortion, kHs Reverser, kHs Resonator, kHs Shaper, kHs Trance Gate",
-    "Xfer Records: Serum",
-    "Individual: Abbey Road Saturator, Drip, RBass, Super VHS, Spitfire LABS, TyrellN6, UVIWorkstation"
+  "Instruments": [
+    "Xfer Serum",
+    "Spitfire LABS"
   ]
 };
 
 export const VST_DETAILS = [
   {
+    id: "waves-r",
     name: "Waves Renaissance Bundle",
     category: "Dynamics & Mixing",
     image: "https://images.unsplash.com/photo-1598653222000-6b7b7a552625?q=80&w=1000&auto=format&fit=crop",
     link: "https://www.waves.com/bundles/renaissance-maxx",
-    blurb: "The classic 'R' series. Warm, musical, and incredibly simple to use for professional vocal and instrument processing."
+    blurb: "The quintessential 'musical' processing suite. Includes the legendary R-Vox and R-Compressor.",
+    plugins: [
+      { name: "R-Vox", desc: "The go-to vocal compressor/gate/limiter.", interface: "https://images.unsplash.com/photo-1589903308904-1010c2294adc?q=80&w=800&auto=format&fit=crop" },
+      { name: "R-Compressor", desc: "Classic warm compression for any source.", interface: "https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?q=80&w=800&auto=format&fit=crop" },
+      { name: "R-Axx", desc: "Instantly great guitar dynamics.", interface: "https://images.unsplash.com/photo-1516280440614-37939bbacd81?q=80&w=800&auto=format&fit=crop" }
+    ]
   },
   {
-    name: "Valhalla Supermassive",
-    category: "Reverb & Delay",
-    image: "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?q=80&w=1000&auto=format&fit=crop",
-    link: "https://valhalladsp.com/shop/reverb/valhalla-supermassive/",
-    blurb: "Designed from the ground up for massive delays and reverbs. Lush, ethereal, and completely free."
-  },
-  {
+    id: "khs-essentials",
     name: "Kilohearts Essentials",
     category: "Dynamics & Utility",
     image: "https://images.unsplash.com/photo-1516280440614-37939bbacd81?q=80&w=1000&auto=format&fit=crop",
     link: "https://kilohearts.com/products/kilohearts_essentials",
-    blurb: "A huge collection of high-quality effects covering everything from dynamics to pitch shifting. Extremely CPU efficient."
+    blurb: "A versatile snap-in ecosystem. Clean, efficient, and powerful tools for modern sound design.",
+    plugins: [
+      { name: "Snap Heap", desc: "The modular container for all Kilohearts effects.", interface: "https://images.unsplash.com/photo-1558403194-611308249627?q=80&w=800&auto=format&fit=crop" },
+      { name: "Multipass", desc: "Multi-band modular processing power.", interface: "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?q=80&w=800&auto=format&fit=crop" }
+    ]
   },
   {
+    id: "valhalla-super",
+    name: "Valhalla Supermassive",
+    category: "Reverb & Delay",
+    image: "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?q=80&w=1000&auto=format&fit=crop",
+    link: "https://valhalladsp.com/shop/reverb/valhalla-supermassive/",
+    blurb: "Massive echoes, lush reverbs, and strange space-time modulations. Completely free and otherworldly.",
+    plugins: [
+      { name: "Supermassive", desc: "The ultimate space machine.", interface: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=800&auto=format&fit=crop" }
+    ]
+  },
+  {
+    id: "serum",
     name: "Xfer Records Serum",
     category: "Instruments",
     image: "https://images.unsplash.com/photo-1514525253344-f814d074358a?q=80&w=1000&auto=format&fit=crop",
     link: "https://xferrecords.com/products/serum",
-    blurb: "The industry-standard wavetable synthesizer. High-quality sound, visual and creative workflow, and a deep feature set."
-  },
-  {
-    name: "Tokyo Dawn TDR Nova",
-    category: "EQ & Mixing",
-    image: "https://images.unsplash.com/photo-1520523839897-bd0b52f945a0?q=80&w=1000&auto=format&fit=crop",
-    link: "https://www.tokyodawnlabs.com/tdr-nova/",
-    blurb: "A parallel dynamic equalizer. Appearing as a parametric equalizer, each band also includes a full featured dynamics section."
-  },
-  {
-    name: "Soothe2",
-    category: "Mixing",
-    image: "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?q=80&w=1000&auto=format&fit=crop",
-    link: "https://oeksound.com/plugins/soothe2/",
-    blurb: "A dynamic resonance suppressor. It identifies problematic resonances on the fly and applies matching reduction automatically."
+    blurb: "Wavetable synthesizer with a high-quality sound and visual workflow. The backbone of modern bass music.",
+    plugins: [
+      { name: "Serum", desc: "Advanced wavetable synthesis.", interface: "https://images.unsplash.com/photo-1511379938547-c1f69419868d?q=80&w=800&auto=format&fit=crop" },
+      { name: "SerumFX", desc: "The effects rack of Serum as a standalone plugin.", interface: "https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?q=80&w=800&auto=format&fit=crop" }
+    ]
   }
 ];
 

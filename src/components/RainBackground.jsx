@@ -18,7 +18,7 @@ const RainBackground = () => {
     resize();
 
     const raindrops = [];
-    const dropCount = 150;
+    const dropCount = 60; // Reduced count
     const colors = ['#3b82f6', '#60a5fa', '#93c5fd', '#1e40af'];
 
     class Drop {
@@ -29,11 +29,11 @@ const RainBackground = () => {
       init() {
         this.x = Math.random() * canvas.width;
         this.y = Math.random() * -canvas.height;
-        this.speed = 4 + Math.random() * 6;
-        this.length = 10 + Math.random() * 15;
-        this.width = 2 + Math.random() * 2; // Pixel art "thick" drops
+        this.speed = 1 + Math.random() * 2; // Much slower
+        this.length = 8 + Math.random() * 10;
+        this.width = 1; // Thinner "pixel" lines
         this.color = colors[Math.floor(Math.random() * colors.length)];
-        this.opacity = 0.1 + Math.random() * 0.3;
+        this.opacity = 0.05 + Math.random() * 0.15; // Lower opacity
       }
 
       update() {
