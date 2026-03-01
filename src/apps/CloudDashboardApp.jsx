@@ -14,19 +14,20 @@ const CloudDashboardApp = () => {
     oci: { status: 'checking', latency: 0 },
     steam: { status: 'checking', latency: 0 },
     anilist: { status: 'checking', latency: 0 },
+    pokeapi: { status: 'checking', latency: 0 },
   });
 
   const [storageData, setStorageData] = useState([]);
 
   const API_ENDPOINTS = useMemo(() => {
     const baseUrl = import.meta.env.BASE_URL || '/';
-    // Clean up double slashes
     const normalize = (path) => path.replace(/\/+/g, '/');
     
     return {
       oci: "https://objectstorage.us-ashburn-1.oraclecloud.com/n/idg3nfddgypd/b/cherryos-deploy-prod/o/healthcheck.txt",
       steam: normalize(`${window.location.origin}${baseUrl}/data/mirror/steam.json`),
       anilist: normalize(`${window.location.origin}${baseUrl}/data/mirror/anilist.json`),
+      pokeapi: "https://pokeapi.co/api/v2/pokemon/pikachu",
     };
   }, []);
 
@@ -37,19 +38,15 @@ const CloudDashboardApp = () => {
     for (const [name, url] of Object.entries(API_ENDPOINTS)) {
       const startTime = Date.now();
       try {
-        // Use GET instead of HEAD for better CORS compatibility with OCI buckets
-        // and ensure we are hitting the correct mirror paths
         const response = await fetch(url, { method: 'GET', mode: 'cors' });
         const latency = Date.now() - startTime;
         
         if (response.ok) {
           statuses[name] = { status: 'healthy', latency };
         } else {
-          console.error(`Health check failed for ${name} (${url}): ${response.status}`);
           statuses[name] = { status: 'degraded', latency: 0 };
         }
       } catch (error) {
-        console.error(`Health check error for ${name}:`, error);
         statuses[name] = { status: 'down', latency: 0 };
       }
     }
@@ -58,7 +55,6 @@ const CloudDashboardApp = () => {
   }, [API_ENDPOINTS]);
   
   const fetchStorageInfo = useCallback(async () => {
-    // These values are based on the OCI scan performed by the system
     setStorageData([
       { name: 'music_manifest.json', size: '10.8 KB', type: 'JSON', status: 'Healthy' },
       { name: 'collection.csv', size: '89.2 KB', type: 'CSV', status: 'Synced' },
@@ -101,7 +97,7 @@ const CloudDashboardApp = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {Object.entries(apiStatus).map(([name, data]) => (
           <div key={name} className="glass-card p-6 rounded-[2rem] space-y-4">
             <div className="flex items-center justify-between">
@@ -153,7 +149,7 @@ const CloudDashboardApp = () => {
 
   return (
     <div className="min-h-[100dvh] bg-[#050505] text-gray-100 flex flex-col font-sans pb-20 relative overflow-hidden">
-      <header className="glass-header sticky top-0 z-40 px-6 py-6 flex items-center justify-between">
+      <header className="glass-header sticky top-0 z-40 px-6 py-6 flex items-center justify-between border-b border-white/5">
         <div className="flex items-center gap-6">
           <button onClick={() => navigate('/')} className="p-2 bg-white/5 hover:bg-white/10 rounded-xl text-cyan-500 transition-all border border-white/5 shadow-xl">
             <ArrowLeft size={20} />
