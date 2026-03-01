@@ -70,7 +70,7 @@ jobs:
           async function run() {
             try {
               const proxy = process.env.VITE_PROXY_URL;
-              if (!proxy) throw new Error('VITE_PROXY_URL is missing from environment.');
+              if (!proxy) throw new Error('VITE_PROXY_URL is missing from env.');
               
               // 1. AniList
               console.log('Fetching AniList...');
