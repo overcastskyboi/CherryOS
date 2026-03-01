@@ -3,17 +3,18 @@ import { Search, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, Filter } fro
 
 const DataGrid = ({ 
   data, 
-  columns, 
+  columns,
+  searchableKeys, // New prop for targeted searching
   pageSize = 8, 
   emptyMessage = "No results found",
-  viewMode = "table", // "table" or "grid"
+  viewMode = "table",
   renderCard
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
   const [currentPage, setCurrentPage] = useState(1);
 
-  // Sorting logic
+  // Sorting logic (unchanged)
   const sortedData = useMemo(() => {
     let items = [...data];
     if (sortConfig.key) {
@@ -28,14 +29,21 @@ const DataGrid = ({
     return items;
   }, [data, sortConfig]);
 
-  // Filtering logic
+  // OPTIMIZED Filtering logic
   const filteredData = useMemo(() => {
-    return sortedData.filter(item => 
-      Object.values(item).some(val => 
-        String(val).toLowerCase().includes(searchQuery.toLowerCase())
-      )
-    );
-  }, [sortedData, searchQuery]);
+    if (!searchQuery) return sortedData;
+    return sortedData.filter(item => {
+      // If searchableKeys are provided, only check those. Otherwise, fallback to all values.
+      if (searchableKeys && searchableKeys.length > 0) {
+        return searchableKeys.some(key => 
+          item[key] && String(item[key]).toLowerCase().includes(searchQuery.toLowerCase())
+        );
+      }
+      return Object.values(item).some(val => 
+        val && String(val).toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    });
+  }, [sortedData, searchQuery, searchableKeys]);
 
   // Pagination logic
   const totalPages = Math.ceil(filteredData.length / pageSize);
@@ -86,11 +94,11 @@ const DataGrid = ({
                   <th 
                     key={col.key}
                     className="px-4 py-3 text-xs font-bold text-gray-400 uppercase tracking-wider cursor-pointer hover:text-white transition-colors"
-                    onClick={() => requestSort(col.key)}
+                    onClick={() => col.sortable !== false && requestSort(col.key)}
                   >
                     <div className="flex items-center gap-1">
                       {col.label}
-                      {sortConfig.key === col.key && (
+                      {sortConfig.key === col.key && col.sortable !== false && (
                         sortConfig.direction === 'asc' ? <ChevronUp size={14} /> : <ChevronDown size={14} />
                       )}
                     </div>

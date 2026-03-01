@@ -1,56 +1,13 @@
 import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, RefreshCcw, Activity, Music, Clock, Waves } from 'lucide-react';
+import { calculateProductionValues } from '../data/constants';
 
 const BPMTimingCalculator = () => {
   const navigate = useNavigate();
   const [bpm, setBpm] = useState(120);
 
-  const results = useMemo(() => {
-    if (!bpm || bpm <= 0) return null;
-    const quarterNoteMs = 60000 / bpm;
-
-    const base = {
-      whole: quarterNoteMs * 4,
-      half: quarterNoteMs * 2,
-      quarter: quarterNoteMs,
-      eighth: quarterNoteMs / 2,
-      sixteenth: quarterNoteMs / 4,
-      thirtySecond: quarterNoteMs / 8,
-      sixtyFourth: quarterNoteMs / 16
-    };
-
-    const variations = (ms) => ({
-      straight: Number(ms.toFixed(2)),
-      dotted: Number((ms * 1.5).toFixed(2)),
-      triplet: Number((ms * 0.66667).toFixed(2))
-    });
-
-    return {
-      delays: {
-        "1/4": variations(base.quarter),
-        "1/8": variations(base.eighth),
-        "1/16": variations(base.sixteenth),
-        "1/32": variations(base.thirtySecond)
-      },
-      frequencies: {
-        "1/4": (1000 / base.quarter).toFixed(3),
-        "1/8": (1000 / base.eighth).toFixed(3),
-        "1/16": (1000 / base.sixteenth).toFixed(3),
-        "1/32": (1000 / base.thirtySecond).toFixed(3)
-      },
-      production: {
-        preDelayTight: (base.sixtyFourth / 2).toFixed(2),
-        preDelayLoose: base.sixtyFourth.toFixed(2),
-        tailDecay: (base.whole + base.half).toFixed(2),
-        snapAttack: (base.sixtyFourth / 4).toFixed(2)
-      },
-      utilities: {
-        sampleLength4Bars: (base.whole * 4 / 1000).toFixed(3),
-        sampleLength1Bar: (base.whole / 1000).toFixed(3)
-      }
-    };
-  }, [bpm]);
+  const results = useMemo(() => calculateProductionValues(bpm), [bpm]);
 
   return (
     <div className="min-h-[100dvh] bg-[#050505] text-gray-100 flex flex-col font-sans pb-20 relative overflow-hidden">
@@ -75,7 +32,6 @@ const BPMTimingCalculator = () => {
       </header>
 
       <main className="flex-1 p-6 md:p-12 relative z-10 max-w-6xl mx-auto w-full space-y-12">
-        {/* BPM Input Section */}
         <section className="flex flex-col items-center gap-6 py-8 glass-card rounded-[2.5rem] p-12 border-rose-500/10 shadow-[0_0_50px_rgba(244,63,94,0.05)]">
           <label className="text-[10px] font-black uppercase tracking-[0.5em] text-rose-500/80">Global Tempo Control</label>
           <div className="flex items-end gap-4">
@@ -91,7 +47,6 @@ const BPMTimingCalculator = () => {
 
         {results && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 animate-elegant">
-            {/* Delays Table */}
             <div className="space-y-6">
               <div className="flex items-center gap-3 border-l-2 border-rose-500 pl-4">
                 <Music size={16} className="text-rose-500" />
@@ -120,7 +75,6 @@ const BPMTimingCalculator = () => {
               </div>
             </div>
 
-            {/* Frequencies & Production */}
             <div className="space-y-12">
               <div className="space-y-6">
                 <div className="flex items-center gap-3 border-l-2 border-rose-500 pl-4">
@@ -158,7 +112,6 @@ const BPMTimingCalculator = () => {
                 </div>
               </div>
 
-              {/* Utility Feature: Sample Lengths */}
               <div className="space-y-6">
                 <div className="flex items-center gap-3 border-l-2 border-rose-500 pl-4">
                   <Clock size={16} className="text-rose-500" />

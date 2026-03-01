@@ -1,6 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import SystemHealth from './SystemHealth';
 import { useOS } from '../context/OSContext';
 import { 
   Clapperboard, Music, Gamepad2, Monitor, 
@@ -11,17 +10,6 @@ import {
 const Desktop = () => {
   const navigate = useNavigate();
   const { isMobile } = useOS();
-  const [showHealth, setShowHealth] = useState(false);
-
-  useEffect(() => {
-    const handleKeyDown = (e) => {
-      if (e.ctrlKey && e.shiftKey && e.key === 'H') {
-        setShowHealth(prev => !prev);
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, []);
 
   const apps = [
     { id: 'watch', name: 'Watch List', icon: Clapperboard, path: '/watch', color: 'text-yellow-400', desc: 'Media Tracking' },
@@ -40,15 +28,6 @@ const Desktop = () => {
       <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-950/20 blur-[120px] rounded-full pointer-events-none" />
       <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-purple-950/10 blur-[120px] rounded-full pointer-events-none" />
 
-      {showHealth && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/60 backdrop-blur-md" onClick={() => setShowHealth(false)} />
-          <div className="relative w-full max-w-lg">
-            <SystemHealth onClose={() => setShowHealth(false)} />
-          </div>
-        </div>
-      )}
-      
       <div className="flex-1 flex flex-col items-center justify-center py-12 relative z-10">
         <div className="w-full max-w-6xl">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
@@ -70,8 +49,6 @@ const Desktop = () => {
                   </p>
                 </div>
                 <ChevronRight className="text-gray-700 group-hover:text-white group-hover:translate-x-1 transition-all" size={16} />
-                
-                {/* Hover Accent */}
                 <div className="absolute bottom-0 left-0 h-[2px] w-0 bg-gradient-to-r from-transparent via-blue-500 to-transparent group-hover:w-full transition-all duration-700" />
               </button>
             ))}
@@ -83,16 +60,12 @@ const Desktop = () => {
         <div className="flex items-center gap-4">
           <span className="flex items-center gap-2">
             <div className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
-            CherryOS 2.3.0 Stable
+            CherryOS 2.4.0 Stable
           </span>
           <span className="hidden md:inline text-gray-800">|</span>
           <span className="text-gray-500">Ashburn Core Active</span>
         </div>
         <div className="flex items-center gap-6">
-          <button onClick={() => setShowHealth(true)} className="hover:text-white transition-colors flex items-center gap-2">
-            <Activity size={12} />
-            System Metrics
-          </button>
           <span className="text-gray-800 hidden md:inline">© 2026</span>
         </div>
       </div>
