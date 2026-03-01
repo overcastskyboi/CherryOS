@@ -13,7 +13,9 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks: {
-          'vendor': ['react', 'react-dom', 'react-router-dom', 'lucide-react', 'zod'],
+          'vendor': ['react', 'react-dom', 'react-router-dom', 'zod'],
+          'icons': ['lucide-react'], // Separate icons chunk
+          'ui': ['recharts', 'papaparse'], // Separate UI data libs
         },
       },
     },

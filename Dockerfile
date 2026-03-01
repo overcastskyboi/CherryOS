@@ -20,9 +20,18 @@ ENV VITE_STEAM_ID=$VITE_STEAM_ID
 ENV VITE_AL_ID=$VITE_AL_ID
 ENV VITE_AL_TOKEN=$VITE_AL_TOKEN
 
+# Copy only dependency files first for caching
 COPY package.json package-lock.json ./
 RUN npm ci
-COPY . .
+
+# Copy only necessary source files
+COPY src/ ./src/
+COPY public/ ./public/
+COPY index.html ./
+COPY vite.config.js ./
+COPY eslint.config.js ./
+
+# Build
 RUN npm run build
 
 # Stage 2: Serve

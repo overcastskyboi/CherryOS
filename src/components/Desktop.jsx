@@ -1,26 +1,12 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useOS } from '../context/OSContext';
-import { 
-  Clapperboard, Music, Gamepad2, Monitor, 
-  Cloud, CloudRain, Package, Calculator,
-  ChevronRight, Activity
-} from 'lucide-react';
+import { DESKTOP_APPS } from '../data/constants';
+import { ChevronRight } from 'lucide-react';
 
 const Desktop = () => {
   const navigate = useNavigate();
   const { isMobile } = useOS();
-
-  const apps = [
-    { id: 'watch', name: 'Watch List', icon: Clapperboard, path: '/watch', color: 'text-yellow-400', desc: 'Media Tracking' },
-    { id: 'songs', name: 'My Music', icon: Music, path: '/songs', color: 'text-pink-400', desc: 'Audio Collection' },
-    { id: 'games', name: 'Game Center', icon: Gamepad2, path: '/games', color: 'text-emerald-400', desc: 'Achievement Hub' },
-    { id: 'studio', name: 'Studio Rack', icon: Monitor, path: '/studio', color: 'text-blue-400', desc: 'VST Management' },
-    { id: 'cloud', name: 'OCI Console', icon: Cloud, path: '/cloud', color: 'text-cyan-400', desc: 'Infrastructure' },
-    { id: 'cloudcast', name: 'CloudCast', icon: CloudRain, path: '/cloudcast', color: 'text-indigo-400', desc: 'Local Weather' },
-    { id: 'collection-tracker', name: 'The Vault', icon: Package, path: '/collection-tracker', color: 'text-amber-400', desc: 'Asset Tracker' },
-    { id: 'bpm-calculator', name: 'BPM Sync', icon: Calculator, path: '/bpm-calculator', color: 'text-rose-400', desc: 'Production Tool' },
-  ];
 
   return (
     <div className="min-h-[100dvh] w-screen bg-[#050505] flex flex-col p-6 md:p-12 relative overflow-x-hidden">
@@ -31,7 +17,7 @@ const Desktop = () => {
       <div className="flex-1 flex flex-col items-center justify-center py-12 relative z-10">
         <div className="w-full max-w-6xl">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
-            {apps.map((app) => (
+            {DESKTOP_APPS.map((app) => (
               <button
                 key={app.id}
                 onClick={() => navigate(app.path)}
@@ -60,7 +46,7 @@ const Desktop = () => {
         <div className="flex items-center gap-4">
           <span className="flex items-center gap-2">
             <div className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
-            CherryOS 2.4.0 Stable
+            CherryOS 2.5.0 Stable
           </span>
           <span className="hidden md:inline text-gray-800">|</span>
           <span className="text-gray-500">Ashburn Core Active</span>

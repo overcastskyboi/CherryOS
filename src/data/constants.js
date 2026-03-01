@@ -1,3 +1,20 @@
+import { 
+  Clapperboard, Music, Gamepad2, Monitor, 
+  Cloud, CloudRain, Package, Calculator,
+  Pocket
+} from 'lucide-react';
+
+export const DESKTOP_APPS = [
+  { id: 'watch', name: 'Watch List', icon: Clapperboard, path: '/watch', color: 'text-yellow-400', desc: 'Media Tracking' },
+  { id: 'songs', name: 'My Music', icon: Music, path: '/songs', color: 'text-pink-400', desc: 'Audio Collection' },
+  { id: 'games', name: 'Game Center', icon: Gamepad2, path: '/games', color: 'text-emerald-400', desc: 'Achievement Hub' },
+  { id: 'pokedex', name: 'Pokédex', icon: Pocket, path: '/pokedex', color: 'text-red-400', desc: 'Pokémon Favorites' },
+  { id: 'studio', name: 'Studio Rack', icon: Monitor, path: '/studio', color: 'text-blue-400', desc: 'VST Management' },
+  { id: 'cloud', name: 'OCI Console', icon: Cloud, path: '/cloud', color: 'text-cyan-400', desc: 'Infrastructure' },
+  { id: 'collection-tracker', name: 'The Vault', icon: Package, path: '/collection-tracker', color: 'text-amber-400', desc: 'Asset Tracker' },
+  { id: 'bpm-calculator', name: 'BPM Sync', icon: Calculator, path: '/bpm-calculator', color: 'text-rose-400', desc: 'Production Tool' },
+];
+
 export const DEMO_MUSIC = [
   {
     album_name: "Melancholy (2021)",
