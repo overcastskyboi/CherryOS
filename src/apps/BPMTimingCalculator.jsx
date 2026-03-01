@@ -10,7 +10,7 @@ import { useOS } from '../context/OSContext';
 
 const BPMTimingCalculator = () => {
   const navigate = useNavigate();
-  const { setThemeColor } = useOS();
+  const { setThemeColor, isMobile } = useOS();
 
   useEffect(() => {
     setThemeColor('#9f1239'); // Cherry Crimson/Rose

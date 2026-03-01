@@ -13,7 +13,7 @@ import { useOS } from '../context/OSContext';
 
 const WatchLogApp = () => {
   const navigate = useNavigate();
-  const { setThemeColor } = useOS();
+  const { setThemeColor, isMobile } = useOS();
 
   useEffect(() => {
     setThemeColor('#f59e0b'); // Cherry Amber

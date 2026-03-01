@@ -73,7 +73,7 @@ import { useOS } from '../context/OSContext';
 
 export default function CollectionTrackerApp() {
   const navigate = useNavigate();
-  const { setThemeColor } = useOS();
+  const { setThemeColor, isMobile } = useOS();
 
   useEffect(() => {
     setThemeColor('#f59e0b'); // Amber

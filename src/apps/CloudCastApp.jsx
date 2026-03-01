@@ -8,7 +8,7 @@ import { useOS } from '../context/OSContext';
 
 const CloudCastApp = () => {
   const navigate = useNavigate();
-  const { setThemeColor } = useOS();
+  const { setThemeColor, isMobile } = useOS();
 
   useEffect(() => {
     setThemeColor('#3b82f6'); // Blue

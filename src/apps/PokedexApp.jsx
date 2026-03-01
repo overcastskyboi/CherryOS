@@ -48,7 +48,7 @@ const SpriteImage = ({ src, alt, className = "", glowColor = "rgba(255,255,255,0
 
 const PokedexApp = () => {
   const navigate = useNavigate();
-  const { setThemeColor } = useOS();
+  const { setThemeColor, isMobile } = useOS();
 
   useEffect(() => {
     setThemeColor('#9f1239'); // Cherry Crimson

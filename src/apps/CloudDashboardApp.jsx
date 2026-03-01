@@ -14,7 +14,8 @@ import { useOS } from '../context/OSContext';
 
 const CloudDashboardApp = () => {
   const navigate = useNavigate();
-  const { setThemeColor } = useOS();
+  const { setThemeColor, isMobile } = useOS();
+
 
   useEffect(() => {
     setThemeColor('#0891b2'); // Cherry Cyan

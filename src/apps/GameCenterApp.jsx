@@ -13,7 +13,7 @@ import { useOS } from '../context/OSContext';
 
 const GameCenterApp = () => {
   const navigate = useNavigate();
-  const { setThemeColor } = useOS();
+  const { setThemeColor, isMobile } = useOS();
 
   useEffect(() => {
     setThemeColor('#10b981'); // Cherry Emerald

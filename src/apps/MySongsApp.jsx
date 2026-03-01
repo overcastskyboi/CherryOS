@@ -9,7 +9,7 @@ import { useOS } from '../context/OSContext';
 
 const MyMusicApp = () => {
   const navigate = useNavigate();
-  const { setThemeColor } = useOS();
+  const { setThemeColor, isMobile } = useOS();
 
   useEffect(() => {
     setThemeColor('#db2777'); // Cherry Pink
