@@ -2,11 +2,13 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import Papa from 'papaparse';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, 
-  ResponsiveContainer, Cell, ReferenceLine 
+  ResponsiveContainer, Cell 
 } from 'recharts';
 import { 
   TrendingUp, DollarSign, Package, ArrowLeft, RefreshCcw, 
-  Search, Filter, Gamepad2, Trophy, Sparkles, Sword 
+  Search, Filter, Gamepad2, Trophy, Sparkles, Sword, 
+  Cpu, Disc, Smartphone, Tablet, Monitor, Book, 
+  Layers, Zap, Flame, Droplet, Leaf, Ghost, Skull
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
@@ -18,6 +20,63 @@ const CATEGORY_MAP = {
   'Other': { color: '#6b7280', icon: Package }
 };
 
+// Granular Icon Mapping
+const SPECIFIC_ICON_MAP = {
+  // Consoles
+  'gamecube': Disc,
+  'nintendo ds': Smartphone,
+  'nintendo 64': Cpu,
+  'gameboy advance': Smartphone,
+  'playstation': Disc,
+  'strategy guide': Book,
+  'wii': Disc,
+  'switch': Smartphone,
+  'nes': Cpu,
+  'snes': Cpu,
+  
+  // Pokemon Sets (Flavor icons)
+  'crown zenith': CrownIcon,
+  'shining fates': Zap,
+  'hidden fates': Ghost,
+  'silver tempest': Droplet,
+  'obsidian flames': Flame,
+  'scarlet & violet': Leaf,
+  'promo': Sparkles,
+  'base set': Layers,
+  
+  // YuGiOh (Flavor icons)
+  'pegasus': WingIcon,
+  'kaiba': Zap,
+  'yugi': Sword,
+  'joey': Flame,
+  'metal raiders': Skull,
+  'dark crisis': Skull,
+  
+  // Sports
+  'prizm': Trophy,
+  'donruss': Trophy,
+  'topps': Trophy,
+};
+
+function CrownIcon(props) {
+  return (
+    <svg {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="m2 4 3 12h14l3-12-6 7-4-7-4 7-6-7z" />
+      <path d="M5 20h14" />
+    </svg>
+  );
+}
+
+function WingIcon(props) {
+  return (
+    <svg {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M2 10c0-3.9 3.1-7 7-7 3.9 0 7 3.1 7 7 0 3.9-3.1 7-7 7-3.9 0-7-3.1-7-7z" />
+      <path d="M12 10c0-3.9 3.1-7 7-7 3.9 0 7 3.1 7 7 0 3.9-3.1 7-7 7-3.9 0-7-3.1-7-7z" />
+      <path d="m2 10 7 7 7-7" />
+    </svg>
+  );
+}
+
 const getBroadCategory = (specific) => {
   const s = specific?.toLowerCase() || '';
   if (s.includes('pokemon')) return 'Pokemon Cards';
@@ -26,6 +85,15 @@ const getBroadCategory = (specific) => {
   const consoles = ['gamecube', 'nintendo ds', 'gameboy advance', 'nintendo 64', 'playstation', 'strategy guide', 'wii', 'switch', 'nes', 'snes', 'xbox'];
   if (consoles.some(c => s.includes(c))) return 'Video Games';
   return 'Other';
+};
+
+const cleanSetName = (name) => {
+  if (!name) return 'Unknown';
+  return name
+    .replace(/^Pokemon\s+/i, '')
+    .replace(/^YuGiOh\s+/i, '')
+    .replace(/^Basketball Cards\s+/i, '')
+    .trim();
 };
 
 export default function CollectionTrackerApp() {
@@ -47,12 +115,12 @@ export default function CollectionTrackerApp() {
         skipEmptyLines: true,
         complete: (results) => {
           const processed = results.data.map(row => {
-            const specificSet = row['console-name'] || 'Uncategorized';
+            const rawSet = row['console-name'] || 'Uncategorized';
             return {
               id: row.id,
               name: row['product-name'],
-              specificSet: specificSet,
-              broadCategory: getBroadCategory(specificSet),
+              specificSet: cleanSetName(rawSet),
+              broadCategory: getBroadCategory(rawSet),
               value: (row['price-in-pennies'] || 0) / 100,
               quantity: row.quantity || 1,
               date: row['date-entered']
@@ -81,7 +149,7 @@ export default function CollectionTrackerApp() {
         const matchesCat = activeCategory === 'All' || item.broadCategory === activeCategory;
         return matchesSearch && matchesCat;
       })
-      .sort((a, b) => b.value - a.value); // Strict Value Sort: High to Low
+      .sort((a, b) => b.value - a.value); 
   }, [data, searchQuery, activeCategory]);
 
   const stats = useMemo(() => {
@@ -90,7 +158,6 @@ export default function CollectionTrackerApp() {
     return { total, count };
   }, [filteredAndSorted]);
 
-  // Aggregate values by broad category for the bar chart
   const chartData = useMemo(() => {
     const aggregates = data.reduce((acc, item) => {
       const cat = item.broadCategory;
@@ -105,6 +172,14 @@ export default function CollectionTrackerApp() {
       color: CATEGORY_MAP[cat].color
     })).sort((a, b) => b.value - a.value);
   }, [data]);
+
+  const getSpecificIcon = (setName, broadCategory) => {
+    const s = setName.toLowerCase();
+    for (const [key, icon] of Object.entries(SPECIFIC_ICON_MAP)) {
+      if (s.includes(key)) return icon;
+    }
+    return CATEGORY_MAP[broadCategory]?.icon || Package;
+  };
 
   const CategoryIcon = ({ category, size = 16, className = "" }) => {
     const Icon = CATEGORY_MAP[category]?.icon || Package;
@@ -157,7 +232,7 @@ export default function CollectionTrackerApp() {
           </div>
           <div className="md:col-span-2 glass-card rounded-[2rem] p-6 h-48">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={chartData}>
+              <BarChart data={chartData} margin={{ top: 20, right: 30, left: 0, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#ffffff05" vertical={false} />
                 <XAxis 
                   dataKey="name" 
@@ -170,8 +245,9 @@ export default function CollectionTrackerApp() {
                   cursor={{ fill: 'transparent' }}
                   contentStyle={{ backgroundColor: '#000', border: '1px solid #ffffff10', borderRadius: '12px', fontSize: '10px' }}
                   itemStyle={{ fontWeight: 'bold' }}
+                  formatter={(val) => `$${Number(val).toLocaleString()}`}
                 />
-                <Bar dataKey="value" radius={[6, 6, 0, 0]}>
+                <Bar dataKey="value" radius={[6, 6, 0, 0]} barSize={40}>
                   {chartData.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={entry.color} fillOpacity={0.6} />
                   ))}
@@ -202,14 +278,15 @@ export default function CollectionTrackerApp() {
         {/* Data Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 animate-elegant">
           {filteredAndSorted.map((item) => {
-            const config = CATEGORY_MAP[item.broadCategory] || CATEGORY_MAP['Other'];
+            const broadConfig = CATEGORY_MAP[item.broadCategory] || CATEGORY_MAP['Other'];
+            const SpecificIcon = getSpecificIcon(item.specificSet, item.broadCategory);
             return (
               <div key={item.id} className="glass-card p-6 rounded-2xl group hover:bg-white/[0.05] transition-all relative">
                 <div className="flex justify-between items-start mb-4">
-                  <div className="p-2 rounded-lg bg-black/40 border border-white/5 transition-colors" style={{ color: config.color }}>
-                    <CategoryIcon category={item.broadCategory} size={16} />
+                  <div className="p-2 rounded-lg bg-black/40 border border-white/5 transition-colors" style={{ color: broadConfig.color }}>
+                    <SpecificIcon size={16} />
                   </div>
-                  <span className="text-[10px] font-mono font-black" style={{ color: config.color }}>
+                  <span className="text-[10px] font-mono font-black" style={{ color: broadConfig.color }}>
                     ${item.value.toFixed(2)}
                   </span>
                 </div>
@@ -219,7 +296,7 @@ export default function CollectionTrackerApp() {
                 <div className="absolute bottom-0 left-6 right-6 h-[1px] bg-gradient-to-r from-transparent via-white/5 to-transparent group-hover:via-white/20 transition-all" />
                 <div 
                   className="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-[2px] transition-all duration-500 group-hover:w-1/2" 
-                  style={{ backgroundColor: config.color }} 
+                  style={{ backgroundColor: broadConfig.color }} 
                 />
               </div>
             );
