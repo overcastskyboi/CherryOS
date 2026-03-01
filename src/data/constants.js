@@ -27,11 +27,16 @@ export const TRACKS = [
 ];
 
 export const GAMING_DATA = {
-  steam: { user: "AugustElliott", level: 42, gamesCount: 184 },
+  steam: { 
+    user: "AugustElliott", 
+    steamId: "76561198043191125",
+    level: 42, 
+    gamesCount: 184 
+  },
   retro: { user: "AugustElliott", hardcorePoints: 1200, recentMastery: "Final Fantasy VII" },
   collection: [
-    { title: "Fallout: New Vegas", platform: "Steam", playtime: "245h", status: "Mastered", rating: 10 },
-    { title: "Clair Obscur: Expedition 33", platform: "Steam", playtime: "45h", status: "Playing", rating: 10 },
+    { title: "Fallout: New Vegas", platform: "Steam", playtime: "245h", status: "Mastered", rating: 10, id: 22380 },
+    { title: "Clair Obscur: Expedition 33", platform: "Steam", playtime: "45h", status: "Playing", rating: 10, id: 1903340 },
     { title: "Final Fantasy VII", platform: "Retro", playtime: "84h", status: "Mastered", rating: 10 },
     { title: "Elden Ring", platform: "Steam", playtime: "120h", status: "Playing", rating: 10 },
     { title: "Metal Gear Solid", platform: "Retro", playtime: "20h", status: "Completed", rating: 9.5 },

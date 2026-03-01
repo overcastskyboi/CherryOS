@@ -42,9 +42,10 @@ const GameCenterApp = () => {
     setError(null);
 
     try {
+      const steamId = GAMING_DATA.steam.steamId;
       // Fetch from both Steam and RetroAchievements
       const [steamRes, raRes] = await Promise.all([
-        fetch(`${PROXY_URL}/steam`, { headers: { 'Accept': 'application/json' } }).catch(err => { console.error("Steam fetch error:", err); return null; }),
+        fetch(`${PROXY_URL}/steam?steamId=${steamId}`, { headers: { 'Accept': 'application/json' } }).catch(err => { console.error("Steam fetch error:", err); return null; }),
         fetch(`${PROXY_URL}/retroachievements`, { headers: { 'Accept': 'application/json' } }).catch(err => { console.error("RetroAchievements fetch error:", err); return null; })
       ]);
 
