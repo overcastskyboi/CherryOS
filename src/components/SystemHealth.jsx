@@ -34,8 +34,12 @@ const SystemHealth = ({ onClose }) => {
   const checkConnectivity = useCallback(async () => {
     // Check OCI
     const startOci = Date.now();
+    const OCI_NAMESPACE = import.meta.env.VITE_OCI_NAMESPACE || 'idg3nfddgypd';
+    const OCI_REGION = import.meta.env.VITE_OCI_REGION || 'us-ashburn-1';
+    const BUCKET_NAME = 'cherryos-deploy-prod';
+    
     try {
-      const res = await fetch('https://objectstorage.us-ashburn-1.oraclecloud.com/n/idg3nfddgypd/b/cherryos-deploy-prod/o/healthcheck.txt', { method: 'HEAD', cache: 'no-store' });
+      const res = await fetch(`https://objectstorage.${OCI_REGION}.oraclecloud.com/n/${OCI_NAMESPACE}/b/${BUCKET_NAME}/o/healthcheck.txt`, { method: 'HEAD', cache: 'no-store' });
       setStatus(prev => ({ ...prev, oci: { state: res.ok ? 'online' : 'error', latency: Date.now() - startOci } }));
     } catch {
       setStatus(prev => ({ ...prev, oci: { state: 'offline', latency: 0 } }));
