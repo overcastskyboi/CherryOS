@@ -6,7 +6,7 @@ on:
   pull_request:
     branches: [ main ]
   schedule:
-    - cron: '0 * * * *' # Run every hour to keep data fresh
+    - cron: '0 * * * *' 
 
 permissions:
   contents: write
@@ -14,7 +14,6 @@ permissions:
   id-token: write
 
 jobs:
-  # 1. Data Refresh & Mirroring
   data-sync:
     name: Refresh API Data Mirror
     runs-on: ubuntu-latest
@@ -35,47 +34,86 @@ jobs:
           VITE_PROXY_URL: ${{ secrets.VITE_PROXY_URL }}
         run: |
           mkdir -p src/data/mirror
-          
-          # Fetch AniList Data
-          curl -X POST https://graphql.anilist.co \
-            -H "Content-Type: application/json" \
-            -H "Authorization: Bearer $VITE_AL_TOKEN" \
-            -d '{"query":"query($userId:Int){MediaListCollection(userId:$userId,type:ANIME){lists{entries{media{id title{english romaji}coverImage{extraLarge}averageScore type status}score(format:POINT_10)progress status}}}MangaList:MediaListCollection(userId:$userId,type:MANGA){lists{entries{media{id title{english romaji}coverImage{extraLarge}averageScore type status}score(format:POINT_10)progress status}}}}","variables":{"userId":'$VITE_AL_ID'}}' \
-            > src/data/mirror/anilist.json
+          node -e "
+          const fs = require('fs');
+          const https = require('https');
 
-          # Fetch Steam Data (via proxy to avoid key exposure and handle Steam complex response)
-          curl -s "$VITE_PROXY_URL/steam?steamId=$VITE_STEAM_ID" > src/data/mirror/steam.json
-          
-          # Add Timestamp
-          echo "{\"lastUpdated\": \"$(date -u)\"}" > src/data/mirror/metadata.json
+          async function post(url, data, headers) {
+            return new Promise((resolve, reject) => {
+              const req = https.request(url, { method: 'POST', headers }, (res) => {
+                let body = '';
+                res.on('data', chunk => body += chunk);
+                res.on('end', () => resolve(JSON.parse(body)));
+              });
+              req.on('error', reject);
+              req.write(JSON.stringify(data));
+              req.end();
+            });
+          }
+
+          async function get(url) {
+            return new Promise((resolve, reject) => {
+              https.get(url, (res) => {
+                let body = '';
+                res.on('data', chunk => body += chunk);
+                res.on('end', () => resolve(JSON.parse(body)));
+              }).on('error', reject);
+            });
+          }
+
+          async function run() {
+            try {
+              // 1. AniList
+              console.log('Fetching AniList...');
+              const aniQuery = {
+                query: 'query(\$userId:Int){MediaListCollection(userId:\$userId,type:ANIME){lists{entries{media{id title{english romaji}coverImage{extraLarge}averageScore type status}score(format:POINT_10)progress status}}}MangaList:MediaListCollection(userId:\$userId,type:MANGA){lists{entries{media{id title{english romaji}coverImage{extraLarge}averageScore type status}score(format:POINT_10)progress status}}}}',
+                variables: { userId: Number(process.env.VITE_AL_ID) }
+              };
+              const aniData = await post('https://graphql.anilist.co', aniQuery, { 
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + process.env.VITE_AL_TOKEN 
+              });
+              fs.writeFileSync('src/data/mirror/anilist.json', JSON.stringify(aniData));
+
+              // 2. Steam
+              console.log('Fetching Steam...');
+              const steamData = await get(process.env.VITE_PROXY_URL + '/steam?steamId=' + process.env.VITE_STEAM_ID);
+              fs.writeFileSync('src/data/mirror/steam.json', JSON.stringify(steamData));
+
+              // 3. Metadata
+              fs.writeFileSync('src/data/mirror/metadata.json', JSON.stringify({ lastUpdated: new Date().toISOString() }));
+              console.log('Mirror updated successfully.');
+            } catch (e) {
+              console.error('Data fetch failed:', e);
+              process.exit(1);
+            }
+          }
+          run();
+          "
 
       - name: Commit Data Mirror (Internal)
         run: |
           git config --global user.name 'github-actions[bot]'
-          git config --global user_email 'github-actions[bot]@users.noreply.github.com'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
           git add src/data/mirror/*.json
-          git commit -m "chore: refresh api data mirror [skip ci]" || echo "No changes to commit"
+          git commit -m "chore: refresh api data mirror [skip ci]" || echo "No changes"
           git push origin main || echo "Push skipped"
 
-  # 2. Quality & Security Gate
   quality-gate:
     name: Code Quality & Security
     needs: data-sync
     if: always()
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        node-version: [20]
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
         with:
-          ref: main # Pull the latest mirrored data
+          ref: main
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: 20
           cache: 'npm'
 
       - name: Install dependencies
@@ -87,11 +125,6 @@ jobs:
       - name: Run Tests
         run: npm run test:coverage
 
-      - name: Security Scan (Audit)
-        run: npm audit || true
-        continue-on-error: true
-
-  # 3. Production Deployment (GitHub Pages)
   deploy-github-pages:
     name: Deploy to GitHub Pages
     needs: quality-gate
@@ -132,7 +165,6 @@ jobs:
           user_email: 'github-actions[bot]@users.noreply.github.com'
           commit_message: 'Automated Deployment via GitHub Actions'
 
-  # 4. Cloud Synchronization (OCI)
   sync-oci:
     name: Sync OCI Infrastructure
     needs: deploy-github-pages
@@ -186,12 +218,8 @@ jobs:
       - name: Sync Artifacts to OCI
         run: |
           /home/runner/bin/oci os object bulk-upload -ns ${{ secrets.OCI_NAMESPACE }} -bn cherryos-deploy-prod --src-dir ./dist --overwrite --content-type auto
-          /home/runner/bin/oci os object put -ns ${{ secrets.OCI_NAMESPACE }} -bn cherryos-deploy-prod --file healthcheck.txt --name healthcheck.txt --force --content-type text/plain
-          /home/runner/bin/oci os object put -ns ${{ secrets.OCI_NAMESPACE }} -bn cherryos-deploy-prod --file src/data/music_manifest.json --name music_manifest.json --force --content-type application/json
-          /home/runner/bin/oci os object put -ns ${{ secrets.OCI_NAMESPACE }} -bn cherryos-deploy-prod --file src/data/collection.csv --name collection.csv --force --content-type text/csv
           /home/runner/bin/oci os object bulk-upload -ns ${{ secrets.OCI_NAMESPACE }} -bn cherryos-deploy-prod --src-dir src/data/mirror --overwrite --content-type application/json
 
-  # 5. Container Deployment
   deploy-container:
     name: Push Docker Image to OCI
     needs: sync-oci
