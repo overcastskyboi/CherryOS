@@ -1,12 +1,23 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 
 const OSContext = createContext();
 
 export const OSProvider = ({ children }) => {
   const [bootState, setBootState] = useState('booting'); // booting, locked, idle
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768 || /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent));
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   return (
-    <OSContext.Provider value={{ bootState, setBootState }}>
+    <OSContext.Provider value={{ bootState, setBootState, isMobile }}>
       {children}
     </OSContext.Provider>
   );

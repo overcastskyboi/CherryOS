@@ -160,7 +160,7 @@ export default function CollectionTrackerApp() {
             </ResponsiveContainer>
           ) : (
             <div className="flex h-full items-center justify-center text-slate-500 text-sm">
-              <img src="/assets/images/cloud_mascot.png" alt="Cloud Mascot" className="w-16 h-16 mr-4" />
+              <img src="assets/images/cloud_mascot.png" alt="Cloud Mascot" className="w-16 h-16 mr-4" />
               Upload multiple times on different days to see chart progression.
             </div>
           )}

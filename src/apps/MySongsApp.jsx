@@ -249,7 +249,7 @@ const MyMusicApp = () => {
 
   const ErrorState = () => (
     <div className="h-full flex flex-col items-center justify-center text-red-500 space-y-4">
-      <img src="/assets/images/cloud_mascot.png" alt="Cloud Mascot" className="w-24 h-24 mb-4" />
+      <img src="assets/images/cloud_mascot.png" alt="Cloud Mascot" className="w-24 h-24 mb-4" />
       <AlertCircle size={48} />
       <div className="text-center">
         <h2 className="text-xl font-bold uppercase tracking-widest">Connection Error</h2>
