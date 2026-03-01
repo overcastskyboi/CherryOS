@@ -77,6 +77,7 @@ export default function CollectionTrackerApp() {
   useEffect(() => {
     setThemeColor('#f59e0b'); // Amber
   }, [setThemeColor]);
+
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
