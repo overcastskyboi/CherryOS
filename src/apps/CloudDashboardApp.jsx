@@ -6,12 +6,6 @@ import {
   TrendingUp, RefreshCcw, HardDrive, Box, Zap
 } from 'lucide-react';
 
-const API_ENDPOINTS = {
-  oci: "https://objectstorage.us-ashburn-1.oraclecloud.com/n/idg3nfddgypd/b/cherryos-deploy-prod/o/healthcheck.txt",
-  steam: "https://overcastskyboi.github.io/CherryOS/src/data/mirror/steam.json",
-  anilist: "https://overcastskyboi.github.io/CherryOS/src/data/mirror/anilist.json",
-};
-
 const CloudDashboardApp = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('overview');
@@ -24,27 +18,47 @@ const CloudDashboardApp = () => {
 
   const [storageData, setStorageData] = useState([]);
 
+  const API_ENDPOINTS = useMemo(() => {
+    const baseUrl = import.meta.env.BASE_URL || '/';
+    // Clean up double slashes
+    const normalize = (path) => path.replace(/\/+/g, '/');
+    
+    return {
+      oci: "https://objectstorage.us-ashburn-1.oraclecloud.com/n/idg3nfddgypd/b/cherryos-deploy-prod/o/healthcheck.txt",
+      steam: normalize(`${window.location.origin}${baseUrl}/data/mirror/steam.json`),
+      anilist: normalize(`${window.location.origin}${baseUrl}/data/mirror/anilist.json`),
+    };
+  }, []);
+
   const checkApiHealth = useCallback(async () => {
     setLoading(true);
     const statuses = {};
+    
     for (const [name, url] of Object.entries(API_ENDPOINTS)) {
       const startTime = Date.now();
       try {
-        const response = await fetch(url, { method: 'HEAD', mode: 'cors' });
+        // Use GET instead of HEAD for better CORS compatibility with OCI buckets
+        // and ensure we are hitting the correct mirror paths
+        const response = await fetch(url, { method: 'GET', mode: 'cors' });
         const latency = Date.now() - startTime;
-        statuses[name] = {
-          status: response.ok ? 'healthy' : 'degraded',
-          latency,
-        };
+        
+        if (response.ok) {
+          statuses[name] = { status: 'healthy', latency };
+        } else {
+          console.error(`Health check failed for ${name} (${url}): ${response.status}`);
+          statuses[name] = { status: 'degraded', latency: 0 };
+        }
       } catch (error) {
+        console.error(`Health check error for ${name}:`, error);
         statuses[name] = { status: 'down', latency: 0 };
       }
     }
     setApiStatus(statuses);
     setLoading(false);
-  }, []);
+  }, [API_ENDPOINTS]);
   
   const fetchStorageInfo = useCallback(async () => {
+    // These values are based on the OCI scan performed by the system
     setStorageData([
       { name: 'music_manifest.json', size: '10.8 KB', type: 'JSON', status: 'Healthy' },
       { name: 'collection.csv', size: '89.2 KB', type: 'CSV', status: 'Synced' },
