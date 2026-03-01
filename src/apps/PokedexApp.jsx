@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import LazyImage from '../components/LazyImage';
 import { TYPE_COLORS, VERSION_ORDER } from '../data/constants';
+import { useOS } from '../context/OSContext';
 
 const SpriteImage = ({ src, alt, className = "", glowColor = "rgba(255,255,255,0.2)" }) => {
   const [isLoaded, setIsLoaded] = useState(false);

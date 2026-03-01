@@ -9,6 +9,7 @@ import { useNavigate } from 'react-router-dom';
 import LazyImage from '../components/LazyImage';
 import { GAMING_DATA } from '../data/constants';
 import { formatTime, formatHours } from '../data/time_utils';
+import { useOS } from '../context/OSContext';
 
 const GameCenterApp = () => {
   const navigate = useNavigate();

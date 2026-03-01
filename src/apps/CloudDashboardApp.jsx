@@ -10,6 +10,7 @@ import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, 
   Tooltip, ResponsiveContainer, AreaChart, Area 
 } from 'recharts';
+import { useOS } from '../context/OSContext';
 
 const CloudDashboardApp = () => {
   const navigate = useNavigate();
