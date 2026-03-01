@@ -79,13 +79,6 @@ jobs:
     needs: deploy-github-pages
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
-    env:
-      OCI_CLI_USER: ${{ secrets.OCI_USER_OCID }}
-      OCI_CLI_TENANCY: ${{ secrets.OCI_TENANCY_OCID }}
-      OCI_CLI_FINGERPRINT: ${{ secrets.OCI_FINGERPRINT }}
-      OCI_CLI_KEY_CONTENT: ${{ secrets.OCI_API_KEY }}
-      OCI_CLI_REGION: ${{ secrets.OCI_REGION }}
-      OCI_NAMESPACE: ${{ secrets.OCI_NAMESPACE }}
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -102,20 +95,27 @@ jobs:
       - name: Build Application
         run: npm run build
 
-      - name: Sync Artifacts to OCI Object Storage
-        uses: oracle-actions/run-oci-cli-command@v1.1.1
-        with:
-          command: 'os object bulk-upload -ns ${{ secrets.OCI_NAMESPACE }} -bn cherryos-deploy-prod --src-dir ./dist --overwrite --content-type auto'
+      - name: Install OCI CLI
+        run: |
+          mkdir -p ~/.oci
+          echo "${{ secrets.OCI_API_KEY }}" > ~/.oci/oci_api_key.pem
+          chmod 600 ~/.oci/oci_api_key.pem
+          cat <<EOF > ~/.oci/config
+          [DEFAULT]
+          user=${{ secrets.OCI_USER_OCID }}
+          fingerprint=${{ secrets.OCI_FINGERPRINT }}
+          tenancy=${{ secrets.OCI_TENANCY_OCID }}
+          region=${{ secrets.OCI_REGION }}
+          key_file=~/.oci/oci_api_key.pem
+          EOF
+          bash -c "$(curl -L https://raw.githubusercontent.com/oracle/oci-cli/master/scripts/install/install.sh)" -- --accept-all-defaults
+          echo "/home/runner/bin" >> $GITHUB_PATH
 
-      - name: Sync Healthcheck to OCI
-        uses: oracle-actions/run-oci-cli-command@v1.1.1
-        with:
-          command: 'os object put -ns ${{ secrets.OCI_NAMESPACE }} -bn cherryos-deploy-prod --file healthcheck.txt --name healthcheck.txt --force --content-type text/plain'
-
-      - name: Sync Music Manifest to OCI
-        uses: oracle-actions/run-oci-cli-command@v1.1.1
-        with:
-          command: 'os object put -ns ${{ secrets.OCI_NAMESPACE }} -bn cherryos-deploy-prod --file src/data/music_manifest.json --name music_manifest.json --force --content-type application/json'
+      - name: Sync Artifacts to OCI
+        run: |
+          /home/runner/bin/oci os object bulk-upload -ns ${{ secrets.OCI_NAMESPACE }} -bn cherryos-deploy-prod --src-dir ./dist --overwrite --content-type auto
+          /home/runner/bin/oci os object put -ns ${{ secrets.OCI_NAMESPACE }} -bn cherryos-deploy-prod --file healthcheck.txt --name healthcheck.txt --force --content-type text/plain
+          /home/runner/bin/oci os object put -ns ${{ secrets.OCI_NAMESPACE }} -bn cherryos-deploy-prod --file src/data/music_manifest.json --name music_manifest.json --force --content-type application/json
 
   # 4. Container Deployment
   deploy-container:
