@@ -43,7 +43,10 @@ jobs:
               const req = https.request(url, { method: 'POST', headers }, (res) => {
                 let body = '';
                 res.on('data', chunk => body += chunk);
-                res.on('end', () => resolve(JSON.parse(body)));
+                res.on('end', () => {
+                  try { resolve(JSON.parse(body)); }
+                  catch (e) { reject(new Error('AniList JSON parse failed: ' + body.substring(0, 100))); }
+                });
               });
               req.on('error', reject);
               req.write(JSON.stringify(data));
@@ -56,13 +59,18 @@ jobs:
               https.get(url, (res) => {
                 let body = '';
                 res.on('data', chunk => body += chunk);
-                res.on('end', () => resolve(JSON.parse(body)));
+                res.on('end', () => {
+                  try { resolve(JSON.parse(body)); }
+                  catch (e) { reject(new Error('Steam JSON parse failed: ' + body.substring(0, 100))); }
+                });
               }).on('error', reject);
             });
           }
 
           async function run() {
             try {
+              if (!process.env.VITE_PROXY_URL) throw new Error('VITE_PROXY_URL is missing from secrets.');
+              
               // 1. AniList
               console.log('Fetching AniList...');
               const aniQuery = {
@@ -77,14 +85,15 @@ jobs:
 
               // 2. Steam
               console.log('Fetching Steam...');
-              const steamData = await get(process.env.VITE_PROXY_URL + '/steam?steamId=' + process.env.VITE_STEAM_ID);
+              const steamUrl = process.env.VITE_PROXY_URL.endsWith('/') ? process.env.VITE_PROXY_URL : process.env.VITE_PROXY_URL + '/';
+              const steamData = await get(steamUrl + 'steam?steamId=' + process.env.VITE_STEAM_ID);
               fs.writeFileSync('src/data/mirror/steam.json', JSON.stringify(steamData));
 
               // 3. Metadata
               fs.writeFileSync('src/data/mirror/metadata.json', JSON.stringify({ lastUpdated: new Date().toISOString() }));
               console.log('Mirror updated successfully.');
             } catch (e) {
-              console.error('Data fetch failed:', e);
+              console.error('Data fetch failed:', e.message);
               process.exit(1);
             }
           }
