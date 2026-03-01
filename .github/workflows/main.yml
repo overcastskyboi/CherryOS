@@ -163,5 +163,13 @@ jobs:
           context: .
           push: true
           tags: ${{ secrets.OCI_REGISTRY_URL }}/${{ secrets.OCI_NAMESPACE }}/cherryos:latest
+          build-args: |
+            VITE_PROXY_URL=${{ secrets.VITE_PROXY_URL }}
+            VITE_WEATHER_API_KEY=${{ secrets.VITE_WEATHER_API_KEY }}
+            VITE_OCI_NAMESPACE=${{ secrets.OCI_NAMESPACE }}
+            VITE_OCI_REGION=${{ secrets.OCI_REGION }}
+            VITE_STEAM_ID=76561198043191125
+            VITE_AL_ID=36296
+            VITE_AL_TOKEN=${{ secrets.ANILIST_TOKEN }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
