@@ -11,6 +11,7 @@ import {
   Layers, Zap, Flame, Droplet, Leaf, Ghost, Skull
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useOS } from '../context/OSContext';
 
 const CATEGORY_MAP = {
   'Video Games': { color: '#3b82f6', icon: Gamepad2 },
@@ -68,8 +69,6 @@ const cleanSetName = (name) => {
     .replace(/^Basketball Cards\s+/i, '')
     .trim();
 };
-
-import { useOS } from '../context/OSContext';
 
 export default function CollectionTrackerApp() {
   const navigate = useNavigate();

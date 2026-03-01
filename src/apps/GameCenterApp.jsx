@@ -48,11 +48,14 @@ const GameCenterApp = () => {
       if (!response.ok) throw new Error("Mirror fetch failed");
       
       const json = await response.json();
+      console.log("GameCenter Mirror Data:", json);
+
       if (json && json.data && Array.isArray(json.data) && json.data.length > 0) {
         setData(json.data);
         setIsMirror(true);
       } else {
-        setData(GAMING_DATA.collection);
+        console.warn("Mirror data empty, using local constant");
+        setData(GAMING_DATA.collection || []);
       }
     } catch (err) {
       console.error("GameCenterApp Data Sync Error:", err);
