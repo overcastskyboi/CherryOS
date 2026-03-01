@@ -123,7 +123,8 @@ jobs:
           commit_message: 'Automated Deployment via GitHub Actions [skip ci]'
 
       - name: Install OCI CLI
-        env: { OCI_API_KEY: ${{ secrets.OCI_API_KEY }} }
+        env:
+          OCI_API_KEY: ${{ secrets.OCI_API_KEY }}
         run: |
           mkdir -p ~/.oci
           echo "$OCI_API_KEY" > ~/.oci/oci_api_key.pem
