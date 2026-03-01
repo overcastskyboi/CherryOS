@@ -105,10 +105,17 @@ jobs:
       - name: Sync Artifacts to OCI Object Storage
         uses: oracle-actions/run-oci-cli-command@v1.1.1
         with:
-          command: |
-            os object bulk-upload -ns ${OCI_NAMESPACE} -bn cherryos-deploy-prod --src-dir ./dist --overwrite --content-type auto
-            os object put -ns ${OCI_NAMESPACE} -bn cherryos-deploy-prod --file healthcheck.txt --name healthcheck.txt --force --content-type text/plain
-            os object put -ns ${OCI_NAMESPACE} -bn cherryos-deploy-prod --file src/data/music_manifest.json --name music_manifest.json --force --content-type application/json
+          command: 'os object bulk-upload -ns ${{ secrets.OCI_NAMESPACE }} -bn cherryos-deploy-prod --src-dir ./dist --overwrite --content-type auto'
+
+      - name: Sync Healthcheck to OCI
+        uses: oracle-actions/run-oci-cli-command@v1.1.1
+        with:
+          command: 'os object put -ns ${{ secrets.OCI_NAMESPACE }} -bn cherryos-deploy-prod --file healthcheck.txt --name healthcheck.txt --force --content-type text/plain'
+
+      - name: Sync Music Manifest to OCI
+        uses: oracle-actions/run-oci-cli-command@v1.1.1
+        with:
+          command: 'os object put -ns ${{ secrets.OCI_NAMESPACE }} -bn cherryos-deploy-prod --file src/data/music_manifest.json --name music_manifest.json --force --content-type application/json'
 
   # 4. Container Deployment
   deploy-container:
