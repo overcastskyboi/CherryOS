@@ -146,7 +146,7 @@ const CloudDashboardApp = () => {
           </button>
           <div>
             <h1 className="text-xl font-black tracking-tighter text-white uppercase italic">OCI Console</h1>
-            <p className="text-[9px] text-gray-500 uppercase tracking-[0.4em] font-bold mt-1">Infrastructure Hub // V2.4.0</p>
+            <p className="text-[9px] text-gray-500 uppercase tracking-[0.4em] font-bold mt-1">Infrastructure Hub // v2.5.1</p>
           </div>
         </div>
         
