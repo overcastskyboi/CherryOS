@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { 
   Gamepad2, ArrowLeft, RefreshCcw, Star, Search, 
   ExternalLink, Clock, AlertCircle, Calendar,
-  Trophy, Target, Zap, Activity
+  Trophy, Target, Zap, Activity, Info
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import LazyImage from '../components/LazyImage';
@@ -37,7 +37,7 @@ const GameCenterApp = () => {
       // 2. Fetch Mirrored Steam Data
       const dataPath = `${baseUrl}data/mirror/steam.json`.replace(/\/+/g, '/');
       const response = await fetch(dataPath);
-      if (!response.ok) throw new Error(`Mirror fetch failed`);
+      if (!response.ok) throw new Error("Mirror fetch failed");
       
       const json = await response.json();
       if (json && json.data && Array.isArray(json.data)) {
@@ -60,6 +60,7 @@ const GameCenterApp = () => {
     fetchMirroredData();
   }, [fetchMirroredData]);
 
+  // Infinite Scroll Observer
   useEffect(() => {
     const observer = new IntersectionObserver((entries) => {
       if (entries[0].isIntersecting) {
@@ -72,17 +73,17 @@ const GameCenterApp = () => {
   }, []);
 
   const stats = useMemo(() => {
-    if (data.length === 0) return null;
+    if (!data || data.length === 0) return null;
 
-    // Total Playtime
-    const totalMinutes = data.reduce((acc, curr) => acc + (parseInt(curr.playtime) || 0), 0);
-    const totalHours = Math.round(totalMinutes / 1); // Playtime is already in hours in the enriched data
+    // Total Playtime (playtime_raw is in minutes)
+    const totalMinutes = data.reduce((acc, curr) => acc + (curr.playtime_raw || 0), 0);
+    const totalHours = Math.round(totalMinutes / 60);
 
     // Mastery (100% achievements)
     const masteryCount = data.filter(g => g.achievementPercent >= 100).length;
 
     // Most Played
-    const topGame = [...data].sort((a,b) => (parseInt(b.playtime) || 0) - (parseInt(a.playtime) || 0))[0];
+    const topGame = [...data].sort((a,b) => (b.playtime_raw || 0) - (a.playtime_raw || 0))[0];
 
     // Average Completion
     const avgComp = Math.round(data.reduce((acc, curr) => acc + (curr.achievementPercent || 0), 0) / data.length);
@@ -173,9 +174,9 @@ const GameCenterApp = () => {
               <p className="text-[10px] font-black text-gray-500 uppercase tracking-[0.3em] mb-1.5">Top Performer</p>
               <div className="flex items-center gap-4">
                 {stats.topGame?.coverImage && <img src={stats.topGame.coverImage} className="w-16 h-8 rounded-lg object-cover shadow-2xl border border-white/5" alt="" />}
-                <div className="flex flex-col min-w-0">
-                  <span className="text-sm font-black text-white uppercase italic truncate pr-8">{stats.topGame?.title}</span>
-                  <span className="text-[9px] font-bold text-emerald-500/80 uppercase tracking-widest">{stats.topGame?.playtime} tracked</span>
+                <div className="flex flex-col min-w-0 pr-8">
+                  <span className="text-sm font-black text-white uppercase italic truncate">{stats.topGame?.title}</span>
+                  <span className="text-[9px] font-bold text-emerald-500/80 uppercase tracking-widest">{stats.topGame?.playtime} logged</span>
                 </div>
               </div>
             </div>
@@ -210,7 +211,7 @@ const GameCenterApp = () => {
 
                   <div className="absolute bottom-4 left-4 right-4 space-y-1">
                     <span className="text-[8px] font-black uppercase tracking-[0.3em] text-blue-400">Steam Artifact</span>
-                    <h3 className="text-xs font-black text-white leading-tight line-clamp-2 uppercase italic tracking-tighter">{item.title}</h3>
+                    <h3 className="text-sm font-black text-white leading-tight line-clamp-2 uppercase italic tracking-tighter">{item.title}</h3>
                   </div>
                 </div>
                 
@@ -218,14 +219,14 @@ const GameCenterApp = () => {
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-1">
                       <p className="text-[8px] text-gray-500 uppercase font-black tracking-[0.2em] flex items-center gap-1">
-                        <Clock size={8} /> Session Time
+                        <Clock size={8} /> Runtime
                       </p>
                       <p className="text-xs font-bold text-white italic">{item.playtime}</p>
                     </div>
                     {item.lastPlayed && (
                       <div className="space-y-1">
                         <p className="text-[8px] text-gray-500 uppercase font-black tracking-[0.2em] flex items-center gap-1">
-                          <Calendar size={8} /> Logged
+                          <Calendar size={8} /> Synced
                         </p>
                         <p className="text-xs font-bold text-gray-400">{formatLastPlayed(item.lastPlayed)}</p>
                       </div>
@@ -260,7 +261,7 @@ const GameCenterApp = () => {
       <footer className="mt-auto px-6 py-4 flex justify-between items-center border-t border-white/5 text-gray-700 bg-black/40 sticky bottom-0 z-50">
         <span className="text-[8px] font-mono uppercase tracking-widest italic flex items-center gap-4">
           <span className="text-gray-500">Inventory: {stats?.totalGames || 0} Assets</span>
-          <span className="hidden sm:inline text-gray-800">|</span>
+          <span className="hidden sm:inline text-gray-900">|</span>
           <span className="text-emerald-500/50">Core Sync Status: NOMINAL</span>
         </span>
         <div className="flex gap-1.5">
