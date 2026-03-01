@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ArrowLeft, ExternalLink, X, Info, ChevronRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { VST_DETAILS } from '../data/constants';
 import LazyImage from '../components/LazyImage';
+import { useOS } from '../context/OSContext';
 
 const StudioRackApp = () => {
   const navigate = useNavigate();
