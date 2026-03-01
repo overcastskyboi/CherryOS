@@ -1,6 +1,6 @@
 import { 
   Clapperboard, Music, Gamepad2, Monitor, 
-  Cloud, CloudRain, Package, Calculator,
+  Cloud, Package, Calculator,
   Pocket
 } from 'lucide-react';
 
