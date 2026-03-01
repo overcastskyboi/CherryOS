@@ -78,24 +78,24 @@ export const GAMING_DATA = {
   steam: { user: "AugustElliott", level: 42, gamesCount: 184 },
   retro: { user: "AugustElliott", hardcorePoints: 1200, recentMastery: "Final Fantasy VII" },
   collection: [
+    { title: "Fallout: New Vegas", platform: "Steam", playtime: "245h", status: "Mastered", rating: 10 },
+    { title: "Clair Obscur: Expedition 33", platform: "Steam", playtime: "45h", status: "Playing", rating: 10 },
     { title: "Final Fantasy VII", platform: "Retro", playtime: "84h", status: "Mastered", rating: 10 },
     { title: "Elden Ring", platform: "Steam", playtime: "120h", status: "Playing", rating: 10 },
     { title: "Metal Gear Solid", platform: "Retro", playtime: "20h", status: "Completed", rating: 9.5 },
     { title: "Silent Hill 2", platform: "Retro", playtime: "12h", status: "Completed", rating: 10 },
     { title: "Cyberpunk 2077", platform: "Steam", playtime: "65h", status: "Completed", rating: 9 },
-    { title: "Bloodborne", platform: "PS4", playtime: "45h", status: "Mastered", rating: 10 },
-    { title: "Sekiro: Shadows Die Twice", platform: "Steam", playtime: "35h", status: "Completed", rating: 9.5 },
-    { title: "The Witcher 3: Wild Hunt", platform: "Steam", playtime: "150h", status: "Completed", rating: 10 }
+    { title: "Bloodborne", platform: "PS4", playtime: "45h", status: "Mastered", rating: 10 }
   ],
   covers: {
+    "Fallout: New Vegas": "https://images.unsplash.com/photo-1542751371-adc38448a05e?q=80&w=1000&auto=format&fit=crop",
+    "Clair Obscur: Expedition 33": "https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?q=80&w=1000&auto=format&fit=crop",
     "Final Fantasy VII": "https://images.unsplash.com/photo-1542751371-adc38448a05e?q=80&w=1000&auto=format&fit=crop",
     "Elden Ring": "https://images.unsplash.com/photo-1612287230202-1ff1d85d1bdf?q=80&w=1000&auto=format&fit=crop",
     "Metal Gear Solid": "https://images.unsplash.com/photo-1585338107529-13afc5f02586?q=80&w=1000&auto=format&fit=crop",
     "Silent Hill 2": "https://images.unsplash.com/photo-1505630285033-a37d80568c08?q=80&w=1000&auto=format&fit=crop",
     "Cyberpunk 2077": "https://images.unsplash.com/photo-1605810230434-7631ac76ec81?q=80&w=1000&auto=format&fit=crop",
-    "Bloodborne": "https://images.unsplash.com/photo-1511512578047-dfb367046420?q=80&w=1000&auto=format&fit=crop",
-    "Sekiro: Shadows Die Twice": "https://images.unsplash.com/photo-1552820728-8b83bb6b773f?q=80&w=1000&auto=format&fit=crop",
-    "The Witcher 3: Wild Hunt": "https://images.unsplash.com/photo-1538481199705-c710c4e965fc?q=80&w=1000&auto=format&fit=crop"
+    "Bloodborne": "https://images.unsplash.com/photo-1511512578047-dfb367046420?q=80&w=1000&auto=format&fit=crop"
   }
 };
 
