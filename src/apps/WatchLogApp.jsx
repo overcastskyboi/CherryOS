@@ -46,7 +46,7 @@ const WatchLogApp = () => {
           title: entry.media.title.english || entry.media.title.romaji,
           type: entry.media.type,
           score: entry.score || entry.media.averageScore / 10 || 0,
-          progress: entry.progress,
+          progress: entry.progress || 0,
           status: entry.status,
           coverImage: entry.media.coverImage.extraLarge,
           id: entry.media.id,
@@ -89,22 +89,25 @@ const WatchLogApp = () => {
   const stats = useMemo(() => {
     if (!data || data.length === 0) return null;
     
-    // Total Time Watched (Anime only)
+    // Total Time Watched (Anime only) - Defensive checks
     const anime = data.filter(i => i.type === 'ANIME');
-    const totalMinutes = anime.reduce((acc, curr) => acc + (curr.progress * curr.duration), 0);
+    const totalMinutes = anime.reduce((acc, curr) => acc + ((Number(curr.progress) || 0) * (Number(curr.duration) || 0)), 0);
     const totalHours = Math.round(totalMinutes / 60);
 
     // Favorite Genre
     const genreCounts = data.reduce((acc, curr) => {
-      curr.genres.forEach(g => acc[g] = (acc[g] || 0) + 1);
+      if (curr.genres && Array.isArray(curr.genres)) {
+        curr.genres.forEach(g => acc[g] = (acc[g] || 0) + 1);
+      }
       return acc;
     }, {});
-    const topGenre = Object.entries(genreCounts).sort((a,b) => b[1] - a[1])[0]?.[0] || 'N/A';
+    const sortedGenres = Object.entries(genreCounts).sort((a,b) => b[1] - a[1]);
+    const topGenre = sortedGenres[0]?.[0] || 'N/A';
 
     // Recent Completions
     const recent = data
       .filter(i => i.status === 'COMPLETED')
-      .sort((a,b) => b.updatedAt - a.updatedAt)
+      .sort((a,b) => (Number(b.updatedAt) || 0) - (Number(a.updatedAt) || 0))
       .slice(0, 3);
 
     return { totalHours, topGenre, recent, totalEntries: data.length };
@@ -278,7 +281,7 @@ const WatchLogApp = () => {
                   </div>
                   
                   <div className="flex flex-wrap gap-1">
-                    {item.genres.slice(0, 2).map(g => (
+                    {item.genres && item.genres.slice(0, 2).map(g => (
                       <span key={g} className="text-[7px] text-gray-600 font-black uppercase border border-white/5 px-1.5 rounded shadow-inner">{g}</span>
                     ))}
                   </div>
@@ -296,7 +299,7 @@ const WatchLogApp = () => {
       <footer className="mt-auto px-6 py-4 flex justify-between items-center border-t border-white/5 text-gray-700 bg-black/40 sticky bottom-0 z-50">
         <span className="text-[8px] font-mono uppercase tracking-widest italic flex items-center gap-4">
           <span className="text-gray-500">Inventory: {stats?.totalEntries || 0} Artifacts</span>
-          <span className="hidden sm:inline text-gray-900">|</span>
+          <span className="hidden sm:inline text-gray-800">|</span>
           <span className="text-emerald-500/50">Core Sync Status: NOMINAL</span>
         </span>
         <div className="flex gap-1.5">

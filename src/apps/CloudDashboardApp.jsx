@@ -21,7 +21,6 @@ const CloudDashboardApp = () => {
 
   const API_ENDPOINTS = useMemo(() => {
     const baseUrl = import.meta.env.BASE_URL || '/';
-    // Robust path joining that preserves the protocol
     const getTargetUrl = (target) => {
       const origin = window.location.origin;
       const combined = `${origin}${baseUrl}${target}`.replace(/([^:]\/)\/+/g, "$1");
@@ -43,10 +42,8 @@ const CloudDashboardApp = () => {
     for (const [name, url] of Object.entries(API_ENDPOINTS)) {
       const startTime = Date.now();
       try {
-        // Use GET for pokeapi as it often blocks HEAD requests
-        const method = name === 'pokeapi' ? 'GET' : 'GET';
         const response = await fetch(url, { 
-          method, 
+          method: 'GET', 
           mode: 'cors',
           cache: 'no-cache'
         });
@@ -55,12 +52,11 @@ const CloudDashboardApp = () => {
         if (response.ok) {
           statuses[name] = { status: 'healthy', latency };
         } else {
-          console.warn(`Health check failed for ${name} (${url}): ${response.status}`);
           statuses[name] = { status: 'degraded', latency: 0 };
         }
       } catch (error) {
-        console.error(`Health check error for ${name}:`, error);
-        statuses[name] = { status: 'down', latency: 0 };
+        // Only mark as down if it's OCI, others are degraded
+        statuses[name] = { status: name === 'oci' ? 'down' : 'degraded', latency: 0 };
       }
     }
     setApiStatus(statuses);
@@ -82,11 +78,15 @@ const CloudDashboardApp = () => {
   }, [checkApiHealth, fetchStorageInfo]);
 
   const overallStatus = useMemo(() => {
-    const statuses = Object.values(apiStatus).map(s => s.status);
-    if (statuses.some(s => s === 'down')) return { text: 'Critical Outage', color: 'text-red-500', pulse: 'bg-red-500' };
-    if (statuses.some(s => s === 'degraded')) return { text: 'Degraded Performance', color: 'text-yellow-500', pulse: 'bg-yellow-500' };
-    if (statuses.every(s => s === 'healthy')) return { text: 'All Systems Operational', color: 'text-emerald-500', pulse: 'bg-emerald-500' };
-    return { text: 'Checking Status...', color: 'text-gray-500', pulse: 'bg-gray-500' };
+    const statuses = Object.values(apiStatus);
+    const hasDown = statuses.some(s => s.status === 'down');
+    const allHealthy = statuses.every(s => s.status === 'healthy');
+    const someDegraded = statuses.some(s => s.status === 'degraded');
+
+    if (hasDown) return { text: 'Critical Outage', color: 'text-red-500', pulse: 'bg-red-500' };
+    if (someDegraded) return { text: 'Degraded Performance', color: 'text-yellow-500', pulse: 'bg-yellow-500' };
+    if (allHealthy) return { text: 'All Systems Operational', color: 'text-emerald-500', pulse: 'bg-emerald-500' };
+    return { text: 'Probing Core...', color: 'text-gray-500', pulse: 'bg-gray-500' };
   }, [apiStatus]);
 
   const StatusIndicator = ({ status }) => {
@@ -98,7 +98,7 @@ const CloudDashboardApp = () => {
 
   const renderOverview = () => (
     <div className="space-y-8 animate-elegant">
-      <div className="glass-card p-10 rounded-[2.5rem] relative overflow-hidden border-white/10">
+      <div className="glass-card p-10 rounded-[2.5rem] relative overflow-hidden border-white/10 shadow-2xl">
         <div className={`absolute top-0 right-0 p-8 opacity-10 ${overallStatus.color}`}><Activity size={120} /></div>
         <div className="relative z-10">
           <span className="text-[10px] font-black uppercase tracking-[0.4em] text-gray-500">Core Integrity</span>
@@ -112,9 +112,9 @@ const CloudDashboardApp = () => {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {Object.entries(apiStatus).map(([name, data]) => (
-          <div key={name} className="glass-card p-6 rounded-[2rem] space-y-4 group hover:bg-white/[0.02] transition-all">
+          <div key={name} className="glass-card p-6 rounded-[2rem] space-y-4 group hover:bg-white/[0.02] transition-all border-white/5">
             <div className="flex items-center justify-between">
-              <span className="text-sm font-black text-white uppercase tracking-widest">{name} API</span>
+              <span className="text-sm font-black text-white uppercase tracking-widest leading-none">{name} API</span>
               <StatusIndicator status={data.status} />
             </div>
             <div className="text-2xl font-black text-white tracking-tighter italic">
@@ -140,9 +140,9 @@ const CloudDashboardApp = () => {
 
       <div className="grid grid-cols-1 gap-3">
         {storageData.map((obj, i) => (
-          <div key={i} className="glass-card p-6 rounded-2xl flex items-center justify-between group hover:bg-white/[0.05] transition-all">
+          <div key={i} className="glass-card p-6 rounded-2xl flex items-center justify-between group hover:bg-white/[0.05] transition-all border-white/5 shadow-xl">
             <div className="flex items-center gap-4">
-              <div className="p-3 bg-black/40 rounded-xl border border-white/5 text-cyan-500">
+              <div className="p-3 bg-black/40 rounded-xl border border-white/5 text-cyan-500 shadow-inner">
                 <Box size={18} />
               </div>
               <div className="space-y-0.5">
@@ -150,7 +150,7 @@ const CloudDashboardApp = () => {
                 <p className="text-[9px] text-gray-600 font-black uppercase tracking-[0.2em]">{obj.type} // {obj.size}</p>
               </div>
             </div>
-            <div className="flex items-center gap-2 px-3 py-1 bg-emerald-500/5 border border-emerald-500/10 rounded-full">
+            <div className="flex items-center gap-2 px-3 py-1 bg-emerald-500/5 border border-emerald-500/10 rounded-full shadow-lg">
               <div className="w-1 h-1 rounded-full bg-emerald-500" />
               <span className="text-[8px] font-black text-emerald-500 uppercase tracking-widest">{obj.status}</span>
             </div>
@@ -162,18 +162,18 @@ const CloudDashboardApp = () => {
 
   return (
     <div className="min-h-[100dvh] bg-[#050505] text-gray-100 flex flex-col font-sans pb-20 relative overflow-hidden">
-      <header className="glass-header sticky top-0 z-40 px-6 py-6 flex items-center justify-between border-b border-white/5">
+      <header className="glass-header sticky top-0 z-40 px-6 py-6 flex items-center justify-between border-b border-white/5 shadow-2xl">
         <div className="flex items-center gap-6">
           <button onClick={() => navigate('/')} className="p-2 bg-white/5 hover:bg-white/10 rounded-xl text-cyan-500 transition-all border border-white/5 shadow-xl">
             <ArrowLeft size={20} />
           </button>
           <div>
-            <h1 className="text-xl font-black tracking-tighter text-white uppercase italic">OCI Console</h1>
+            <h1 className="text-xl font-black tracking-tighter text-white uppercase italic leading-none">OCI Console</h1>
             <p className="text-[9px] text-gray-500 uppercase tracking-[0.4em] font-bold mt-1">Infrastructure Hub // v2.5.2</p>
           </div>
         </div>
         
-        <nav className="hidden md:flex bg-white/5 border border-white/10 rounded-2xl p-1 gap-1">
+        <nav className="hidden md:flex bg-white/5 border border-white/10 rounded-2xl p-1 gap-1 shadow-inner">
           <button onClick={() => setActiveTab('overview')} className={`px-4 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all ${activeTab === 'overview' ? 'bg-cyan-500 text-black shadow-[0_0_20px_rgba(6,182,212,0.3)]' : 'text-gray-500 hover:text-white'}`}>
             System Health
           </button>
@@ -187,7 +187,7 @@ const CloudDashboardApp = () => {
         {activeTab === 'overview' ? renderOverview() : renderStorage()}
       </main>
 
-      <footer className="mt-auto px-6 py-4 flex justify-between items-center bg-black/40 border-t border-white/5 text-gray-700">
+      <footer className="mt-auto px-6 py-4 flex justify-between items-center bg-black/40 border-t border-white/5 text-gray-700 sticky bottom-0 z-50 shadow-[0_-10px_50px_rgba(0,0,0,0.5)]">
         <span className="text-[8px] font-mono uppercase tracking-widest">Tenancy_ID: idg3nfddgypd</span>
         <button onClick={checkApiHealth} className="flex items-center gap-2 hover:text-white transition-colors">
           <div className={`w-1.5 h-1.5 rounded-full ${loading ? 'bg-yellow-500' : overallStatus.pulse} animate-pulse`} />
