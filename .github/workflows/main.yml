@@ -80,7 +80,7 @@ jobs:
             try {
               // 1. Pokedex Mirror (Concurrent)
               console.log('Mirroring Pokedex...');
-              const moveCache = new Map(); // Cache move types to avoid redundant requests
+              const moveCache = new Map(); // Cache move details to avoid redundant requests
 
               const pokedex = await Promise.all(FAVORITES.map(async (name) => {
                 try {
@@ -97,15 +97,19 @@ jobs:
                   ).slice(0, 50); 
 
                   for (const m of levelUpMoves) {
-                    // Resolve move type (cached)
-                    let moveType = 'normal';
+                    // Resolve move details (cached)
+                    let moveInfo = { type: 'normal', accuracy: null, power: null };
                     if (moveCache.has(m.move.name)) {
-                      moveType = moveCache.get(m.move.name);
+                      moveInfo = moveCache.get(m.move.name);
                     } else {
                       try {
                         const moveDetails = await request(m.move.url);
-                        moveType = moveDetails.type.name;
-                        moveCache.set(m.move.name, moveType);
+                        moveInfo = {
+                          type: moveDetails.type.name,
+                          accuracy: moveDetails.accuracy,
+                          power: moveDetails.power
+                        };
+                        moveCache.set(m.move.name, moveInfo);
                       } catch(e) {}
                     }
 
@@ -117,7 +121,9 @@ jobs:
                         name: m.move.name.replace(/-/g, ' '),
                         level: d.level_learned_at,
                         method: d.move_learn_method.name,
-                        type: moveType
+                        type: moveInfo.type,
+                        accuracy: moveInfo.accuracy,
+                        power: moveInfo.power
                       });
                     });
                   }
