@@ -11,7 +11,7 @@ import { GAMING_DATA } from '../data/constants';
 const GameCenterApp = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
-  const [data, setData] = useState(GAMING_DATA.collection);
+  const [data, setData] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [lastSynced, setLastSynced] = useState(null);
   const [isMirror, setIsMirror] = useState(false);
@@ -42,12 +42,7 @@ const GameCenterApp = () => {
       const json = await response.json();
       if (json && json.data && Array.isArray(json.data)) {
         if (json.data.length > 0) {
-          const processed = json.data.map(item => ({
-            ...item,
-            // Use local mirror path
-            coverImage: `${baseUrl}${item.coverImage}`.replace(/\/+/g, '/')
-          }));
-          setData(processed);
+          setData(json.data);
           setIsMirror(true);
         } else {
           setData(GAMING_DATA.collection);
@@ -71,16 +66,16 @@ const GameCenterApp = () => {
       if (entries[0].isIntersecting) {
         setDisplayCount(prev => prev + 12);
       }
-    }, { threshold: 1.0 });
+    }, { threshold: 0.1 });
 
     if (loaderRef.current) observer.observe(loaderRef.current);
     return () => observer.disconnect();
-  }, []);
+  }, [data.length]);
 
   const stats = useMemo(() => {
     if (!data || data.length === 0) return null;
 
-    // Total Playtime
+    // Total Playtime (playtime_raw is in minutes)
     const totalMinutes = data.reduce((acc, curr) => acc + (Number(curr.playtime_raw) || 0), 0);
     const totalHours = Math.round(totalMinutes / 60);
 
@@ -90,16 +85,14 @@ const GameCenterApp = () => {
     // Most Played
     const topGame = [...data].sort((a,b) => (Number(b.playtime_raw) || 0) - (Number(a.playtime_raw) || 0))[0];
 
-    // Average Completion
-    const avgComp = Math.round(data.reduce((acc, curr) => acc + (Number(curr.achievementPercent) || 0), 0) / data.length);
-
-    return { totalHours, masteryCount, topGame, avgComp, totalGames: data.length };
+    return { totalHours, masteryCount, topGame, totalGames: data.length };
   }, [data]);
 
   const filteredAndSortedData = useMemo(() => {
     const items = data.length > 0 ? data : GAMING_DATA.collection;
     return items
       .filter(item => item.title.toLowerCase().includes(searchQuery.toLowerCase()))
+      // Sort by achievement percentage (highest first)
       .sort((a, b) => (Number(b.achievementPercent) || 0) - (Number(a.achievementPercent) || 0));
   }, [data, searchQuery]);
 
@@ -108,7 +101,7 @@ const GameCenterApp = () => {
   }, [filteredAndSortedData, displayCount]);
 
   const formatLastPlayed = (timestamp) => {
-    if (!timestamp) return '---';
+    if (!timestamp || timestamp === 0) return '---';
     return new Date(timestamp * 1000).toLocaleDateString();
   };
 
@@ -189,9 +182,9 @@ const GameCenterApp = () => {
         )}
 
         <div className="max-w-7xl mx-auto space-y-12">
-          {!loading && visibleData.length === 0 && (
+          {!loading && filteredAndSortedData.length === 0 && (
             <div className="flex flex-col items-center justify-center py-20 text-gray-600 space-y-4 opacity-50">
-              <AlertCircle size={48} />
+              <Activity size={48} />
               <p className="text-sm font-black uppercase tracking-widest">Scanning empty sectors...</p>
             </div>
           )}
@@ -216,7 +209,7 @@ const GameCenterApp = () => {
 
                   <div className="absolute bottom-4 left-4 right-4 space-y-1">
                     <span className="text-[8px] font-black uppercase tracking-[0.3em] text-blue-400">Steam Artifact</span>
-                    <h3 className="text-xs font-black text-white leading-tight line-clamp-2 uppercase italic tracking-tighter">{item.title}</h3>
+                    <h3 className="text-sm font-black text-white leading-tight line-clamp-2 uppercase italic tracking-tighter">{item.title}</h3>
                   </div>
                 </div>
                 
@@ -228,7 +221,7 @@ const GameCenterApp = () => {
                       </p>
                       <p className="text-xs font-bold text-white italic">{item.playtime}</p>
                     </div>
-                    {item.lastPlayed && (
+                    {item.lastPlayed && item.lastPlayed > 0 && (
                       <div className="space-y-1">
                         <p className="text-[8px] text-gray-500 uppercase font-black tracking-[0.2em] flex items-center gap-1">
                           <Calendar size={8} /> Synced

@@ -16,7 +16,7 @@ jobs:
   build-and-deploy:
     name: Build, Test, & Deploy
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -44,14 +44,9 @@ jobs:
           VITE_AL_ID: "36296"
         run: |
           mkdir -p public/data/mirror
-          mkdir -p public/assets/mirror/pokedex
-          mkdir -p public/assets/mirror/anilist
-          mkdir -p public/assets/mirror/steam
-          
           node -e "
           const fs = require('fs');
           const https = require('https');
-          const path = require('path');
           
           async function request(url, options = {}) {
             return new Promise((resolve, reject) => {
@@ -72,26 +67,6 @@ jobs:
             });
           }
 
-          async function downloadImage(url, dest) {
-            return new Promise((resolve, reject) => {
-              const file = fs.createWriteStream(dest);
-              https.get(url, (res) => {
-                if (res.statusCode !== 200) {
-                  reject(new Error('Status: ' + res.statusCode));
-                  return;
-                }
-                res.pipe(file);
-                file.on('finish', () => {
-                  file.close();
-                  resolve();
-                });
-              }).on('error', (err) => {
-                fs.unlink(dest, () => {});
-                reject(err);
-              });
-            });
-          }
-
           const FAVORITES = [
             'gengar', 'mimikyu-disguised', 'scizor', 'chimecho', 'meganium', 'shuckle', 
             'jirachi', 'celebi', 'swampert', 'tyranitar', 'snorlax', 'mienshao', 'raikou', 
@@ -103,12 +78,11 @@ jobs:
 
           async function run() {
             try {
-              // 1. Pokedex Mirror
+              // 1. Pokedex Mirror (Optimized concurrent fetching)
               console.log('Mirroring Pokedex...');
-              const pokedex = [];
               const moveCache = {};
-
-              for (const name of FAVORITES) {
+              
+              const pokedex = await Promise.all(FAVORITES.map(async (name) => {
                 try {
                   const data = await request(\`https://pokeapi.co/api/v2/pokemon/\${name}\`);
                   const species = await request(data.species.url);
@@ -117,10 +91,10 @@ jobs:
                     ?.flavor_text.replace(/[\\n\\f]/g, ' ') || '';
                   
                   const pokemonMoves = {};
+                  // Only fetch first 20 moves to avoid massive bloat and timeout
+                  const limitedMoves = data.moves.slice(0, 30);
                   
-                  // Limit move fetching to essentials
-                  const relevantMoves = data.moves; 
-                  for (const m of relevantMoves) {
+                  for (const m of limitedMoves) {
                     const moveName = m.move.name;
                     if (!moveCache[moveName]) {
                       try {
@@ -131,9 +105,7 @@ jobs:
                           power: moveData.power,
                           type: moveData.type.name
                         };
-                      } catch(e) { 
-                        moveCache[moveName] = { name: moveName.replace(/-/g, ' '), accuracy: null, power: null, type: 'normal' };
-                      }
+                      } catch(e) { moveCache[moveName] = { name: moveName.replace(/-/g, ' '), type: 'normal' }; }
                     }
 
                     m.version_group_details.forEach(d => {
@@ -147,9 +119,7 @@ jobs:
                     });
                   }
 
-                  const spriteName = data.name.replace(/-disguised|-galar|-shield/g,'');
-                  
-                  pokedex.push({
+                  return {
                     id: data.id,
                     name: data.name,
                     types: data.types.map(t => t.type.name),
@@ -157,16 +127,16 @@ jobs:
                     height: data.height,
                     weight: data.weight,
                     description,
-                    sprite: \`https://play.pokemonshowdown.com/sprites/gen5ani/\${spriteName}.gif\`,
-                    shinySprite: \`https://play.pokemonshowdown.com/sprites/gen5ani-shiny/\${spriteName}.gif\`,
+                    sprite: \`https://play.pokemonshowdown.com/sprites/gen5ani/\${data.name.replace(/-disguised|-galar|-shield/g,'')}.gif\`,
+                    shinySprite: \`https://play.pokemonshowdown.com/sprites/gen5ani-shiny/\${data.name.replace(/-disguised|-galar|-shield/g,'')}.gif\`,
                     artwork: \`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/\${data.id}.png\`,
                     footprint: \`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/footprints/\${data.id}.png\`,
                     moves: pokemonMoves
-                  });
-                  console.log(\`Processed \${name}\`);
-                } catch(e) { console.error(\`Failed \${name}:\`, e.message); }
-              }
-              fs.writeFileSync('public/data/mirror/pokedex.json', JSON.stringify(pokedex));
+                  };
+                } catch(e) { console.error(\`Failed \${name}\`); return null; }
+              }));
+
+              fs.writeFileSync('public/data/mirror/pokedex.json', JSON.stringify(pokedex.filter(p => p !== null)));
 
               // 2. AniList Mirror
               console.log('Mirroring AniList...');
@@ -180,7 +150,7 @@ jobs:
                     variables: { username: 'AugustElliott' }
                   })
                 });
-              } catch(e) { console.error('AniList failed:', e.message); }
+              } catch(e) { }
               fs.writeFileSync('public/data/mirror/anilist.json', JSON.stringify(aniData || { data: { MediaListCollection: { lists: [] }, MangaList: { lists: [] } } }));
 
               // 3. Steam Mirror
@@ -192,27 +162,20 @@ jobs:
                 const raw = await request(\`https://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/?key=\${key}&steamid=\${id}&format=json&include_appinfo=true&include_played_free_games=true\`);
                 if (raw.response && raw.response.games) {
                   const games = raw.response.games;
-                  console.log('Fetched ' + games.length + ' owned games.');
-                  
-                  // Batch fetch achievements for all games
-                  // To avoid timing out, we'll process them in batches
                   for (const g of games) {
                     let achPerc = 0;
-                    try {
-                      // Only fetch achievements if the game has been played to save time
-                      if (g.playtime_forever > 0) {
+                    if (g.playtime_forever > 0) {
+                      try {
                         const ach = await request(\`https://api.steampowered.com/ISteamUserStats/GetPlayerAchievements/v0001/?appid=\${g.appid}&key=\${key}&steamid=\${id}\`);
                         if (ach.playerstats && ach.playerstats.achievements) {
                           const total = ach.playerstats.achievements.length;
                           const won = ach.playerstats.achievements.filter(a => a.achieved === 1).length;
                           achPerc = total > 0 ? (won / total) * 100 : 0;
                         }
-                      }
-                    } catch(e) {}
-                    
+                      } catch(e) {}
+                    }
                     const hours = Math.floor(g.playtime_forever / 60);
                     const mins = g.playtime_forever % 60;
-                    
                     steamData.push({
                       id: g.appid,
                       title: g.name,
@@ -224,13 +187,13 @@ jobs:
                     });
                   }
                 }
-              } catch(e) { console.error('Steam failed:', e.message); }
+              } catch(e) { }
               fs.writeFileSync('public/data/mirror/steam.json', JSON.stringify({ data: steamData }));
 
               fs.writeFileSync('public/data/mirror/metadata.json', JSON.stringify({ lastUpdated: new Date().toISOString() }));
               console.log('Mirror complete.');
             } catch (err) {
-              console.error('Mirror engine failure:', err.message);
+              console.error('Mirror failure:', err.message);
               process.exit(1);
             }
           }
