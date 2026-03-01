@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
-import { Gamepad2, ArrowLeft, RefreshCcw, Star, Search, ExternalLink, Clock } from 'lucide-react';
+import { Gamepad2, ArrowLeft, RefreshCcw, Star, Search, ExternalLink, Clock, AlertCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import LazyImage from '../components/LazyImage';
 import { GAMING_DATA } from '../data/constants';
@@ -10,6 +10,7 @@ const GameCenterApp = () => {
   const [data, setData] = useState(GAMING_DATA.collection);
   const [searchQuery, setSearchQuery] = useState('');
   const [lastSynced, setLastSynced] = useState(null);
+  const [isMirror, setIsMirror] = useState(false);
   
   // Infinite Scroll State
   const [displayCount, setDisplayCount] = useState(12);
@@ -17,6 +18,7 @@ const GameCenterApp = () => {
 
   const fetchMirroredData = useCallback(async () => {
     setLoading(true);
+    setIsMirror(false);
     try {
       // 1. Fetch Metadata
       const metaRes = await fetch(`${import.meta.env.BASE_URL}data/mirror/metadata.json`).catch(() => null);
@@ -35,10 +37,15 @@ const GameCenterApp = () => {
           ...item,
           coverImage: item.id ? `https://cdn.akamai.steamstatic.com/steam/apps/${item.id}/header.jpg` : (item.coverImage || GAMING_DATA.covers[item.title])
         }));
-        setData(processed);
+        
+        if (processed.length > 0) {
+          setData(processed);
+          setIsMirror(true);
+        }
       }
     } catch (err) {
-      console.warn("Using local fallback buffer.");
+      console.warn("Mirror Unavailable, using Local Fallback Buffer.");
+      setData(GAMING_DATA.collection);
     } finally {
       setLoading(false);
     }
@@ -61,7 +68,8 @@ const GameCenterApp = () => {
   }, []);
 
   const filteredAndSortedData = useMemo(() => {
-    return data
+    const items = data.length > 0 ? data : GAMING_DATA.collection;
+    return items
       .filter(item => item.platform === 'Steam')
       .filter(item => item.title.toLowerCase().includes(searchQuery.toLowerCase()))
       .sort((a, b) => (b.achievementPercent || 0) - (a.achievementPercent || 0));
@@ -81,9 +89,11 @@ const GameCenterApp = () => {
           <div>
             <h1 className="text-xl font-black tracking-tighter text-white uppercase italic">Game Center</h1>
             <div className="flex items-center gap-2 mt-1">
-              <p className="text-[9px] text-gray-500 uppercase tracking-[0.4em] font-bold">Steam Cloud Mirror // Active</p>
+              <p className={`text-[9px] uppercase tracking-[0.4em] font-bold ${isMirror ? 'text-emerald-500' : 'text-yellow-600'}`}>
+                {isMirror ? 'Cloud Mirror // Active' : 'Local Buffer // Offline'}
+              </p>
               {lastSynced && (
-                <div className="flex items-center gap-1 text-[8px] text-emerald-500/60 font-mono">
+                <div className="flex items-center gap-1 text-[8px] text-gray-500 font-mono">
                   <Clock size={10} />
                   <span>{new Date(lastSynced).toLocaleString()}</span>
                 </div>
@@ -111,6 +121,12 @@ const GameCenterApp = () => {
 
       <main className="flex-1 p-6 md:p-12 relative z-10">
         <div className="max-w-7xl mx-auto space-y-12">
+          {!loading && visibleData.length === 0 && (
+            <div className="flex flex-col items-center justify-center py-20 text-gray-600 space-y-4">
+              <AlertCircle size={48} />
+              <p className="text-sm font-black uppercase tracking-widest">No Library Entries Found</p>
+            </div>
+          )}
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4 md:gap-6">
             {visibleData.map((item, idx) => (
               <div key={idx} className="group relative glass-card rounded-2xl overflow-hidden hover:bg-white/[0.05] transition-all duration-500 animate-elegant">
@@ -151,10 +167,10 @@ const GameCenterApp = () => {
       </main>
 
       <footer className="mt-auto px-6 py-4 flex justify-between items-center border-t border-white/5 text-gray-700 bg-black/40">
-        <span className="text-[8px] font-mono uppercase tracking-widest">Mirror_Sync: Stable</span>
+        <span className="text-[8px] font-mono uppercase tracking-widest">Source: {isMirror ? 'Cloud_Mirror' : 'Local_Buffer'}</span>
         <div className="flex gap-1">
-          <div className="w-1 h-1 bg-emerald-500" />
-          <div className="w-1 h-1 bg-emerald-500 animate-pulse" />
+          <div className={`w-1 h-1 ${isMirror ? 'bg-emerald-500' : 'bg-yellow-500'}`} />
+          <div className={`w-1 h-1 ${isMirror ? 'bg-emerald-500' : 'bg-yellow-500'} animate-pulse`} />
         </div>
       </footer>
     </div>

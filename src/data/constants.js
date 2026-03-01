@@ -15,6 +15,36 @@ export const DESKTOP_APPS = [
   { id: 'bpm-calculator', name: 'BPM Sync', icon: Calculator, path: '/bpm-calculator', color: 'text-rose-400', desc: 'Production Tool' },
 ];
 
+export const ANIME_DATA = {
+  catalogue: [
+    { title: "Berserk", type: "Manga", score: 9.5, progress: "376+ Ch", status: "Reading" },
+    { title: "Hunter x Hunter (2011)", type: "Anime", score: 10, progress: "148 Eps", status: "Completed" },
+    { title: "Fullmetal Alchemist: Brotherhood", type: "Anime", score: 10, progress: "64 Eps", status: "Completed" },
+    { title: "Steins;Gate", type: "Anime", score: 10, progress: "24 Eps", status: "Completed" },
+    { title: "Vinland Saga Season 2", type: "Anime", score: 10, progress: "24 Eps", status: "Completed" },
+    { title: "Monster", type: "Anime", score: 9.5, progress: "74 Eps", status: "Completed" }
+  ],
+  covers: {
+    "Berserk": "https://s4.anilist.co/file/anilistcdn/media/manga/cover/large/bx30002-79997M9AasY6.png",
+    "Hunter x Hunter (2011)": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx11061-s9Pj7zPrAl39.png",
+    "Fullmetal Alchemist: Brotherhood": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx5114-K9999M9AasY6.png",
+    "Steins;Gate": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx9253-89997M9AasY6.png",
+    "Vinland Saga Season 2": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx146175-99997M9AasY6.png",
+    "Monster": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx19-99997M9AasY6.png"
+  }
+};
+
+export const GAMING_DATA = {
+  steam: { user: "AugustElliott", level: 42, gamesCount: 184 },
+  collection: [
+    { title: "Fallout: New Vegas", platform: "Steam", playtime: "245h", achievementPercent: 100, rating: 10, id: 22380 },
+    { title: "Elden Ring", platform: "Steam", playtime: "120h", achievementPercent: 85, rating: 10, id: 1245620 },
+    { title: "Cyberpunk 2077", platform: "Steam", playtime: "65h", achievementPercent: 45, rating: 9, id: 1091500 },
+    { title: "Sekiro: Shadows Die Twice", platform: "Steam", playtime: "35h", achievementPercent: 95, rating: 9.5, id: 814380 }
+  ],
+  covers: {}
+};
+
 export const DEMO_MUSIC = [
   {
     album_name: "Melancholy (2021)",
@@ -29,17 +59,6 @@ export const DEMO_MUSIC = [
     ]
   }
 ];
-
-export const ANIME_DATA = {
-  catalogue: [],
-  covers: {}
-};
-
-export const GAMING_DATA = {
-  steam: {},
-  collection: [],
-  covers: {}
-};
 
 export const VST_DETAILS = [
   {

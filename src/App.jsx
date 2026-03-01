@@ -11,6 +11,7 @@ import CloudDashboardApp from './apps/CloudDashboardApp';
 import CloudCastApp from './apps/CloudCastApp';
 import CollectionTrackerApp from './apps/CollectionTrackerApp';
 import BPMTimingCalculator from './apps/BPMTimingCalculator';
+import PokedexApp from './apps/PokedexApp';
 import RainBackground from './components/RainBackground';
 
 const MainContent = () => {
@@ -33,6 +34,7 @@ const MainContent = () => {
           <Route path="/cloudcast" element={<div className="bg-blue-900/40 min-h-[100dvh]"><CloudCastApp /></div>} />
           <Route path="/collection-tracker" element={<div className="bg-slate-900/40 min-h-[100dvh]"><CollectionTrackerApp /></div>} />
           <Route path="/bpm-calculator" element={<div className="bg-gray-900/40 min-h-[100dvh]"><BPMTimingCalculator /></div>} />
+          <Route path="/pokedex" element={<div className="bg-red-900/40 min-h-[100dvh]"><PokedexApp /></div>} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </div>
