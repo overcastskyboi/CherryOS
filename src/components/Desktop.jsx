@@ -31,12 +31,9 @@ const Desktop = () => {
                   <app.icon size={isMobile ? 24 : 36} strokeWidth={1.5} />
                 </div>
                 <div className="flex-1 min-w-0 relative z-10">
-                  <h3 className="text-base font-black text-white uppercase italic tracking-tighter group-hover:text-blue-400 transition-colors leading-none mb-1">
+                  <h3 className="text-base font-black text-white uppercase italic tracking-tighter group-hover:text-blue-400 transition-colors leading-none">
                     {app.name}
                   </h3>
-                  <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest truncate opacity-80 group-hover:opacity-100 transition-opacity">
-                    {app.desc}
-                  </p>
                 </div>
                 <ChevronRight className="text-gray-800 group-hover:text-white group-hover:translate-x-1 transition-all" size={20} />
                 
@@ -59,7 +56,7 @@ const Desktop = () => {
           <span className="text-gray-500">Ashburn Core Active</span>
         </div>
         <div className="flex items-center gap-6">
-          <span className="text-gray-800 hidden md:inline">© 2026</span>
+          <span className="text-gray-800 hidden md:inline">© 2026 Colin Cherry</span>
         </div>
       </div>
     </div>

@@ -43,7 +43,7 @@ const LockScreen = () => {
 
         <div className="space-y-1">
           <h1 className="text-3xl md:text-4xl font-black tracking-tighter uppercase italic text-white group-hover:text-rose-400 transition-colors">CHERRY OS</h1>
-          <p className="text-gray-500 font-black text-[10px] tracking-[0.4em] uppercase">User_Authenticated // AugustElliott</p>
+          <p className="text-gray-500 font-black text-[10px] tracking-[0.4em] uppercase">User_Authenticated // ColinCherry</p>
         </div>
 
         <div className="pt-12">

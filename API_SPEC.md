@@ -27,4 +27,4 @@ The system utilizes a GitHub Actions workflow that runs on every push and twice 
 4.  **Runtime** ⮕ Apps fetch from their own local path (e.g., `import.meta.env.BASE_URL + 'data/mirror/...'`).
 
 ---
-© 2026 CherryOS Core. All data validated via Zod.
+© 2026 Colin Cherry. All data validated via Zod.

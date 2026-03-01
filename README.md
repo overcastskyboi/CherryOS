@@ -49,4 +49,4 @@ CherryOS utilizes a triple-redundant architecture:
 -   **LCP Optimized**: Aggressive lazy loading and asset compression achieve < 2.0s LCP targets.
 
 ---
-© 2026 August Elliott. Developed for the Modern Web.
+© 2026 Colin Cherry. Developed for the Modern Web.

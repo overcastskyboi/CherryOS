@@ -48,13 +48,11 @@ const GameCenterApp = () => {
       if (!response.ok) throw new Error("Mirror fetch failed");
       
       const json = await response.json();
-      if (json && json.data && Array.isArray(json.data)) {
-        if (json.data.length > 0) {
-          setData(json.data);
-          setIsMirror(true);
-        } else {
-          setData(GAMING_DATA.collection);
-        }
+      if (json && json.data && Array.isArray(json.data) && json.data.length > 0) {
+        setData(json.data);
+        setIsMirror(true);
+      } else {
+        setData(GAMING_DATA.collection);
       }
     } catch (err) {
       console.error("GameCenterApp Data Sync Error:", err);
@@ -147,12 +145,20 @@ const GameCenterApp = () => {
           <button onClick={() => navigate('/')} className="p-2 bg-white/5 hover:bg-white/10 rounded-xl text-emerald-500 transition-all border border-white/5 shadow-xl">
             <ArrowLeft size={isMobile ? 20 : 24} />
           </button>
-          <div>
-            <h1 className="text-lg md:text-xl font-black tracking-tighter text-white uppercase italic leading-none">Game Center</h1>
-            <div className="flex items-center gap-2 mt-1">
-              <p className={`text-[8px] md:text-[9px] uppercase tracking-[0.4em] font-bold ${isMirror ? 'text-emerald-500' : 'text-yellow-600'}`}>
-                {isMirror ? 'Neural Link' : 'Local'} // Active
-              </p>
+          <div className="flex items-center gap-4">
+            <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-cyan-600 p-[2px]">
+              <div className="w-full h-full rounded-[10px] bg-black flex items-center justify-center overflow-hidden">
+                <img src="https://avatars.githubusercontent.com/u/1?v=4" alt="Steam Avatar" className="w-full h-full object-cover opacity-80" />
+              </div>
+            </div>
+            <div>
+              <h1 className="text-lg md:text-xl font-black tracking-tighter text-white uppercase italic leading-none">{GAMING_DATA.steam.user}</h1>
+              <div className="flex items-center gap-2 mt-1">
+                <span className="text-[8px] md:text-[9px] font-black text-emerald-500 uppercase tracking-widest bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">Level {GAMING_DATA.steam.level}</span>
+                <p className={`text-[8px] md:text-[9px] uppercase tracking-[0.4em] font-bold ${isMirror ? 'text-emerald-500' : 'text-yellow-600'}`}>
+                  {isMirror ? 'Neural Link' : 'Local'} // Active
+                </p>
+              </div>
             </div>
           </div>
         </div>
