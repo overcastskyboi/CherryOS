@@ -83,7 +83,7 @@ const Desktop = () => {
         <div className="flex items-center gap-4">
           <span className="flex items-center gap-2">
             <div className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
-            CherryOS 2.2.0 Stable
+            CherryOS 2.2.1 Stable
           </span>
           <span className="hidden md:inline text-gray-800">|</span>
           <span className="text-gray-500">Ashburn Core Active</span>
