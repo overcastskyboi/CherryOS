@@ -46,9 +46,12 @@ const WatchLogApp = () => {
           title: entry.media.title.english || entry.media.title.romaji,
           type: entry.media.type,
           score: entry.score || entry.media.averageScore / 10 || 0,
-          progress: entry.progress || 0,
+          progress: entry.progress,
           status: entry.status,
-          coverImage: entry.media.coverImage.extraLarge,
+          // Use mirrored image path if available
+          coverImage: entry.media.coverImage.local 
+            ? `${baseUrl}${entry.media.coverImage.local}`.replace(/\/+/g, '/')
+            : entry.media.coverImage.extraLarge,
           id: entry.media.id,
           duration: entry.media.duration || 0,
           episodes: entry.media.episodes || 0,
@@ -89,25 +92,19 @@ const WatchLogApp = () => {
   const stats = useMemo(() => {
     if (!data || data.length === 0) return null;
     
-    // Total Time Watched (Anime only) - Defensive checks
     const anime = data.filter(i => i.type === 'ANIME');
-    const totalMinutes = anime.reduce((acc, curr) => acc + ((Number(curr.progress) || 0) * (Number(curr.duration) || 0)), 0);
+    const totalMinutes = anime.reduce((acc, curr) => acc + (Number(curr.progress || 0) * Number(curr.duration || 0)), 0);
     const totalHours = Math.round(totalMinutes / 60);
 
-    // Favorite Genre
     const genreCounts = data.reduce((acc, curr) => {
-      if (curr.genres && Array.isArray(curr.genres)) {
-        curr.genres.forEach(g => acc[g] = (acc[g] || 0) + 1);
-      }
+      (curr.genres || []).forEach(g => acc[g] = (acc[g] || 0) + 1);
       return acc;
     }, {});
-    const sortedGenres = Object.entries(genreCounts).sort((a,b) => b[1] - a[1]);
-    const topGenre = sortedGenres[0]?.[0] || 'N/A';
+    const topGenre = Object.entries(genreCounts).sort((a,b) => b[1] - a[1])[0]?.[0] || 'N/A';
 
-    // Recent Completions
     const recent = data
       .filter(i => i.status === 'COMPLETED')
-      .sort((a,b) => (Number(b.updatedAt) || 0) - (Number(a.updatedAt) || 0))
+      .sort((a,b) => (b.updatedAt || 0) - (a.updatedAt || 0))
       .slice(0, 3);
 
     return { totalHours, topGenre, recent, totalEntries: data.length };
@@ -198,7 +195,6 @@ const WatchLogApp = () => {
       </header>
 
       <main className="flex-1 p-6 md:p-12 relative z-10 space-y-12">
-        {/* Overview Nodes */}
         {stats && (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 animate-elegant">
             <div className="glass-card p-6 rounded-3xl relative overflow-hidden group border-yellow-500/10">
@@ -281,7 +277,7 @@ const WatchLogApp = () => {
                   </div>
                   
                   <div className="flex flex-wrap gap-1">
-                    {item.genres && item.genres.slice(0, 2).map(g => (
+                    {(item.genres || []).slice(0, 2).map(g => (
                       <span key={g} className="text-[7px] text-gray-600 font-black uppercase border border-white/5 px-1.5 rounded shadow-inner">{g}</span>
                     ))}
                   </div>

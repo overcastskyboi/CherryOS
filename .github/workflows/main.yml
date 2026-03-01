@@ -44,9 +44,14 @@ jobs:
           VITE_AL_ID: "36296"
         run: |
           mkdir -p public/data/mirror
+          mkdir -p public/assets/mirror/pokedex
+          mkdir -p public/assets/mirror/anilist
+          mkdir -p public/assets/mirror/steam
+          
           node -e "
           const fs = require('fs');
           const https = require('https');
+          const path = require('path');
           
           async function request(url, options = {}) {
             return new Promise((resolve, reject) => {
@@ -64,6 +69,26 @@ jobs:
               req.on('error', reject);
               if (options.body) req.write(options.body);
               req.end();
+            });
+          }
+
+          async function downloadImage(url, dest) {
+            return new Promise((resolve, reject) => {
+              const file = fs.createWriteStream(dest);
+              https.get(url, (res) => {
+                if (res.statusCode !== 200) {
+                  reject(new Error('Status: ' + res.statusCode));
+                  return;
+                }
+                res.pipe(file);
+                file.on('finish', () => {
+                  file.close();
+                  resolve();
+                });
+              }).on('error', (err) => {
+                fs.unlink(dest, () => {});
+                reject(err);
+              });
             });
           }
 
@@ -93,7 +118,9 @@ jobs:
                   
                   const pokemonMoves = {};
                   
-                  for (const m of data.moves) {
+                  // Limit move fetching to save time/requests
+                  const relevantMoves = data.moves.slice(0, 50); 
+                  for (const m of relevantMoves) {
                     const moveName = m.move.name;
                     if (!moveCache[moveName]) {
                       try {
@@ -120,7 +147,7 @@ jobs:
                     });
                   }
 
-                  // Sort moves for each version group
+                  // Sort moves
                   Object.keys(pokemonMoves).forEach(v => {
                     pokemonMoves[v].sort((a, b) => {
                       if (a.method === 'egg' && b.method !== 'egg') return -1;
@@ -128,6 +155,20 @@ jobs:
                       return a.level - b.level;
                     });
                   });
+
+                  // Download Assets
+                  const spriteName = data.name.replace(/-disguised|-galar|-shield/g,'');
+                  const spriteUrl = \`https://play.pokemonshowdown.com/sprites/gen5ani/\${spriteName}.gif\`;
+                  const shinyUrl = \`https://play.pokemonshowdown.com/sprites/gen5ani-shiny/\${spriteName}.gif\`;
+                  const artworkUrl = \`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/\${data.id}.png\`;
+                  const footprintUrl = \`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/footprints/\${data.id}.png\`;
+
+                  await Promise.all([
+                    downloadImage(spriteUrl, \`public/assets/mirror/pokedex/\${data.id}.gif\`).catch(() => {}),
+                    downloadImage(shinyUrl, \`public/assets/mirror/pokedex/\${data.id}_s.gif\`).catch(() => {}),
+                    downloadImage(artworkUrl, \`public/assets/mirror/pokedex/\${data.id}.png\`).catch(() => {}),
+                    downloadImage(footprintUrl, \`public/assets/mirror/pokedex/\${data.id}_f.png\`).catch(() => {})
+                  ]);
                   
                   pokedex.push({
                     id: data.id,
@@ -137,21 +178,22 @@ jobs:
                     height: data.height,
                     weight: data.weight,
                     description,
-                    sprite: \`https://play.pokemonshowdown.com/sprites/gen5ani/\${data.name.replace(/-disguised|-galar|-shield/g,'')}.gif\`,
-                    shinySprite: \`https://play.pokemonshowdown.com/sprites/gen5ani-shiny/\${data.name.replace(/-disguised|-galar|-shield/g,'')}.gif\`,
-                    artwork: \`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/\${data.id}.png\`,
-                    footprint: \`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/footprints/\${data.id}.png\`,
+                    sprite: \`assets/mirror/pokedex/\${data.id}.gif\`,
+                    shinySprite: \`assets/mirror/pokedex/\${data.id}_s.gif\`,
+                    artwork: \`assets/mirror/pokedex/\${data.id}.png\`,
+                    footprint: \`assets/mirror/pokedex/\${data.id}_f.png\`,
                     moves: pokemonMoves
                   });
+                  console.log(\`Processed \${name}\`);
                 } catch(e) { console.error(\`Failed \${name}:\`, e.message); }
               }
               fs.writeFileSync('public/data/mirror/pokedex.json', JSON.stringify(pokedex));
 
               // 2. AniList Mirror
-              console.log('Mirroring AniList for user AugustElliott...');
+              console.log('Mirroring AniList...');
               let aniData = null;
               try {
-                aniData = await request('https://graphql.anilist.co', {
+                const rawAni = await request('https://graphql.anilist.co', {
                   method: 'POST',
                   headers: { 'Content-Type': 'application/json' },
                   body: JSON.stringify({
@@ -159,7 +201,23 @@ jobs:
                     variables: { username: 'AugustElliott' }
                   })
                 });
-                if (aniData && aniData.data) console.log('AniList sync successful.');
+                
+                if (rawAni && rawAni.data) {
+                  const lists = [
+                    ...rawAni.data.MediaListCollection.lists,
+                    ...rawAni.data.MangaList.lists
+                  ];
+                  for (const list of lists) {
+                    for (const entry of list.entries) {
+                      const url = entry.media.coverImage.extraLarge;
+                      const dest = \`public/assets/mirror/anilist/\${entry.media.id}.jpg\`;
+                      await downloadImage(url, dest).catch(() => {});
+                      entry.media.coverImage.local = \`assets/mirror/anilist/\${entry.media.id}.jpg\`;
+                    }
+                  }
+                  aniData = rawAni;
+                  console.log('AniList mirror complete.');
+                }
               } catch(e) { console.error('AniList failed:', e.message); }
               fs.writeFileSync('public/data/mirror/anilist.json', JSON.stringify(aniData || { data: { MediaListCollection: { lists: [] }, MangaList: { lists: [] } } }));
 
@@ -169,7 +227,6 @@ jobs:
               try {
                 const key = process.env.VITE_STEAM_API_KEY;
                 const id = process.env.VITE_STEAM_ID;
-                if (!key) throw new Error('Steam key missing');
                 const raw = await request(\`https://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/?key=\${key}&steamid=\${id}&format=json&include_appinfo=true&include_played_free_games=true\`);
                 if (raw.response && raw.response.games) {
                   const games = raw.response.games.filter(g => g.playtime_forever > 0).sort((a,b) => b.playtime_forever - a.playtime_forever).slice(0, 50);
@@ -187,17 +244,21 @@ jobs:
                     const hours = Math.floor(g.playtime_forever / 60);
                     const mins = g.playtime_forever % 60;
                     
+                    const imgUrl = \`https://cdn.akamai.steamstatic.com/steam/apps/\${g.appid}/header.jpg\`;
+                    const imgDest = \`public/assets/mirror/steam/\${g.appid}.jpg\`;
+                    await downloadImage(imgUrl, imgDest).catch(() => {});
+
                     steamData.push({
                       id: g.appid,
                       title: g.name,
                       playtime: hours > 0 ? \`\${hours}h \${mins}m\` : \`\${mins}m\`,
                       playtime_raw: g.playtime_forever,
                       achievementPercent: achPerc,
-                      coverImage: \`https://cdn.akamai.steamstatic.com/steam/apps/\${g.appid}/header.jpg\`,
+                      coverImage: \`assets/mirror/steam/\${g.appid}.jpg\`,
                       lastPlayed: g.rtime_last_played
                     });
                   }
-                  console.log('Steam sync successful.');
+                  console.log('Steam mirror complete.');
                 }
               } catch(e) { console.error('Steam failed:', e.message); }
               fs.writeFileSync('public/data/mirror/steam.json', JSON.stringify({ data: steamData }));
@@ -211,9 +272,6 @@ jobs:
           }
           run();
           "
-
-      - name: Verify Mirror Files
-        run: ls -R public/data/mirror
 
       - name: Build Application
         env:

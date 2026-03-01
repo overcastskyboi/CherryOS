@@ -42,7 +42,12 @@ const GameCenterApp = () => {
       const json = await response.json();
       if (json && json.data && Array.isArray(json.data)) {
         if (json.data.length > 0) {
-          setData(json.data);
+          const processed = json.data.map(item => ({
+            ...item,
+            // Use local mirror path
+            coverImage: `${baseUrl}${item.coverImage}`.replace(/\/+/g, '/')
+          }));
+          setData(processed);
           setIsMirror(true);
         } else {
           setData(GAMING_DATA.collection);
@@ -75,18 +80,18 @@ const GameCenterApp = () => {
   const stats = useMemo(() => {
     if (!data || data.length === 0) return null;
 
-    // Total Playtime (playtime_raw is in minutes)
-    const totalMinutes = data.reduce((acc, curr) => acc + (curr.playtime_raw || 0), 0);
+    // Total Playtime
+    const totalMinutes = data.reduce((acc, curr) => acc + (Number(curr.playtime_raw) || 0), 0);
     const totalHours = Math.round(totalMinutes / 60);
 
     // Mastery (100% achievements)
-    const masteryCount = data.filter(g => g.achievementPercent >= 100).length;
+    const masteryCount = data.filter(g => Number(g.achievementPercent) >= 100).length;
 
     // Most Played
-    const topGame = [...data].sort((a,b) => (b.playtime_raw || 0) - (a.playtime_raw || 0))[0];
+    const topGame = [...data].sort((a,b) => (Number(b.playtime_raw) || 0) - (Number(a.playtime_raw) || 0))[0];
 
     // Average Completion
-    const avgComp = Math.round(data.reduce((acc, curr) => acc + (curr.achievementPercent || 0), 0) / data.length);
+    const avgComp = Math.round(data.reduce((acc, curr) => acc + (Number(curr.achievementPercent) || 0), 0) / data.length);
 
     return { totalHours, masteryCount, topGame, avgComp, totalGames: data.length };
   }, [data]);
@@ -95,7 +100,7 @@ const GameCenterApp = () => {
     const items = data.length > 0 ? data : GAMING_DATA.collection;
     return items
       .filter(item => item.title.toLowerCase().includes(searchQuery.toLowerCase()))
-      .sort((a, b) => (b.achievementPercent || 0) - (a.achievementPercent || 0));
+      .sort((a, b) => (Number(b.achievementPercent) || 0) - (Number(a.achievementPercent) || 0));
   }, [data, searchQuery]);
 
   const visibleData = useMemo(() => {
@@ -141,8 +146,8 @@ const GameCenterApp = () => {
               className="bg-white/5 border border-white/10 rounded-xl py-2 pl-10 pr-4 text-[10px] font-bold text-white focus:outline-none w-64 transition-all focus:border-emerald-500/50"
             />
           </div>
-          <button onClick={fetchMirroredData} className="p-2 bg-white/5 hover:bg-white/10 rounded-xl border border-white/5 transition-all shadow-xl">
-            <RefreshCcw size={16} className={loading ? 'animate-spin' : 'text-emerald-500'} />
+          <button onClick={fetchMirroredData} className="p-2 bg-white/5 hover:bg-white/10 rounded-xl border border-white/5 transition-all shadow-xl text-emerald-500">
+            <RefreshCcw size={16} className={loading ? 'animate-spin' : ''} />
           </button>
         </div>
       </header>
@@ -169,7 +174,7 @@ const GameCenterApp = () => {
               </div>
             </div>
 
-            <div className="glass-card p-6 rounded-3xl relative overflow-hidden group border-emerald-500/10 lg:col-span-2">
+            <div className="glass-card p-6 rounded-3xl relative overflow-hidden group border-emerald-500/10 lg:col-span-2 flex flex-col justify-between">
               <div className="absolute top-0 right-0 p-4 opacity-5 text-blue-500 group-hover:scale-110 transition-transform"><Target size={60} /></div>
               <p className="text-[10px] font-black text-gray-500 uppercase tracking-[0.3em] mb-1.5">Top Performer</p>
               <div className="flex items-center gap-4">
@@ -184,9 +189,9 @@ const GameCenterApp = () => {
         )}
 
         <div className="max-w-7xl mx-auto space-y-12">
-          {!loading && filteredAndSortedData.length === 0 && (
+          {!loading && visibleData.length === 0 && (
             <div className="flex flex-col items-center justify-center py-20 text-gray-600 space-y-4 opacity-50">
-              <Activity size={48} />
+              <AlertCircle size={48} />
               <p className="text-sm font-black uppercase tracking-widest">Scanning empty sectors...</p>
             </div>
           )}
@@ -203,15 +208,15 @@ const GameCenterApp = () => {
                   <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent opacity-90" />
                   
                   <div className="absolute top-3 right-3">
-                    <div className={`px-2 py-1 rounded-lg backdrop-blur-md border flex items-center gap-1.5 shadow-xl ${item.achievementPercent >= 100 ? 'bg-yellow-500/20 border-yellow-500/30 text-yellow-500' : 'bg-black/60 border-white/10 text-emerald-400'}`}>
-                      {item.achievementPercent >= 100 ? <Trophy size={10} className="fill-current" /> : <Star size={10} className="fill-current" />}
-                      <span className="text-[10px] font-black">{Math.round(item.achievementPercent)}%</span>
+                    <div className={`px-2 py-1 rounded-lg backdrop-blur-md border flex items-center gap-1.5 shadow-xl ${Number(item.achievementPercent) >= 100 ? 'bg-yellow-500/20 border-yellow-500/30 text-yellow-500' : 'bg-black/60 border-white/10 text-emerald-400'}`}>
+                      {Number(item.achievementPercent) >= 100 ? <Trophy size={10} className="fill-current" /> : <Star size={10} className="fill-current" />}
+                      <span className="text-[10px] font-black">{Math.round(Number(item.achievementPercent) || 0)}%</span>
                     </div>
                   </div>
 
                   <div className="absolute bottom-4 left-4 right-4 space-y-1">
                     <span className="text-[8px] font-black uppercase tracking-[0.3em] text-blue-400">Steam Artifact</span>
-                    <h3 className="text-sm font-black text-white leading-tight line-clamp-2 uppercase italic tracking-tighter">{item.title}</h3>
+                    <h3 className="text-xs font-black text-white leading-tight line-clamp-2 uppercase italic tracking-tighter">{item.title}</h3>
                   </div>
                 </div>
                 
@@ -236,14 +241,14 @@ const GameCenterApp = () => {
                   <div className="space-y-2">
                     <div className="flex justify-between items-center text-[8px] font-black uppercase tracking-widest text-gray-500">
                       <span>Neural Link</span>
-                      <span className={item.achievementPercent >= 100 ? 'text-yellow-500' : 'text-emerald-500'}>
-                        {item.achievementPercent >= 100 ? 'Mastered' : `${Math.round(item.achievementPercent)}%`}
+                      <span className={Number(item.achievementPercent) >= 100 ? 'text-yellow-500' : 'text-emerald-500'}>
+                        {Number(item.achievementPercent) >= 100 ? 'Mastered' : `${Math.round(Number(item.achievementPercent) || 0)}%`}
                       </span>
                     </div>
                     <div className="h-1 bg-white/5 rounded-full overflow-hidden border border-white/5 shadow-inner">
                       <div 
-                        className={`h-full transition-all duration-1000 shadow-[0_0_10px_rgba(16,185,129,0.2)] ${item.achievementPercent >= 100 ? 'bg-gradient-to-r from-yellow-600 to-amber-400' : 'bg-gradient-to-r from-emerald-600 to-cyan-400'}`}
-                        style={{ width: `${item.achievementPercent}%` }}
+                        className={`h-full transition-all duration-1000 shadow-[0_0_10px_rgba(16,185,129,0.2)] ${Number(item.achievementPercent) >= 100 ? 'bg-gradient-to-r from-yellow-600 to-amber-400' : 'bg-gradient-to-r from-emerald-600 to-cyan-400'}`}
+                        style={{ width: `${Number(item.achievementPercent) || 0}%` }}
                       />
                     </div>
                   </div>

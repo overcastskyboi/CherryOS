@@ -26,7 +26,17 @@ const PokedexApp = () => {
       const response = await fetch(path);
       if (!response.ok) throw new Error("Failed to load database");
       const data = await response.json();
-      setPokemonList(data);
+      
+      // Post-process to add BASE_URL to mirrored paths
+      const processed = data.map(p => ({
+        ...p,
+        sprite: `${baseUrl}${p.sprite}`.replace(/\/+/g, '/'),
+        shinySprite: `${baseUrl}${p.shinySprite}`.replace(/\/+/g, '/'),
+        artwork: `${baseUrl}${p.artwork}`.replace(/\/+/g, '/'),
+        footprint: `${baseUrl}${p.footprint}`.replace(/\/+/g, '/')
+      }));
+      
+      setPokemonList(processed);
     } catch (err) {
       console.error('Pokedex Data Load Error:', err);
     } finally {
@@ -45,7 +55,6 @@ const PokedexApp = () => {
     if (pokemon.moves) {
       const versions = Object.keys(pokemon.moves);
       if (versions.length > 0) {
-        // Prefer a version that has moves if possible
         const bestVersion = versions.find(v => pokemon.moves[v].length > 0) || versions[0];
         setSelectedVersionGroup(bestVersion);
       }
@@ -99,7 +108,6 @@ const PokedexApp = () => {
         .scrollbar-hide::-webkit-scrollbar { display: none; }
       `}</style>
 
-      {/* Header */}
       <header className="bg-red-700/10 backdrop-blur-md border-b border-white/5 px-6 py-6 flex items-center justify-between sticky top-0 z-50">
         <div className="flex items-center gap-6">
           <button 
@@ -156,7 +164,6 @@ const PokedexApp = () => {
           <div className="animate-in slide-in-from-bottom-8 duration-700">
             {selectedPokemon && (
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
-                {/* Visual Module */}
                 <div className="lg:col-span-5 space-y-8">
                   <div className="pokedex-glass rounded-[3.5rem] p-12 relative overflow-hidden group border-white/10 shadow-[0_0_100px_rgba(239,68,68,0.05)]">
                     <div className="absolute inset-0 bg-gradient-to-b from-red-500/5 to-transparent pointer-events-none" />
@@ -208,7 +215,6 @@ const PokedexApp = () => {
                   </div>
                 </div>
 
-                {/* Data Module */}
                 <div className="lg:col-span-7 space-y-12">
                   <div className="space-y-6">
                     <div className="flex items-center gap-4 border-l-2 border-red-500 pl-6">
@@ -291,7 +297,6 @@ const PokedexApp = () => {
         )}
       </main>
 
-      {/* Footer Meta */}
       <footer className="fixed bottom-0 left-0 right-0 px-8 py-5 flex justify-between items-center bg-black/80 backdrop-blur-3xl border-t border-white/5 text-gray-700 z-50">
         <div className="flex items-center gap-6">
           <span className="text-[9px] font-mono uppercase tracking-widest italic flex items-center gap-2">
