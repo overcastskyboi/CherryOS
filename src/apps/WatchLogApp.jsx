@@ -37,8 +37,8 @@ const WatchLogApp = () => {
       const json = await response.json();
       if (json && json.data) {
         const allEntries = [
-          ...json.data.MediaListCollection.lists.flatMap(l => l.entries),
-          ...json.data.MangaList.lists.flatMap(l => l.entries)
+          ...(json.data.MediaListCollection?.lists?.flatMap(l => l.entries) || []),
+          ...(json.data.MangaList?.lists?.flatMap(l => l.entries) || [])
         ];
         
         const processed = allEntries.map(entry => ({
@@ -54,6 +54,9 @@ const WatchLogApp = () => {
         if (processed.length > 0) {
           setData(processed);
           setIsMirror(true);
+        } else {
+          console.warn("Mirror contains 0 entries, using Local Fallback Buffer.");
+          setData(ANIME_DATA.catalogue);
         }
       }
     } catch (err) {

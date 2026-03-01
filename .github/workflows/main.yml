@@ -62,7 +62,9 @@ jobs:
                 });
               });
               req.on('error', reject);
-              if (options.body) req.write(options.body);
+              if (options.body) {
+                req.write(options.body);
+              }
               req.end();
             });
           }
@@ -84,9 +86,11 @@ jobs:
                     })
                   });
                   console.log('AniList mirror generated.');
-                } else { console.warn('ANILIST_TOKEN missing.'); }
+                }
               } catch(e) { console.error('AniList fetch failed:', e.message); }
-              if (aniData) fs.writeFileSync('public/data/mirror/anilist.json', JSON.stringify(aniData));
+              
+              if (!aniData) aniData = { data: { MediaListCollection: { lists: [] }, MangaList: { lists: [] } } };
+              fs.writeFileSync('public/data/mirror/anilist.json', JSON.stringify(aniData));
 
               console.log('Fetching Steam Data...');
               let steamData = null;
@@ -97,7 +101,9 @@ jobs:
                   console.log('Steam mirror generated.');
                 }
               } catch(e) { console.error('Steam fetch failed:', e.message); }
-              if (steamData) fs.writeFileSync('public/data/mirror/steam.json', JSON.stringify(steamData));
+              
+              if (!steamData) steamData = { data: [] };
+              fs.writeFileSync('public/data/mirror/steam.json', JSON.stringify(steamData));
 
               fs.writeFileSync('public/data/mirror/metadata.json', JSON.stringify({ lastUpdated: new Date().toISOString() }));
               console.log('Mirror cycle complete.');
@@ -146,9 +152,11 @@ jobs:
           echo "/home/runner/bin" >> $GITHUB_PATH
 
       - name: Sync Artifacts to OCI Object Storage
+        env:
+          OCI_NAMESPACE: ${{ secrets.OCI_NAMESPACE }}
         run: |
-          /home/runner/bin/oci os object bulk-upload -ns ${{ secrets.OCI_NAMESPACE }} -bn cherryos-deploy-prod --src-dir ./dist --overwrite
-          /home/runner/bin/oci os object put -ns ${{ secrets.OCI_NAMESPACE }} -bn cherryos-deploy-prod --file healthcheck.txt --name healthcheck.txt --force
+          /home/runner/bin/oci os object bulk-upload -ns $OCI_NAMESPACE -bn cherryos-deploy-prod --src-dir ./dist --overwrite
+          /home/runner/bin/oci os object put -ns $OCI_NAMESPACE -bn cherryos-deploy-prod --file healthcheck.txt --name healthcheck.txt --force
 
       - name: Login to OCI Container Registry
         uses: docker/login-action@v3

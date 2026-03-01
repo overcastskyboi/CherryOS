@@ -45,6 +45,9 @@ const GameCenterApp = () => {
         if (processed.length > 0) {
           setData(processed);
           setIsMirror(true);
+        } else {
+          console.warn("Steam Mirror contains 0 entries, using Local Fallback Buffer.");
+          setData(GAMING_DATA.collection);
         }
       }
     } catch (err) {
