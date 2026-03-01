@@ -114,20 +114,35 @@ jobs:
       - name: Build Application
         run: npm run build
 
-      - name: Setup OCI CLI
-        uses: oracle-actions/setup-oci-cli@v1
+      - name: Sync dist to Bucket
+        uses: oracle-actions/run-oci-cli-command@v1.1.1
         with:
           user: ${{ secrets.OCI_USER_OCID }}
           fingerprint: ${{ secrets.OCI_FINGERPRINT }}
           tenancy: ${{ secrets.OCI_TENANCY_OCID }}
           region: ${{ secrets.OCI_REGION }}
           api_key: ${{ secrets.OCI_API_KEY }}
+          command: 'os object bulk-upload -ns ${{ secrets.OCI_NAMESPACE }} -bn cherryos-deploy-prod --src-dir ./dist --overwrite --content-type auto'
 
-      - name: Sync dist to Bucket
-        run: |
-          oci os object bulk-upload -ns ${{ secrets.OCI_NAMESPACE }} -bn cherryos-deploy-prod --src-dir ./dist --overwrite --content-type auto
-          oci os object put -ns ${{ secrets.OCI_NAMESPACE }} -bn cherryos-deploy-prod --file healthcheck.txt --name healthcheck.txt --force --content-type text/plain
-          oci os object put -ns ${{ secrets.OCI_NAMESPACE }} -bn cherryos-deploy-prod --file src/data/music_manifest.json --name music_manifest.json --force --content-type application/json
+      - name: Sync healthcheck
+        uses: oracle-actions/run-oci-cli-command@v1.1.1
+        with:
+          user: ${{ secrets.OCI_USER_OCID }}
+          fingerprint: ${{ secrets.OCI_FINGERPRINT }}
+          tenancy: ${{ secrets.OCI_TENANCY_OCID }}
+          region: ${{ secrets.OCI_REGION }}
+          api_key: ${{ secrets.OCI_API_KEY }}
+          command: 'os object put -ns ${{ secrets.OCI_NAMESPACE }} -bn cherryos-deploy-prod --file healthcheck.txt --name healthcheck.txt --force --content-type text/plain'
+
+      - name: Sync music manifest
+        uses: oracle-actions/run-oci-cli-command@v1.1.1
+        with:
+          user: ${{ secrets.OCI_USER_OCID }}
+          fingerprint: ${{ secrets.OCI_FINGERPRINT }}
+          tenancy: ${{ secrets.OCI_TENANCY_OCID }}
+          region: ${{ secrets.OCI_REGION }}
+          api_key: ${{ secrets.OCI_API_KEY }}
+          command: 'os object put -ns ${{ secrets.OCI_NAMESPACE }} -bn cherryos-deploy-prod --file src/data/music_manifest.json --name music_manifest.json --force --content-type application/json'
 
   deploy-oci-container:
     name: Build and Push Docker to OCI
