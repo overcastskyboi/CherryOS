@@ -190,11 +190,11 @@ const PokedexApp = () => {
                 className="group pokedex-glass p-6 rounded-[2.5rem] flex flex-col items-center gap-6 hover:bg-white/[0.05] transition-all hover:-translate-y-2 active:scale-95 shadow-2xl border-white/5 overflow-visible animate-elegant"
                 style={{ animationDelay: `${i * 50}ms` }}
               >
-                <div className="w-28 h-28 relative flex items-center justify-center overflow-visible">
+                <div className="w-32 h-32 relative flex items-center justify-center overflow-visible">
                   <SpriteImage 
                     src={p.sprite}
                     alt={p.name}
-                    className="group-hover:scale-125"
+                    className="scale-[1.6] group-hover:scale-[1.9] transition-transform duration-500"
                     glowColor={`${TYPE_COLORS[p.types[0].toLowerCase()] || '#ffffff'}33`}
                   />
                 </div>
