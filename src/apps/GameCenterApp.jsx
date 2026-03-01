@@ -53,19 +53,17 @@ const GameCenterApp = () => {
   }, [fetchData]);
 const filteredAndSortedData = useMemo(() => {
   return data
+    .filter(item => item.platform === 'Steam') // Force Steam Only
     .filter(item =>
-      item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.platform.toLowerCase().includes(searchQuery.toLowerCase())
+      item.title.toLowerCase().includes(searchQuery.toLowerCase())
     )
     .sort((a, b) => {
-      // Sort by achievement completion % if available, then by rating
       const aComp = a.achievementPercent || 0;
       const bComp = b.achievementPercent || 0;
       if (bComp !== aComp) return bComp - aComp;
       return (b.rating || 0) - (a.rating || 0);
     });
-}, [data, searchQuery]);
-  const GameCard = ({ item }) => (
+}, [data, searchQuery]);  const GameCard = ({ item }) => (
     <div className="group relative glass-card rounded-2xl overflow-hidden hover:bg-white/[0.05] transition-all duration-500 animate-elegant">
       <div className="aspect-square relative overflow-hidden">
         <LazyImage
@@ -160,12 +158,12 @@ const filteredAndSortedData = useMemo(() => {
           )}
 
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4 md:gap-6">
-            {filteredData.map((item, idx) => (
+            {filteredAndSortedData.map((item, idx) => (
               <GameCard key={idx} item={item} />
             ))}
           </div>
 
-          {filteredData.length === 0 && (
+          {filteredAndSortedData.length === 0 && (
             <div className="h-64 flex flex-col items-center justify-center text-center opacity-20">
               <Gamepad2 size={48} className="mb-4" />
               <p className="text-[10px] font-black uppercase tracking-[0.3em]">Vault is Empty</p>

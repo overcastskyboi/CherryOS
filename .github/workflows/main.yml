@@ -67,6 +67,9 @@ jobs:
           VITE_WEATHER_API_KEY: ${{ secrets.VITE_WEATHER_API_KEY }}
           VITE_OCI_NAMESPACE: ${{ secrets.OCI_NAMESPACE }}
           VITE_OCI_REGION: ${{ secrets.OCI_REGION }}
+          VITE_STEAM_ID: "76561198043191125"
+          VITE_AL_ID: "36296"
+          VITE_AL_TOKEN: ${{ secrets.ANILIST_TOKEN }}
         run: npm run build
 
       - name: Deploy to GitHub Pages
@@ -103,6 +106,9 @@ jobs:
           VITE_WEATHER_API_KEY: ${{ secrets.VITE_WEATHER_API_KEY }}
           VITE_OCI_NAMESPACE: ${{ secrets.OCI_NAMESPACE }}
           VITE_OCI_REGION: ${{ secrets.OCI_REGION }}
+          VITE_STEAM_ID: "76561198043191125"
+          VITE_AL_ID: "36296"
+          VITE_AL_TOKEN: ${{ secrets.ANILIST_TOKEN }}
         run: npm run build
 
       - name: Install OCI CLI
