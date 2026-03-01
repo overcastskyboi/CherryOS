@@ -71,14 +71,29 @@ const GameCenterApp = () => {
   // Infinite Scroll Observer
   useEffect(() => {
     const observer = new IntersectionObserver((entries) => {
-      if (entries[0].isIntersecting) {
+      if (entries[0].isIntersecting && !loading) {
         setDisplayCount(prev => prev + 12);
       }
     }, { threshold: 0.1 });
 
-    if (loaderRef.current) observer.observe(loaderRef.current);
-    return () => observer.disconnect();
-  }, [data.length]);
+    const currentLoader = loaderRef.current;
+    if (currentLoader) observer.observe(currentLoader);
+    return () => {
+      if (currentLoader) observer.unobserve(currentLoader);
+    };
+  }, [loading]);
+
+  const [showScrollTop, setShowScrollTop] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => setShowScrollTop(window.scrollY > 600);
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   const stats = useMemo(() => {
     if (!data || data.length === 0) return null;
@@ -106,8 +121,14 @@ const GameCenterApp = () => {
     const items = data.length > 0 ? data : GAMING_DATA.collection;
     return items
       .filter(item => item.title.toLowerCase().includes(searchQuery.toLowerCase()))
-      // Sort by achievement percentage (highest first)
-      .sort((a, b) => (Number(b.achievementPercent) || 0) - (Number(a.achievementPercent) || 0));
+      // Sort by achievement percentage (highest first), then by playtime_raw
+      .sort((a, b) => {
+        const diff = (Number(b.achievementPercent) || 0) - (Number(a.achievementPercent) || 0);
+        if (Math.abs(diff) < 0.01) {
+          return (Number(b.playtime_raw) || 0) - (Number(a.playtime_raw) || 0);
+        }
+        return diff;
+      });
   }, [data, searchQuery]);
 
   const visibleData = useMemo(() => {
@@ -302,6 +323,14 @@ const GameCenterApp = () => {
           <div className={`w-2 h-2 rounded-full ${isMirror ? 'bg-emerald-500' : 'bg-yellow-500'} animate-pulse`} />
         </div>
       </footer>
+
+      {/* Floating Back to Top */}
+      <button 
+        onClick={scrollToTop}
+        className={`fixed bottom-24 right-8 p-4 bg-emerald-500 text-black rounded-2xl shadow-2xl transition-all duration-500 z-[60] hover:scale-110 active:scale-90 ${showScrollTop ? 'translate-y-0 opacity-100' : 'translate-y-20 opacity-0'}`}
+      >
+        <Zap size={24} className="fill-current" />
+      </button>
     </div>
   );
 };
