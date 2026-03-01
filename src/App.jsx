@@ -22,18 +22,20 @@ const MainContent = () => {
   return (
     <>
       <RainBackground />
-      <Routes>
-        <Route path="/" element={<Desktop />} />
-        <Route path="/songs" element={<div className="bg-black/40"><MySongsApp /></div>} />  
-        <Route path="/watch" element={<div className="bg-black/40"><WatchLogApp /></div>} /> 
-        <Route path="/games" element={<div className="bg-black/40"><GameCenterApp /></div>} />
-        <Route path="/studio" element={<div className="bg-black/40"><StudioRackApp /></div>} />
-        <Route path="/cloud" element={<div className="bg-black/40"><CloudDashboardApp /></div>} />
-        <Route path="/cloudcast" element={<div className="bg-blue-900/40"><CloudCastApp /></div>} />
-        <Route path="/collection-tracker" element={<div className="bg-slate-900/40"><CollectionTrackerApp /></div>} />
-        <Route path="/bpm-calculator" element={<div className="bg-gray-900/40"><BPMTimingCalculator /></div>} />
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
+      <div className="relative z-10 min-h-[100dvh]">
+        <Routes>
+          <Route path="/" element={<Desktop />} />
+          <Route path="/songs" element={<div className="bg-black/40 min-h-[100dvh]"><MySongsApp /></div>} />  
+          <Route path="/watch" element={<div className="bg-black/40 min-h-[100dvh]"><WatchLogApp /></div>} /> 
+          <Route path="/games" element={<div className="bg-black/40 min-h-[100dvh]"><GameCenterApp /></div>} />
+          <Route path="/studio" element={<div className="bg-black/40 min-h-[100dvh]"><StudioRackApp /></div>} />
+          <Route path="/cloud" element={<div className="bg-black/40 min-h-[100dvh]"><CloudDashboardApp /></div>} />
+          <Route path="/cloudcast" element={<div className="bg-blue-900/40 min-h-[100dvh]"><CloudCastApp /></div>} />
+          <Route path="/collection-tracker" element={<div className="bg-slate-900/40 min-h-[100dvh]"><CollectionTrackerApp /></div>} />
+          <Route path="/bpm-calculator" element={<div className="bg-gray-900/40 min-h-[100dvh]"><BPMTimingCalculator /></div>} />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </div>
     </>
   );
 };

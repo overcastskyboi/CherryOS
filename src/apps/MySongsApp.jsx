@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { Disc, Pause, Play, SkipForward, ArrowLeft, Music, LayoutGrid, AlertCircle, RefreshCcw, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import LazyImage from '../components/LazyImage';
@@ -27,19 +27,11 @@ const MyMusicApp = () => {
   const [progress, setProgress] = useState(0);
   const [duration, setDuration] = useState(0);
   const [isSeeking, setIsSeeking] = useState(false);
+  const [autoplayBlocked, setAutoplayBlocked] = useState(false);
 
-  const audioRef = useRef(null);
+  // Persistent Audio Element
+  const audio = useMemo(() => new Audio(), []);
   const seekTimeout = useRef(null);
-  
-  useEffect(() => {
-    audioRef.current = new Audio();
-    return () => {
-      if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current.src = '';
-      }
-    };
-  }, []);
 
   const manifestUrl = "https://objectstorage.us-ashburn-1.oraclecloud.com/n/idg3nfddgypd/b/cherryos-deploy-prod/o/music_manifest.json";
   const APPLE_MUSIC_URL = "https://music.apple.com/us/artist/colin-cherry/1639040887";
@@ -54,6 +46,21 @@ const MyMusicApp = () => {
     setCurrentIndex(next);
     setIsPlaying(true);
   }, [currentIndex, queue]);
+
+  const togglePlay = () => {
+    if (isPlaying) {
+      audio.pause();
+      setIsPlaying(false);
+    } else {
+      audio.play().then(() => {
+        setIsPlaying(true);
+        setAutoplayBlocked(false);
+      }).catch((err) => {
+        console.warn("Playback failed:", err);
+        setAutoplayBlocked(true);
+      });
+    }
+  };
 
   // --- Data Fetching ---
   const fetchMusicData = useCallback(async () => {
@@ -80,7 +87,6 @@ const MyMusicApp = () => {
     } catch (err) {
       console.error("Fetch Failed, entering Demo Mode:", err);
       setIsDemoMode(true);
-      // Construct a demo album from constants
       const demoAlbum = {
         album_name: "CherryOS Momentum",
         artist: "Colin Cherry",
@@ -90,7 +96,7 @@ const MyMusicApp = () => {
         tracks: TRACKS.map(t => ({
           title: t.title,
           track_number: t.id,
-          url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" // Public demo file
+          url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"
         }))
       };
       setLibrary([demoAlbum]);
@@ -101,12 +107,13 @@ const MyMusicApp = () => {
 
   useEffect(() => {
     fetchMusicData();
-  }, [fetchMusicData]);
+    return () => {
+      audio.pause();
+      audio.src = '';
+    };
+  }, [fetchMusicData, audio]);
 
   useEffect(() => {
-    const audio = audioRef.current;
-    if (!audio) return;
-
     const handleEnded = () => skipTrack(1);
     const handleTimeUpdate = () => { if (!isSeeking) setProgress(audio.currentTime); };
     const handleLoadedMetadata = () => setDuration(audio.duration);
@@ -120,17 +127,31 @@ const MyMusicApp = () => {
       audio.removeEventListener('timeupdate', handleTimeUpdate);
       audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
     };
-  }, [skipTrack, isSeeking]);
+  }, [skipTrack, isSeeking, audio]);
 
+  // Handle Source Changes
   useEffect(() => {
     if (queue.length > 0) {
       const track = queue[currentIndex];
-      if (audioRef.current.src !== track.url) {
-        audioRef.current.src = track.url;
-        if (isPlaying) audioRef.current.play().catch(console.error);
+      if (audio.src !== track.url) {
+        audio.src = track.url;
+        if (isPlaying) {
+          audio.play().catch(() => setAutoplayBlocked(true));
+        }
       }
     }
-  }, [currentIndex, queue, isPlaying]);
+  }, [currentIndex, queue, isPlaying, audio]);
+
+  // Sync state with audio element (essential for hardware controls/external interference)
+  useEffect(() => {
+    const syncState = () => setIsPlaying(!audio.paused);
+    audio.addEventListener('play', syncState);
+    audio.addEventListener('pause', syncState);
+    return () => {
+      audio.removeEventListener('play', syncState);
+      audio.removeEventListener('pause', syncState);
+    };
+  }, [audio]);
 
   const playCollection = (album, startIndex = 0) => {
     const playerQueue = album.tracks.map(t => ({
@@ -141,14 +162,16 @@ const MyMusicApp = () => {
     }));
     setQueue(playerQueue);
     setCurrentIndex(startIndex);
-    setIsPlaying(true);
     setView('player');
-  };
-
-  const togglePlay = () => {
-    if (isPlaying) audioRef.current.pause();
-    else audioRef.current.play().catch(console.error);
-    setIsPlaying(!isPlaying);
+    
+    // Explicit play triggered by user action
+    audio.src = playerQueue[startIndex].url;
+    audio.play().then(() => {
+      setIsPlaying(true);
+      setAutoplayBlocked(false);
+    }).catch(() => {
+      setAutoplayBlocked(true);
+    });
   };
 
   const handleSeek = (e) => {
@@ -157,7 +180,7 @@ const MyMusicApp = () => {
     setIsSeeking(true);
     clearTimeout(seekTimeout.current);
     seekTimeout.current = setTimeout(() => {
-      audioRef.current.currentTime = newTime;
+      audio.currentTime = newTime;
       setIsSeeking(false);
     }, 100);
   };
@@ -170,18 +193,18 @@ const MyMusicApp = () => {
   };
 
   if (loading) return (
-    <div className="h-screen bg-black flex flex-col items-center justify-center text-yellow-500 font-mono text-xs animate-pulse">
+    <div className="h-screen bg-black flex flex-col items-center justify-center text-yellow-500 font-mono text-xs animate-pulse relative z-[100]">
       <Disc className="animate-spin mb-4" size={32} />
       <span>INITIALIZING_AUDIO_CORE...</span>
     </div>
   );
 
   return (
-    <div className="bg-[#0a0a0a] text-white min-h-[100dvh] flex flex-col relative select-none font-sans pb-24">
+    <div className="bg-[#0a0a0a] text-white min-h-[100dvh] flex flex-col relative select-none font-sans pb-24 z-10">
       <div className="absolute inset-0 bg-gradient-to-br from-blue-950/20 via-black to-yellow-950/20 pointer-events-none" />
 
       {/* Header */}
-      <div className="bg-black/60 backdrop-blur-2xl sticky top-0 z-30 border-b border-white/5 px-6 py-4 flex items-center justify-between">
+      <div className="bg-black/60 backdrop-blur-2xl sticky top-0 z-40 border-b border-white/5 px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-4">
           <button onClick={() => navigate('/')} className="p-2 hover:bg-white/5 rounded-full text-yellow-500 transition-colors">
             <ArrowLeft size={24} />
@@ -201,7 +224,7 @@ const MyMusicApp = () => {
 
       {/* Library Grid */}
       {view === 'library' && (
-        <div className="p-6 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6 animate-in fade-in duration-500">
+        <div className="p-6 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6 animate-in fade-in duration-500 relative z-20">
           {library.map((album, i) => (
             <button key={i} onClick={() => { setSelectedAlbum(album); setView('album'); }} className="group text-left space-y-3">
               <div className="relative aspect-square rounded-2xl overflow-hidden border border-white/5 bg-gray-900 group-hover:border-yellow-500/30 transition-all">
@@ -210,7 +233,7 @@ const MyMusicApp = () => {
                   <Play fill="white" className="text-white" size={32} />
                 </div>
               </div>
-              <h3 className="text-sm font-bold truncate">{album.album_name}</h3>
+              <h3 className="text-sm font-bold truncate uppercase tracking-tight">{album.album_name}</h3>
               <p className="text-[10px] text-gray-500 uppercase font-black">{album.artist}</p>
             </button>
           ))}
@@ -219,25 +242,25 @@ const MyMusicApp = () => {
 
       {/* Album Detail */}
       {view === 'album' && selectedAlbum && (
-        <div className="p-6 max-w-4xl mx-auto space-y-8 animate-in slide-in-from-right-4 duration-300">
+        <div className="p-6 max-w-4xl mx-auto space-y-8 animate-in slide-in-from-right-4 duration-300 relative z-20">
           <button onClick={() => setView('library')} className="text-xs font-bold text-gray-500 hover:text-white flex items-center gap-2">
             <ArrowLeft size={14} /> Back to Library
           </button>
           <div className="flex flex-col md:flex-row gap-8 items-center md:items-end">
-            <div className="w-48 h-48 rounded-2xl overflow-hidden shadow-2xl border border-white/10 flex-shrink-0">
+            <div className="w-48 h-48 rounded-2xl overflow-hidden shadow-2xl border border-white/10 flex-shrink-0 bg-gray-900">
               <img src={selectedAlbum.cover_url} className="w-full h-full object-cover" alt="" />
             </div>
             <div className="text-center md:text-left space-y-2">
               <span className="text-[10px] font-black text-yellow-500 uppercase tracking-widest">{selectedAlbum.type}</span>
-              <h2 className="text-4xl font-black tracking-tighter leading-none">{selectedAlbum.album_name}</h2>
-              <p className="text-gray-400 font-bold">{selectedAlbum.artist}</p>
+              <h2 className="text-4xl font-black tracking-tighter leading-none uppercase italic">{selectedAlbum.album_name}</h2>
+              <p className="text-gray-400 font-bold uppercase tracking-widest">{selectedAlbum.artist}</p>
             </div>
           </div>
-          <div className="bg-white/5 rounded-2xl border border-white/5 divide-y divide-white/5">
+          <div className="bg-white/5 rounded-2xl border border-white/5 divide-y divide-white/5 overflow-hidden">
             {selectedAlbum.tracks.map((track, i) => (
-              <button key={i} onClick={() => playCollection(selectedAlbum, i)} className="w-full flex items-center gap-4 p-4 hover:bg-white/5 transition-colors text-left group">
+              <button key={i} onClick={() => playCollection(selectedAlbum, i)} className="w-full flex items-center gap-4 p-4 hover:bg-white/10 transition-colors text-left group">
                 <span className="text-xs font-mono text-gray-600 w-4">{i + 1}</span>
-                <span className="flex-1 text-sm font-bold group-hover:text-yellow-500 transition-colors uppercase">{track.title}</span>
+                <span className="flex-1 text-sm font-bold group-hover:text-yellow-500 transition-colors uppercase tracking-tight">{track.title}</span>
                 <Play size={12} className="opacity-0 group-hover:opacity-100 text-yellow-500" fill="currentColor" />
               </button>
             ))}
@@ -247,18 +270,21 @@ const MyMusicApp = () => {
 
       {/* Full Player */}
       {view === 'player' && queue[currentIndex] && (
-        <div className="flex-1 flex flex-col items-center justify-center p-6 space-y-8 animate-in zoom-in-95 duration-500">
-          <button onClick={() => setView('library')} className="absolute top-24 left-6 p-2 bg-white/5 rounded-full">
-            <LayoutGrid size={20} />
+        <div className="flex-1 flex flex-col items-center justify-center p-6 space-y-8 animate-in zoom-in-95 duration-500 relative z-30 min-h-[60vh]">
+          <button onClick={() => setView('library')} className="absolute top-8 left-6 p-2 bg-white/5 rounded-full hover:bg-white/10 transition-colors">
+            <LayoutGrid size={24} />
           </button>
-          <div className="w-64 h-64 md:w-80 md:h-80 rounded-3xl overflow-hidden shadow-2xl border border-white/10 relative">
+          
+          <div className="relative w-64 h-64 md:w-80 md:h-80 rounded-3xl overflow-hidden shadow-2xl border border-white/10 bg-gray-900">
             <img src={queue[currentIndex].cover_url} className="w-full h-full object-cover" alt="" />
             <div className={`absolute inset-0 bg-yellow-500/10 animate-pulse ${isPlaying ? 'block' : 'hidden'}`} />
           </div>
+
           <div className="text-center space-y-1">
-            <h2 className="text-3xl font-black tracking-tighter uppercase italic">{queue[currentIndex].title}</h2>
+            <h2 className="text-3xl md:text-4xl font-black tracking-tighter uppercase italic text-white leading-tight">{queue[currentIndex].title}</h2>
             <p className="text-yellow-500 text-sm font-black uppercase tracking-widest">{queue[currentIndex].artist}</p>
           </div>
+
           <div className="w-full max-w-xs space-y-4">
             <input type="range" min="0" max={duration || 0} value={progress} onChange={handleSeek} className="w-full h-1 bg-gray-800 rounded-lg appearance-none cursor-pointer accent-yellow-500" />
             <div className="flex justify-between text-[10px] font-mono text-gray-500">
@@ -266,34 +292,41 @@ const MyMusicApp = () => {
               <span>{formatTime(duration)}</span>
             </div>
           </div>
+
           <div className="flex items-center gap-8">
-            <button onClick={() => skipTrack(-1)} className="text-gray-500 hover:text-white"><SkipForward size={32} className="rotate-180" /></button>
-            <button onClick={togglePlay} className="w-16 h-16 bg-white rounded-full flex items-center justify-center text-black">
+            <button onClick={() => skipTrack(-1)} className="text-gray-500 hover:text-white transition-colors active:scale-90"><SkipForward size={32} className="rotate-180" /></button>
+            <button onClick={togglePlay} className="w-16 h-16 bg-white rounded-full flex items-center justify-center text-black hover:scale-105 active:scale-95 transition-all">
               {isPlaying ? <Pause size={28} fill="black" /> : <Play size={28} fill="black" className="ml-1" />}
             </button>
-            <button onClick={() => skipTrack(1)} className="text-gray-500 hover:text-white"><SkipForward size={32} /></button>
+            <button onClick={() => skipTrack(1)} className="text-gray-500 hover:text-white transition-colors active:scale-90"><SkipForward size={32} /></button>
           </div>
+
+          {autoplayBlocked && (
+            <div className="bg-yellow-500/10 border border-yellow-500/20 px-4 py-2 rounded-full animate-bounce">
+              <p className="text-yellow-500 text-[10px] font-black uppercase tracking-widest">Action Required: Click Play to Start Audio</p>
+            </div>
+          )}
         </div>
       )}
 
       {/* Mini Player */}
       {queue.length > 0 && view !== 'player' && (
-        <div className="fixed bottom-0 left-0 right-0 h-20 bg-black/90 backdrop-blur-xl border-t border-white/5 px-6 flex items-center justify-between z-50">
-          <div className="flex items-center gap-3 w-1/3 cursor-pointer" onClick={() => setView('player')}>
-            <img src={queue[currentIndex].cover_url} className="w-10 h-10 rounded-lg object-cover" alt="" />
+        <div className="fixed bottom-0 left-0 right-0 h-20 bg-black/95 backdrop-blur-2xl border-t border-white/5 px-6 flex items-center justify-between z-50 shadow-[0_-10px_50px_rgba(0,0,0,0.8)]">
+          <div className="flex items-center gap-3 w-1/3 cursor-pointer group" onClick={() => setView('player')}>
+            <img src={queue[currentIndex].cover_url} className="w-10 h-10 rounded-lg object-cover border border-white/10 group-hover:border-yellow-500/50 transition-all bg-gray-900" alt="" />
             <div className="min-w-0">
-              <div className="text-xs font-black truncate uppercase">{queue[currentIndex].title}</div>
+              <div className="text-xs font-black truncate uppercase text-white group-hover:text-yellow-500 transition-colors">{queue[currentIndex].title}</div>
               <div className="text-[9px] text-gray-500 uppercase font-bold truncate">{queue[currentIndex].artist}</div>
             </div>
           </div>
           <div className="flex items-center gap-4">
-            <button onClick={() => skipTrack(-1)}><SkipForward size={18} className="rotate-180 text-gray-500" /></button>
-            <button onClick={togglePlay} className="w-10 h-10 bg-white rounded-full flex items-center justify-center text-black">
+            <button onClick={() => skipTrack(-1)} className="hover:text-white transition-colors"><SkipForward size={18} className="rotate-180 text-gray-500" /></button>
+            <button onClick={togglePlay} className="w-10 h-10 bg-white rounded-full flex items-center justify-center text-black hover:scale-110 active:scale-95 transition-all shadow-lg">
               {isPlaying ? <Pause size={18} fill="black" /> : <Play size={18} fill="black" className="ml-0.5" />}
             </button>
-            <button onClick={() => skipTrack(1)}><SkipForward size={18} text-gray-500 /></button>
+            <button onClick={() => skipTrack(1)} className="hover:text-white transition-colors"><SkipForward size={18} className="text-gray-500" /></button>
           </div>
-          <div className="w-1/3 hidden md:block">
+          <div className="w-1/3 hidden md:block px-4">
             <div className="h-1 bg-gray-800 rounded-full overflow-hidden">
               <div className="h-full bg-yellow-500" style={{ width: `${(progress / (duration || 1)) * 100}%` }} />
             </div>
