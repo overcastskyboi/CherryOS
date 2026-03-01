@@ -7,6 +7,13 @@
 :root {
   color-scheme: dark;
   --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  
+  /* Cherry OS Palette */
+  --cherry-crimson: #9f1239;
+  --cherry-pink: #db2777;
+  --cherry-cyan: #0891b2;
+  --cherry-emerald: #10b981;
+  --cherry-amber: #f59e0b;
 }
 
 html,
@@ -19,32 +26,35 @@ body,
   font-family: var(--font-sans);
   overflow-x: hidden;
   color: #fff;
+  font-feature-settings: "tnum"; /* Standardize to tabular numbers */
 }
 
 * {
   box-sizing: border-box;
 }
 
-/* Glassmorphism */
+/* Glassmorphism Refined */
 .glass-card {
-  background: rgba(255, 255, 255, 0.03);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  background: rgba(15, 15, 15, 0.4);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
   border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.8);
+  box-shadow: 0 12px 40px -12px rgba(0, 0, 0, 0.7);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .glass-header {
-  background: rgba(0, 0, 0, 0.6);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(30px) saturate(180%);
+  -webkit-backdrop-filter: blur(30px) saturate(180%);
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
 }
 
 /* Elegant Scrollbar */
 ::-webkit-scrollbar {
-  width: 5px;
-  height: 5px;
+  width: 4px;
+  height: 4px;
 }
 
 ::-webkit-scrollbar-track {
@@ -52,12 +62,12 @@ body,
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.05);
   border-radius: 10px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.1);
 }
 
 .scrollbar-hide {
@@ -71,15 +81,21 @@ body,
 
 /* Animations */
 @keyframes fade-in {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from { opacity: 0; transform: scale(0.98) translateY(10px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
 }
 
 .animate-elegant {
   animation: fade-in 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
+/* Global Transitions */
+.view-transition {
+  transition: opacity 0.5s ease, transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
 /* Rain Canvas */
 canvas {
   filter: blur(0.5px);
+  transition: filter 0.5s ease;
 }

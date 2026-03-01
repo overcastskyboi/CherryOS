@@ -13,6 +13,11 @@ import {
 
 const CloudDashboardApp = () => {
   const navigate = useNavigate();
+  const { setThemeColor } = useOS();
+
+  useEffect(() => {
+    setThemeColor('#0891b2'); // Cherry Cyan
+  }, [setThemeColor]);
   const [activeTab, setActiveTab] = useState('overview');
   const [loading, setLoading] = useState(false);
   const [apiStatus, setApiStatus] = useState({

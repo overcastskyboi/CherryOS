@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useOS } from '../context/OSContext';
 import { DESKTOP_APPS } from '../data/constants';
@@ -6,36 +6,43 @@ import { ChevronRight } from 'lucide-react';
 
 const Desktop = () => {
   const navigate = useNavigate();
-  const { isMobile } = useOS();
+  const { isMobile, setThemeColor } = useOS();
+
+  useEffect(() => {
+    setThemeColor('#3b82f6'); // Reset to default blue on desktop
+  }, [setThemeColor]);
 
   return (
-    <div className="min-h-[100dvh] w-screen bg-[#050505] flex flex-col p-6 md:p-12 relative overflow-x-hidden">
-      {/* Background Glow */}
-      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-950/20 blur-[120px] rounded-full pointer-events-none" />
-      <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-purple-950/10 blur-[120px] rounded-full pointer-events-none" />
+    <div className="min-h-[100dvh] w-screen bg-transparent flex flex-col p-6 md:p-12 relative overflow-x-hidden">
+      {/* Background Glows Refined */}
+      <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-blue-600/10 blur-[150px] rounded-full pointer-events-none" />
+      <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-indigo-600/10 blur-[150px] rounded-full pointer-events-none" />
 
       <div className="flex-1 flex flex-col items-center justify-center py-12 relative z-10">
-        <div className="w-full max-w-6xl">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+        <div className="w-full max-w-7xl">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-8">
             {DESKTOP_APPS.map((app) => (
               <button
                 key={app.id}
                 onClick={() => navigate(app.path)}
-                className="group relative flex items-center gap-4 p-6 glass-card rounded-2xl transition-all hover:bg-white/[0.06] active:scale-[0.98] text-left overflow-hidden"
+                className="group relative flex items-center gap-6 p-8 glass-card rounded-[2.5rem] transition-all hover:bg-white/[0.08] hover:-translate-y-1 active:scale-[0.98] text-left overflow-hidden border-white/5 shadow-2xl"
               >
-                <div className={`p-3 rounded-xl bg-black/40 border border-white/5 ${app.color} group-hover:scale-110 transition-transform duration-500`}>
-                  <app.icon size={isMobile ? 24 : 32} strokeWidth={1.5} />
+                <div className={`p-4 rounded-2xl bg-black/40 border border-white/5 ${app.color} group-hover:scale-110 transition-transform duration-500 shadow-inner relative z-10`}>
+                  <app.icon size={isMobile ? 28 : 36} strokeWidth={1.5} />
                 </div>
-                <div className="flex-1 min-w-0">
-                  <h3 className="text-sm font-black text-white uppercase tracking-tighter group-hover:text-blue-400 transition-colors">
+                <div className="flex-1 min-w-0 relative z-10">
+                  <h3 className="text-base font-black text-white uppercase italic tracking-tighter group-hover:text-blue-400 transition-colors leading-none mb-1">
                     {app.name}
                   </h3>
-                  <p className="text-[10px] text-gray-500 font-medium uppercase tracking-widest mt-0.5 truncate">
+                  <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest truncate opacity-80 group-hover:opacity-100 transition-opacity">
                     {app.desc}
                   </p>
                 </div>
-                <ChevronRight className="text-gray-700 group-hover:text-white group-hover:translate-x-1 transition-all" size={16} />
-                <div className="absolute bottom-0 left-0 h-[2px] w-0 bg-gradient-to-r from-transparent via-blue-500 to-transparent group-hover:w-full transition-all duration-700" />
+                <ChevronRight className="text-gray-800 group-hover:text-white group-hover:translate-x-1 transition-all" size={20} />
+                
+                {/* App Specific Glow Overlay */}
+                <div className={`absolute inset-0 bg-gradient-to-br from-transparent via-transparent to-white/[0.02] opacity-0 group-hover:opacity-100 transition-opacity duration-700`} />
+                <div className="absolute bottom-0 left-0 h-[3px] w-0 bg-gradient-to-r from-transparent via-blue-500 to-transparent group-hover:w-full transition-all duration-[800ms] ease-in-out" />
               </button>
             ))}
           </div>

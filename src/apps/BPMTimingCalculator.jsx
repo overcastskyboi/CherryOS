@@ -6,8 +6,15 @@ import {
 } from 'lucide-react';
 import { calculateProductionValues } from '../data/constants';
 
+import { useOS } from '../context/OSContext';
+
 const BPMTimingCalculator = () => {
   const navigate = useNavigate();
+  const { setThemeColor } = useOS();
+
+  useEffect(() => {
+    setThemeColor('#9f1239'); // Cherry Crimson/Rose
+  }, [setThemeColor]);
   const [bpm, setBpm] = useState(128);
 
   const results = useMemo(() => calculateProductionValues(bpm), [bpm]);

@@ -4,8 +4,15 @@ import { useNavigate } from 'react-router-dom';
 import { z } from 'zod';
 import { PixelIcon } from '../components/PixelIcons';
 
+import { useOS } from '../context/OSContext';
+
 const CloudCastApp = () => {
   const navigate = useNavigate();
+  const { setThemeColor } = useOS();
+
+  useEffect(() => {
+    setThemeColor('#3b82f6'); // Blue
+  }, [setThemeColor]);
   const [location, setLocation] = useState('Indianapolis, IN');
   const [weatherData, setWeatherData] = useState(null);
   const [loading, setLoading] = useState(false);

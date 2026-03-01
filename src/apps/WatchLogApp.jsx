@@ -7,9 +7,17 @@ import {
 import { useNavigate } from 'react-router-dom';
 import LazyImage from '../components/LazyImage';
 import { ANIME_DATA } from '../data/constants';
+import { formatHours } from '../data/time_utils';
+
+import { useOS } from '../context/OSContext';
 
 const WatchLogApp = () => {
   const navigate = useNavigate();
+  const { setThemeColor } = useOS();
+
+  useEffect(() => {
+    setThemeColor('#f59e0b'); // Cherry Amber
+  }, [setThemeColor]);
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -94,7 +102,7 @@ const WatchLogApp = () => {
     
     const anime = data.filter(i => i.type === 'ANIME');
     const totalMinutes = anime.reduce((acc, curr) => acc + (Number(curr.progress || 0) * Number(curr.duration || 0)), 0);
-    const totalHours = Math.round(totalMinutes / 60);
+    const depth = formatHours(Math.round(totalMinutes / 60));
 
     const genreCounts = data.reduce((acc, curr) => {
       (curr.genres || []).forEach(g => acc[g] = (acc[g] || 0) + 1);
@@ -107,7 +115,7 @@ const WatchLogApp = () => {
       .sort((a,b) => (b.updatedAt || 0) - (a.updatedAt || 0))
       .slice(0, 3);
 
-    return { totalHours, topGenre, recent, totalEntries: data.length };
+    return { depth, topGenre, recent, totalEntries: data.length };
   }, [data]);
 
   const filteredAndSortedData = useMemo(() => {
@@ -201,8 +209,8 @@ const WatchLogApp = () => {
               <div className="absolute top-0 right-0 p-4 opacity-5 text-yellow-500 group-hover:scale-110 transition-transform"><Clock size={60} /></div>
               <p className="text-[10px] font-black text-gray-500 uppercase tracking-[0.3em] mb-1">Archive Depth</p>
               <div className="flex items-end gap-2">
-                <span className="text-3xl font-black text-white italic">{stats.totalHours}</span>
-                <span className="text-[10px] font-bold text-yellow-500 mb-1.5 uppercase">Hours</span>
+                <span className="text-3xl font-black text-white italic">{stats.depth.label.split(' ')[0]}</span>
+                <span className="text-[10px] font-bold text-yellow-500 mb-1.5 uppercase">{stats.depth.label.split(' ').slice(1).join(' ') || 'Total'}</span>
               </div>
             </div>
 

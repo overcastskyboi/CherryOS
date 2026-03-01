@@ -24,18 +24,18 @@ const MainContent = () => {
   return (
     <>
       <RainBackground />
-      <div className="relative z-10 min-h-[100dvh]">
+      <div className="relative z-10 min-h-[100dvh] selection:bg-rose-500/30 transition-colors duration-1000">
         <Routes>
           <Route path="/" element={<Desktop />} />
-          <Route path="/songs" element={<div className="bg-black/40 min-h-[100dvh]"><MySongsApp /></div>} />  
-          <Route path="/watch" element={<div className="bg-black/40 min-h-[100dvh]"><WatchLogApp /></div>} /> 
-          <Route path="/games" element={<div className="bg-black/40 min-h-[100dvh]"><GameCenterApp /></div>} />
-          <Route path="/studio" element={<div className="bg-black/40 min-h-[100dvh]"><StudioRackApp /></div>} />
-          <Route path="/cloud" element={<div className="bg-black/40 min-h-[100dvh]"><CloudDashboardApp /></div>} />
-          <Route path="/cloudcast" element={<div className="bg-blue-900/40 min-h-[100dvh]"><CloudCastApp /></div>} />
-          <Route path="/collection-tracker" element={<div className="bg-slate-900/40 min-h-[100dvh]"><CollectionTrackerApp /></div>} />
-          <Route path="/bpm-calculator" element={<div className="bg-gray-900/40 min-h-[100dvh]"><BPMTimingCalculator /></div>} />
-          <Route path="/pokedex" element={<div className="bg-red-900/40 min-h-[100dvh]"><PokedexApp /></div>} />
+          <Route path="/songs" element={<MySongsApp />} />  
+          <Route path="/watch" element={<WatchLogApp />} /> 
+          <Route path="/games" element={<GameCenterApp />} />
+          <Route path="/studio" element={<StudioRackApp />} />
+          <Route path="/cloud" element={<CloudDashboardApp />} />
+          <Route path="/cloudcast" element={<CloudCastApp />} />
+          <Route path="/collection-tracker" element={<CollectionTrackerApp />} />
+          <Route path="/bpm-calculator" element={<BPMTimingCalculator />} />
+          <Route path="/pokedex" element={<PokedexApp />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </div>

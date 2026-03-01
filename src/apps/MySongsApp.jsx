@@ -5,8 +5,15 @@ import LazyImage from '../components/LazyImage';
 import { MusicManifestSchema } from '../data/schemas';
 import { DEMO_MUSIC } from '../data/constants';
 
+import { useOS } from '../context/OSContext';
+
 const MyMusicApp = () => {
   const navigate = useNavigate();
+  const { setThemeColor } = useOS();
+
+  useEffect(() => {
+    setThemeColor('#db2777'); // Cherry Pink
+  }, [setThemeColor]);
 
   // Data State
   const [library, setLibrary] = useState([]);
@@ -206,9 +213,12 @@ const MyMusicApp = () => {
       </main>
 
       {queue.length > 0 && (
-        <div className="fixed bottom-0 left-0 right-0 h-20 bg-black/95 backdrop-blur-2xl border-t border-white/10 px-6 flex items-center justify-between z-50 shadow-[0_-10px_50px_rgba(0,0,0,0.9)]">
+        <div className="fixed bottom-0 left-0 right-0 h-20 bg-black/95 backdrop-blur-3xl border-t border-white/10 px-6 flex items-center justify-between z-50 shadow-[0_-10px_50px_rgba(0,0,0,0.9)]">
           <div className="flex items-center gap-4 w-1/3 cursor-pointer group" onClick={() => setView('album')}>
-            <LazyImage src={queue[currentIndex].cover_url} alt={queue[currentIndex].title} className="w-12 h-12 rounded-xl object-cover border border-white/10" />
+            <div className="relative">
+              <LazyImage src={queue[currentIndex].cover_url} alt={queue[currentIndex].title} className="w-12 h-12 rounded-xl object-cover border border-white/10 relative z-10" />
+              <div className="absolute inset-0 blur-2xl opacity-40 group-hover:opacity-80 transition-opacity bg-pink-500" />
+            </div>
             <div className="min-w-0">
               <div className="text-xs font-black truncate uppercase text-white tracking-tight">{queue[currentIndex].title}</div>
               <div className="text-[9px] text-gray-500 font-bold truncate uppercase tracking-widest">{queue[currentIndex].artist}</div>

@@ -6,6 +6,11 @@ import LazyImage from '../components/LazyImage';
 
 const StudioRackApp = () => {
   const navigate = useNavigate();
+  const { setThemeColor } = useOS();
+
+  useEffect(() => {
+    setThemeColor('#f59e0b'); // Cherry Amber
+  }, [setThemeColor]);
   const [selectedSuite, setSelectedSuite] = useState(null);
   const [activePluginIndex, setActivePluginIndex] = useState(0);
 

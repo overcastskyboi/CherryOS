@@ -69,8 +69,15 @@ const cleanSetName = (name) => {
     .trim();
 };
 
+import { useOS } from '../context/OSContext';
+
 export default function CollectionTrackerApp() {
   const navigate = useNavigate();
+  const { setThemeColor } = useOS();
+
+  useEffect(() => {
+    setThemeColor('#f59e0b'); // Amber
+  }, [setThemeColor]);
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -167,6 +174,21 @@ export default function CollectionTrackerApp() {
     return <Icon size={size} className={className} />;
   };
 
+  const CustomTooltip = ({ active, payload }) => {
+    if (active && payload && payload.length) {
+      const data = payload[0].payload;
+      return (
+        <div className="bg-black/90 backdrop-blur-md border border-white/10 p-3 rounded-xl shadow-2xl">
+          <p className="text-[10px] font-black text-white uppercase tracking-widest mb-1 italic">{data.name}</p>
+          <p className="text-sm font-black italic tracking-tighter" style={{ color: data.color }}>
+            ${Number(data.value).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+          </p>
+        </div>
+      );
+    }
+    return null;
+  };
+
   return (
     <div className="min-h-[100dvh] bg-[#050505] text-slate-100 flex flex-col font-sans pb-20 relative overflow-hidden">
       <div className="absolute bottom-0 left-0 w-[60%] h-[60%] bg-amber-950/10 blur-[150px] rounded-full pointer-events-none" />
@@ -220,10 +242,8 @@ export default function CollectionTrackerApp() {
                 />
                 <YAxis hide />
                 <Tooltip 
-                  cursor={{ fill: 'transparent' }}
-                  contentStyle={{ backgroundColor: '#000', border: '1px solid #ffffff10', borderRadius: '12px', fontSize: '10px' }}
-                  itemStyle={{ fontWeight: 'bold' }}
-                  formatter={(val) => `$${Number(val).toLocaleString()}`}
+                  cursor={{ fill: 'rgba(255,255,255,0.05)' }}
+                  content={<CustomTooltip />}
                 />
                 <Bar dataKey="value" radius={[6, 6, 0, 0]} barSize={40}>
                   {chartData.map((entry, index) => (

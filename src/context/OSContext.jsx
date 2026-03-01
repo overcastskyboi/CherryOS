@@ -5,6 +5,7 @@ const OSContext = createContext();
 export const OSProvider = ({ children }) => {
   const [bootState, setBootState] = useState('booting'); // booting, locked, idle
   const [isMobile, setIsMobile] = useState(false);
+  const [themeColor, setThemeColor] = useState('#3b82f6'); // Default Blue
 
   useEffect(() => {
     const checkMobile = () => {
@@ -19,7 +20,7 @@ export const OSProvider = ({ children }) => {
   }, []);
 
   return (
-    <OSContext.Provider value={{ bootState, setBootState, isMobile }}>
+    <OSContext.Provider value={{ bootState, setBootState, isMobile, themeColor, setThemeColor }}>
       {children}
     </OSContext.Provider>
   );
