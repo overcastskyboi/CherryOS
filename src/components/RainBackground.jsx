@@ -18,8 +18,8 @@ const RainBackground = () => {
     resize();
 
     const raindrops = [];
-    const dropCount = 40; // Even fewer for elegance
-    const colors = ['#ffffff', '#60a5fa', '#3b82f6'];
+    const dropCount = 25; // Extremely sparse for elegance
+    const colors = ['#ffffff', '#60a5fa'];
 
     class Drop {
       constructor() {
@@ -29,11 +29,11 @@ const RainBackground = () => {
       init() {
         this.x = Math.random() * canvas.width;
         this.y = Math.random() * -canvas.height;
-        this.speed = 0.5 + Math.random() * 1.5; // Very slow, graceful
-        this.length = 20 + Math.random() * 30; // Longer, thinner lines
-        this.width = 0.5; // Ultra-thin
+        this.speed = 0.2 + Math.random() * 0.8; // Glacial movement
+        this.length = 15 + Math.random() * 25;
+        this.width = 0.3; // Hairline thin
         this.color = colors[Math.floor(Math.random() * colors.length)];
-        this.opacity = 0.03 + Math.random() * 0.07; // Very subtle
+        this.opacity = 0.02 + Math.random() * 0.04; // Barely visible
       }
 
       update() {

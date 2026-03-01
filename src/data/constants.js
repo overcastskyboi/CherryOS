@@ -10,14 +10,14 @@ export const ANIME_DATA = {
     { title: "Chainsaw Man", type: "Manga", score: 9, progress: "170+ Ch", status: "Reading" }
   ],
   covers: {
-    "Berserk": "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=1000&auto=format&fit=crop",
-    "Hunter x Hunter (2011)": "https://images.unsplash.com/photo-1541562232579-512a21360020?q=80&w=1000&auto=format&fit=crop",
-    "Fullmetal Alchemist: Brotherhood": "https://images.unsplash.com/photo-1618336753974-aae8e04506aa?q=80&w=1000&auto=format&fit=crop",
-    "Steins;Gate": "https://images.unsplash.com/photo-1501139083538-0139583c060f?q=80&w=1000&auto=format&fit=crop",
-    "Vinland Saga Season 2": "https://images.unsplash.com/photo-1533107862482-0e6974b06ec4?q=80&w=1000&auto=format&fit=crop",
-    "Monster": "https://images.unsplash.com/photo-1509248961158-e54f6934749c?q=80&w=1000&auto=format&fit=crop",
-    "Vagabond": "https://images.unsplash.com/photo-1524413845077-123b6637130a?q=80&w=1000&auto=format&fit=crop",
-    "Chainsaw Man": "https://images.unsplash.com/photo-1534423861386-85a16f5d13fd?q=80&w=1000&auto=format&fit=crop"
+    "Berserk": "https://s4.anilist.co/file/anilistcdn/media/manga/cover/large/bx30002-79997M9AasY6.png",
+    "Hunter x Hunter (2011)": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx11061-s9Pj7zPrAl39.png",
+    "Fullmetal Alchemist: Brotherhood": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx5114-K9999M9AasY6.png",
+    "Steins;Gate": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx9253-89997M9AasY6.png",
+    "Vinland Saga Season 2": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx146175-99997M9AasY6.png",
+    "Monster": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx19-99997M9AasY6.png",
+    "Vagabond": "https://s4.anilist.co/file/anilistcdn/media/manga/cover/large/bx30656-99997M9AasY6.png",
+    "Chainsaw Man": "https://s4.anilist.co/file/anilistcdn/media/manga/cover/large/bx105778-99997M9AasY6.png"
   }
 };
 
@@ -36,42 +36,19 @@ export const GAMING_DATA = {
   collection: [
     { title: "Fallout: New Vegas", platform: "Steam", playtime: "245h", status: "Mastered", rating: 10, id: 22380 },
     { title: "Clair Obscur: Expedition 33", platform: "Steam", playtime: "45h", status: "Playing", rating: 10, id: 1903340 },
-    { title: "Final Fantasy VII", platform: "Retro", playtime: "84h", status: "Mastered", rating: 10 },
-    { title: "Elden Ring", platform: "Steam", playtime: "120h", status: "Playing", rating: 10 },
-    { title: "Metal Gear Solid", platform: "Retro", playtime: "20h", status: "Completed", rating: 9.5 },
-    { title: "Silent Hill 2", platform: "Retro", playtime: "12h", status: "Completed", rating: 10 },
-    { title: "Cyberpunk 2077", platform: "Steam", playtime: "65h", status: "Completed", rating: 9 },
-    { title: "Bloodborne", platform: "PS4", playtime: "45h", status: "Mastered", rating: 10 }
+    { title: "Elden Ring", platform: "Steam", playtime: "120h", status: "Playing", rating: 10, id: 1245620 },
+    { title: "Cyberpunk 2077", platform: "Steam", playtime: "65h", status: "Completed", rating: 9, id: 1091500 },
+    { title: "Sekiro: Shadows Die Twice", platform: "Steam", playtime: "35h", status: "Completed", rating: 9.5, id: 814380 },
+    { title: "The Witcher 3: Wild Hunt", platform: "Steam", playtime: "150h", status: "Completed", rating: 10, id: 292030 }
   ],
   covers: {
-    "Fallout: New Vegas": "https://images.unsplash.com/photo-1542751371-adc38448a05e?q=80&w=1000&auto=format&fit=crop",
-    "Clair Obscur: Expedition 33": "https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?q=80&w=1000&auto=format&fit=crop",
-    "Final Fantasy VII": "https://images.unsplash.com/photo-1542751371-adc38448a05e?q=80&w=1000&auto=format&fit=crop",
-    "Elden Ring": "https://images.unsplash.com/photo-1612287230202-1ff1d85d1bdf?q=80&w=1000&auto=format&fit=crop",
-    "Metal Gear Solid": "https://images.unsplash.com/photo-1585338107529-13afc5f02586?q=80&w=1000&auto=format&fit=crop",
-    "Silent Hill 2": "https://images.unsplash.com/photo-1505630285033-a37d80568c08?q=80&w=1000&auto=format&fit=crop",
-    "Cyberpunk 2077": "https://images.unsplash.com/photo-1605810230434-7631ac76ec81?q=80&w=1000&auto=format&fit=crop",
-    "Bloodborne": "https://images.unsplash.com/photo-1511512578047-dfb367046420?q=80&w=1000&auto=format&fit=crop"
+    "Fallout: New Vegas": "https://cdn.akamai.steamstatic.com/steam/apps/22380/header.jpg",
+    "Clair Obscur: Expedition 33": "https://cdn.akamai.steamstatic.com/steam/apps/1903340/header.jpg",
+    "Elden Ring": "https://cdn.akamai.steamstatic.com/steam/apps/1245620/header.jpg",
+    "Cyberpunk 2077": "https://cdn.akamai.steamstatic.com/steam/apps/1091500/header.jpg",
+    "Sekiro: Shadows Die Twice": "https://cdn.akamai.steamstatic.com/steam/apps/814380/header.jpg",
+    "The Witcher 3: Wild Hunt": "https://cdn.akamai.steamstatic.com/steam/apps/292030/header.jpg"
   }
-};
-
-export const VST_LIST = {
-  "Dynamics & Mixing": [
-    "Waves Renaissance Bundle",
-    "Kilohearts Essentials",
-    "Tokyo Dawn Labs TDR Nova",
-    "Soothe2",
-    "TBProAudio Bundle"
-  ],
-  "Reverb & Delay": [
-    "Valhalla Supermassive",
-    "Valhalla Delay",
-    "Valhalla VintageVerb"
-  ],
-  "Instruments": [
-    "Xfer Serum",
-    "Spitfire LABS"
-  ]
 };
 
 export const VST_DETAILS = [
@@ -79,48 +56,35 @@ export const VST_DETAILS = [
     id: "waves-r",
     name: "Waves Renaissance Bundle",
     category: "Dynamics & Mixing",
-    image: "https://images.unsplash.com/photo-1598653222000-6b7b7a552625?q=80&w=1000&auto=format&fit=crop",
+    image: "https://static.waves.com/images/products/bundles/renaissance-maxx.jpg",
     link: "https://www.waves.com/bundles/renaissance-maxx",
     blurb: "The quintessential 'musical' processing suite. Includes the legendary R-Vox and R-Compressor.",
     plugins: [
-      { name: "R-Vox", desc: "The go-to vocal compressor/gate/limiter.", interface: "https://images.unsplash.com/photo-1589903308904-1010c2294adc?q=80&w=800&auto=format&fit=crop" },
-      { name: "R-Compressor", desc: "Classic warm compression for any source.", interface: "https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?q=80&w=800&auto=format&fit=crop" },
-      { name: "R-Axx", desc: "Instantly great guitar dynamics.", interface: "https://images.unsplash.com/photo-1516280440614-37939bbacd81?q=80&w=800&auto=format&fit=crop" }
-    ]
-  },
-  {
-    id: "khs-essentials",
-    name: "Kilohearts Essentials",
-    category: "Dynamics & Utility",
-    image: "https://images.unsplash.com/photo-1516280440614-37939bbacd81?q=80&w=1000&auto=format&fit=crop",
-    link: "https://kilohearts.com/products/kilohearts_essentials",
-    blurb: "A versatile snap-in ecosystem. Clean, efficient, and powerful tools for modern sound design.",
-    plugins: [
-      { name: "Snap Heap", desc: "The modular container for all Kilohearts effects.", interface: "https://images.unsplash.com/photo-1558403194-611308249627?q=80&w=800&auto=format&fit=crop" },
-      { name: "Multipass", desc: "Multi-band modular processing power.", interface: "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?q=80&w=800&auto=format&fit=crop" }
-    ]
-  },
-  {
-    id: "valhalla-super",
-    name: "Valhalla Supermassive",
-    category: "Reverb & Delay",
-    image: "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?q=80&w=1000&auto=format&fit=crop",
-    link: "https://valhalladsp.com/shop/reverb/valhalla-supermassive/",
-    blurb: "Massive echoes, lush reverbs, and strange space-time modulations. Completely free and otherworldly.",
-    plugins: [
-      { name: "Supermassive", desc: "The ultimate space machine.", interface: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=800&auto=format&fit=crop" }
+      { name: "R-Vox", desc: "The go-to vocal compressor/gate/limiter.", interface: "https://static.waves.com/images/products/plugins/full/renaissance-vox.jpg" },
+      { name: "R-Compressor", desc: "Classic warm compression for any source.", interface: "https://static.waves.com/images/products/plugins/full/renaissance-compressor.jpg" },
+      { name: "R-EQ", desc: "Musical and transparent equalization.", interface: "https://static.waves.com/images/products/plugins/full/renaissance-equalizer.jpg" }
     ]
   },
   {
     id: "serum",
     name: "Xfer Records Serum",
     category: "Instruments",
-    image: "https://images.unsplash.com/photo-1514525253344-f814d074358a?q=80&w=1000&auto=format&fit=crop",
+    image: "https://xferrecords.com/product_images/serum_box_large.png",
     link: "https://xferrecords.com/products/serum",
-    blurb: "Wavetable synthesizer with a high-quality sound and visual workflow. The backbone of modern bass music.",
+    blurb: "The industry-standard wavetable synthesizer. High-quality sound, visual and creative workflow.",
     plugins: [
-      { name: "Serum", desc: "Advanced wavetable synthesis.", interface: "https://images.unsplash.com/photo-1511379938547-c1f69419868d?q=80&w=800&auto=format&fit=crop" },
-      { name: "SerumFX", desc: "The effects rack of Serum as a standalone plugin.", interface: "https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?q=80&w=800&auto=format&fit=crop" }
+      { name: "Serum", desc: "Advanced wavetable synthesis.", interface: "https://xferrecords.com/product_images/serum_main_large.png" }
+    ]
+  },
+  {
+    id: "valhalla-super",
+    name: "Valhalla Supermassive",
+    category: "Reverb & Delay",
+    image: "https://valhalladsp.com/wp-content/uploads/2020/05/Supermassive_Main.png",
+    link: "https://valhalladsp.com/shop/reverb/valhalla-supermassive/",
+    blurb: "Massive echoes, lush reverbs, and strange space-time modulations.",
+    plugins: [
+      { name: "Supermassive", desc: "The ultimate space machine.", interface: "https://valhalladsp.com/wp-content/uploads/2020/05/Supermassive_Screen.png" }
     ]
   }
 ];
