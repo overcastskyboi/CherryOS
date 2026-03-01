@@ -1,25 +1,8 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { Gamepad2, ArrowLeft, RefreshCcw, Star, AlertCircle, Search, Trophy, Monitor } from 'lucide-react';
+import { Gamepad2, ArrowLeft, RefreshCcw, Star, AlertCircle, Search, Trophy, Monitor, ExternalLink } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import LazyImage from '../components/LazyImage';
 import { GAMING_DATA } from '../data/constants';
-
-const ErrorState = ({ message, onRetry }) => (
-  <div className="h-full flex flex-col items-center justify-center text-red-500 space-y-4">
-    <img src="assets/images/cloud_mascot.png" alt="Cloud Mascot" className="w-24 h-24 mb-4" />
-    <AlertCircle size={48} />
-    <div className="text-center">
-      <h2 className="text-xl font-bold uppercase tracking-widest">Connection Error</h2>
-      <p className="text-sm text-red-400/60 font-mono mt-2">{message}</p>
-    </div>
-    <button
-      onClick={onRetry}
-      className="px-6 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-500 rounded-full text-xs font-bold uppercase tracking-widest transition-colors flex items-center gap-2"
-    >
-      <RefreshCcw size={14} /> Retry Connection
-    </button>
-  </div>
-);
 
 const GameCenterApp = () => {
   const navigate = useNavigate();
@@ -28,113 +11,86 @@ const GameCenterApp = () => {
   const [data, setData] = useState(GAMING_DATA.collection);
   const [searchQuery, setSearchQuery] = useState('');
 
-  const stats = [
-    { label: 'Steam Level', value: GAMING_DATA.steam.level, icon: <Gamepad2 size={16} /> },
-    { label: 'HC Points', value: GAMING_DATA.retro.hardcorePoints, icon: <Trophy size={16} /> },
-    { label: 'Library Size', value: GAMING_DATA.steam.gamesCount, icon: <Monitor size={16} /> },
-  ];
+  const PROXY_URL = import.meta.env.VITE_PROXY_URL;
+  const STEAM_ID = GAMING_DATA.steam.steamId;
 
   const fetchData = useCallback(async () => {
-    const PROXY_URL = import.meta.env.VITE_PROXY_URL;
-    if (!PROXY_URL) return;
+    if (!PROXY_URL) {
+      console.warn("Proxy URL missing, staying in local mode.");
+      return;
+    }
 
     setLoading(true);
     setError(null);
 
     try {
-      const steamId = GAMING_DATA.steam.steamId;
-      // Fetch from both Steam and RetroAchievements
-      const [steamRes, raRes] = await Promise.all([
-        fetch(`${PROXY_URL}/steam?steamId=${steamId}`, { headers: { 'Accept': 'application/json' } }).catch(err => { console.error("Steam fetch error:", err); return null; }),
-        fetch(`${PROXY_URL}/retroachievements`, { headers: { 'Accept': 'application/json' } }).catch(err => { console.error("RetroAchievements fetch error:", err); return null; })
-      ]);
-
-      let combinedData = [];
-
-      if (steamRes && steamRes.ok) {
-        const steamJson = await steamRes.json();
-        if (Array.isArray(steamJson.data)) {
-          combinedData = [...combinedData, ...steamJson.data.map(item => ({
-            ...item,
-            coverImage: item.coverImage || GAMING_DATA.covers[item.title] || undefined
-          }))];
-        }
-      }
-
-      if (raRes && raRes.ok) {
-        const raJson = await raRes.json();
-        if (Array.isArray(raJson.data)) {
-          combinedData = [...combinedData, ...raJson.data.map(item => ({
-            ...item,
-            coverImage: item.coverImage || GAMING_DATA.covers[item.title] || undefined
-          }))];
-        }
-      }
-
-      if (combinedData.length > 0) {
-        setData(combinedData);
+      const response = await fetch(`${PROXY_URL}/steam?steamId=${STEAM_ID}`, {
+        headers: { 'Accept': 'application/json' }
+      });
+      
+      if (!response.ok) throw new Error("Cloud synchronization failed.");
+      
+      const json = await response.json();
+      if (json.data && Array.isArray(json.data)) {
+        const processed = json.data.map(item => ({
+          ...item,
+          coverImage: item.coverImage || GAMING_DATA.covers[item.title] || undefined
+        }));
+        
+        // Ensure requested top games are present if returned by API
+        setData(processed);
       }
     } catch (err) {
-      console.error("Fetch error in fetchData:", err); // Log the error explicitly
-      setError(err.message || 'Failed to fetch game data.');
+      console.error("Steam Fetch Error:", err);
+      setError("Cloud Sync Unavailable. Using local database.");
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [PROXY_URL, STEAM_ID]);
 
   useEffect(() => {
     fetchData();
   }, [fetchData]);
 
-  const filteredAndSortedData = useMemo(() => {
-    return data
-      .filter(item =>
-        item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        item.platform.toLowerCase().includes(searchQuery.toLowerCase())
-      )
-      .sort((a, b) => (b.rating || 0) - (a.rating || 0));
+  const filteredData = useMemo(() => {
+    return data.filter(item =>
+      item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      item.platform.toLowerCase().includes(searchQuery.toLowerCase())
+    ).sort((a, b) => (b.rating || 0) - (a.rating || 0));
   }, [data, searchQuery]);
 
-  const getRatingColor = (rating) => {
-    if (rating >= 9.5) return 'text-green-400';
-    if (rating >= 8.5) return 'text-blue-400';
-    return 'text-gray-400';
-  };
-
   const GameCard = ({ item }) => (
-    <div className="group relative bg-gray-900/40 border border-white/5 rounded-2xl overflow-hidden hover:border-green-500/30 transition-all hover:-translate-y-1 shadow-2xl">
-      <div className="aspect-square relative">
+    <div className="group relative glass-card rounded-2xl overflow-hidden hover:bg-white/[0.05] transition-all duration-500 animate-elegant">
+      <div className="aspect-square relative overflow-hidden">
         <LazyImage
-          src={item.coverImage || 'https://via.placeholder.com/400x400?text=No+Image'}
+          src={item.coverImage || GAMING_DATA.covers[item.title] || 'https://via.placeholder.com/400x400?text=No+Image'}
           alt={item.title}
-          className="w-full h-full object-cover"
+          className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent opacity-80" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent opacity-90" />
 
         <div className="absolute top-3 right-3">
-          <div className={`px-3 py-1 rounded-full bg-black/60 backdrop-blur-md border border-white/10 flex items-center gap-1.5 ${getRatingColor(item.rating)}`}>
-            <Star size={12} className="fill-current" />
-            <span className="text-xs font-black font-mono">{item.rating || 'N/A'}</span>
+          <div className="px-2 py-1 rounded-lg bg-black/60 backdrop-blur-md border border-white/10 flex items-center gap-1.5 text-emerald-400">
+            <Star size={10} className="fill-current" />
+            <span className="text-[10px] font-black">{item.rating || 'N/A'}</span>
           </div>
         </div>
 
-        <div className="absolute bottom-4 left-4 right-4">
-          <div className="flex flex-col gap-1">
-            <span className={`text-[10px] font-black uppercase tracking-[0.2em] ${item.platform === 'Steam' ? 'text-blue-400' : 'text-purple-400'}`}>
-                {item.platform}
-            </span>
-            <h3 className="text-sm font-bold text-white leading-tight line-clamp-2 group-hover:text-green-400 transition-colors uppercase italic">{item.title}</h3>
-          </div>
+        <div className="absolute bottom-4 left-4 right-4 space-y-1">
+          <span className="text-[8px] font-black uppercase tracking-[0.3em] text-blue-400">
+            {item.platform}
+          </span>
+          <h3 className="text-xs font-black text-white leading-tight line-clamp-2 uppercase italic">{item.title}</h3>
         </div>
       </div>
 
       <div className="p-4 bg-black/40 border-t border-white/5 flex items-center justify-between">
         <div className="flex flex-col">
-          <span className="text-[9px] text-gray-500 uppercase font-bold tracking-widest">Playtime</span>
-          <span className="text-[10px] text-gray-300 font-mono">{item.playtime}</span>
+          <span className="text-[8px] text-gray-500 uppercase font-black tracking-widest">Time</span>
+          <span className="text-[10px] text-gray-300 font-bold">{item.playtime}</span>
         </div>
-        <div className={`text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-sm ${
-          item.status === 'Mastered' || item.status === 'Completed' ? 'bg-green-500/10 text-green-500' : 'bg-blue-500/10 text-blue-500'
+        <div className={`px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest border ${
+          item.status === 'Mastered' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-blue-500/10 text-blue-400 border-blue-500/20'
         }`}>
           {item.status}
         </div>
@@ -143,98 +99,88 @@ const GameCenterApp = () => {
   );
 
   return (
-    <div className="bg-[#0a0a0a] text-gray-100 min-h-[100dvh] flex flex-col font-sans">
+    <div className="bg-[#050505] text-gray-100 min-h-[100dvh] flex flex-col relative overflow-hidden">
       {/* Header */}
-      <div className="bg-black/60 backdrop-blur-2xl sticky top-0 z-30 border-b border-white/5 px-6 py-4 flex items-center justify-between">
+      <header className="glass-header sticky top-0 z-40 px-6 py-6 flex items-center justify-between">
         <div className="flex items-center gap-6">
-          <button onClick={() => navigate('/')} className="p-2 hover:bg-white/5 rounded-full text-green-500 transition-colors">
-            <ArrowLeft size={24} />
+          <button onClick={() => navigate('/')} className="p-2 bg-white/5 hover:bg-white/10 rounded-xl text-emerald-500 transition-all border border-white/5 shadow-xl">
+            <ArrowLeft size={20} />
           </button>
-          <div className="flex flex-col">
-            <h1 className="text-2xl font-black tracking-tighter text-white uppercase italic">Game Center</h1>
-            <span className="text-[10px] text-gray-500 uppercase tracking-[0.3em] mt-1 font-bold">Cross-Platform Library</span>
+          <div>
+            <h1 className="text-xl font-black tracking-tighter text-white uppercase italic">Game Center</h1>
+            <p className="text-[9px] text-gray-500 uppercase tracking-[0.4em] font-bold mt-1">Direct Link // Steam API</p>
           </div>
         </div>
 
-        <div className="flex items-center gap-6">
-            <div className="hidden lg:flex gap-6">
-                {stats.map(stat => (
-                    <div key={stat.label} className="flex flex-col items-end">
-                        <span className="text-[9px] text-gray-500 uppercase font-bold tracking-tighter">{stat.label}</span>
-                        <div className="flex items-center gap-1.5 text-green-500">
-                            {stat.icon}
-                            <span className="font-mono text-xs font-bold">{stat.value}</span>
-                        </div>
-                    </div>
-                ))}
+        <div className="flex items-center gap-4">
+          <div className="hidden lg:flex gap-6 mr-4 border-r border-white/5 pr-6">
+            <div className="text-right">
+              <p className="text-[8px] text-gray-600 font-black uppercase tracking-widest">Library</p>
+              <p className="text-xs font-black text-emerald-500">{GAMING_DATA.steam.gamesCount}</p>
             </div>
-
-            <div className="relative hidden md:block">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" size={16} />
-                <input
-                    type="text"
-                    placeholder="Search collection..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="bg-white/5 border border-white/10 rounded-full py-2 pl-10 pr-4 text-xs font-bold text-white placeholder-gray-600 focus:outline-none focus:border-green-500/50 w-64 transition-all"
-                />
+            <div className="text-right">
+              <p className="text-[8px] text-gray-600 font-black uppercase tracking-widest">Level</p>
+              <p className="text-xs font-black text-blue-500">{GAMING_DATA.steam.level}</p>
             </div>
-
-            <button
-                onClick={fetchData}
-                disabled={loading}
-                className="p-3 bg-white/5 hover:bg-white/10 rounded-full transition-all disabled:opacity-30 border border-white/5"
-            >
-                <RefreshCcw size={18} className={loading ? 'animate-spin' : 'text-green-500'} />
-            </button>
+          </div>
+          
+          <div className="relative hidden md:block">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" size={14} />
+            <input
+              type="text"
+              placeholder="Filter vault..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="bg-white/5 border border-white/10 rounded-xl py-2 pl-10 pr-4 text-[10px] font-bold text-white placeholder-gray-600 focus:outline-none focus:border-emerald-500/50 w-48 transition-all"
+            />
+          </div>
+          <button 
+            onClick={fetchData}
+            disabled={loading}
+            className="p-2 bg-white/5 hover:bg-white/10 rounded-xl border border-white/5 transition-all disabled:opacity-30"
+          >
+            <RefreshCcw size={16} className={loading ? 'animate-spin' : 'text-emerald-500'} />
+          </button>
         </div>
-      </div>
+      </header>
 
-      <main className="flex-1 overflow-y-auto p-6 md:p-12">
-        <div className="max-w-7xl mx-auto">
-          {error && <ErrorState message={error} onRetry={fetchData} />}
-          {!error && (
-            <>
-              {/* Search Mobile */}
-              <div className="md:hidden mb-8 relative">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" size={16} />
-                    <input
-                        type="text"
-                        placeholder="Search collection..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        className="bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-4 text-sm font-bold text-white placeholder-gray-600 focus:outline-none focus:border-green-500/50 w-full transition-all"
-                    />
-              </div>
+      <main className="flex-1 p-6 md:p-12 relative z-10">
+        <div className="max-w-7xl mx-auto space-y-12">
+          {error && (
+            <div className="flex items-center justify-center p-4 bg-emerald-500/5 border border-emerald-500/10 rounded-2xl gap-3 text-emerald-500">
+              <AlertCircle size={16} />
+              <p className="text-[10px] font-black uppercase tracking-widest">{error}</p>
+            </div>
+          )}
 
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 gap-8">
-                {filteredAndSortedData.map((item, idx) => (
-                  <GameCard key={idx} item={item} />
-                ))}
-              </div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4 md:gap-6">
+            {filteredData.map((item, idx) => (
+              <GameCard key={idx} item={item} />
+            ))}
+          </div>
 
-              {filteredAndSortedData.length === 0 && (
-                  <div className="h-96 flex flex-col items-center justify-center text-center space-y-4">
-                      <div className="p-6 bg-white/5 rounded-full">
-                        <Gamepad2 size={48} className="text-gray-700" />
-                      </div>
-                      <p className="text-gray-500 font-bold uppercase tracking-widest text-xs">No games found in your collection</p>
-                  </div>
-              )}
-            </>
+          {filteredData.length === 0 && (
+            <div className="h-64 flex flex-col items-center justify-center text-center opacity-20">
+              <Gamepad2 size={48} className="mb-4" />
+              <p className="text-[10px] font-black uppercase tracking-[0.3em]">Vault is Empty</p>
+            </div>
           )}
         </div>
       </main>
 
-      {/* Footer Info */}
-      {!import.meta.env.VITE_PROXY_URL && (
-        <div className="bg-green-500/5 border-t border-green-500/10 px-6 py-2 flex items-center gap-3">
-          <AlertCircle size={14} className="text-green-500" />
-          <p className="text-[9px] text-green-500/80 uppercase font-black tracking-widest">
-            Steam API Sync Offline: Displaying cached collection metadata.
-          </p>
+      {/* Footer Decor */}
+      <footer className="mt-auto px-6 py-4 flex justify-between items-center border-t border-white/5 text-gray-700 bg-black/40">
+        <span className="text-[8px] font-mono uppercase tracking-widest">Profile_ID: AugustElliott</span>
+        <div className="flex gap-4 items-center">
+          <a href={`https://steamcommunity.com/profiles/${STEAM_ID}`} target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">
+            <ExternalLink size={12} />
+          </a>
+          <div className="flex gap-1">
+            <div className="w-1 h-1 bg-emerald-500" />
+            <div className="w-1 h-1 bg-emerald-500 animate-pulse" />
+          </div>
         </div>
-      )}
+      </footer>
     </div>
   );
 };

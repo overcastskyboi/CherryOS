@@ -62,6 +62,11 @@ jobs:
         run: npm ci
 
       - name: Build Application
+        env:
+          VITE_PROXY_URL: ${{ secrets.VITE_PROXY_URL }}
+          VITE_WEATHER_API_KEY: ${{ secrets.VITE_WEATHER_API_KEY }}
+          VITE_OCI_NAMESPACE: ${{ secrets.OCI_NAMESPACE }}
+          VITE_OCI_REGION: ${{ secrets.OCI_REGION }}
         run: npm run build
 
       - name: Deploy to GitHub Pages
@@ -93,6 +98,11 @@ jobs:
         run: npm ci
 
       - name: Build Application
+        env:
+          VITE_PROXY_URL: ${{ secrets.VITE_PROXY_URL }}
+          VITE_WEATHER_API_KEY: ${{ secrets.VITE_WEATHER_API_KEY }}
+          VITE_OCI_NAMESPACE: ${{ secrets.OCI_NAMESPACE }}
+          VITE_OCI_REGION: ${{ secrets.OCI_REGION }}
         run: npm run build
 
       - name: Install OCI CLI
