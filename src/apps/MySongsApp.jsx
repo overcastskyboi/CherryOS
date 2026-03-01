@@ -135,15 +135,15 @@ const MyMusicApp = () => {
     <div className="bg-[#0a0a0a] text-white min-h-[100dvh] flex flex-col relative select-none font-sans pb-24 z-10 animate-elegant">
       <div className="absolute inset-0 bg-gradient-to-br from-blue-950/20 via-black to-yellow-950/20 pointer-events-none" />
       
-      <header className="bg-black/60 backdrop-blur-2xl sticky top-0 z-40 border-b border-white/5 px-6 py-4 flex items-center justify-between">
-        <div className="flex items-center gap-4">
+      <header className="bg-black/60 backdrop-blur-2xl sticky top-0 z-40 border-b border-white/5 px-4 md:px-6 py-4 flex items-center justify-between">
+        <div className="flex items-center gap-3 md:gap-4">
           <button onClick={() => navigate('/')} className="p-2 hover:bg-white/5 rounded-full text-yellow-500 transition-colors">
-            <ArrowLeft size={24} />
+            <ArrowLeft size={isMobile ? 20 : 24} />
           </button>
           <div>
-            <h1 className="text-xl font-black tracking-tighter text-white uppercase italic">My Music</h1>
-            <p className="text-gray-500 text-[9px] font-bold uppercase tracking-widest mt-1">
-              {isDemoMode ? 'Demo Mode // Local Buffer' : `Official Releases // ${library.length} Collections`}
+            <h1 className="text-lg md:text-xl font-black tracking-tighter text-white uppercase italic leading-none">My Music</h1>
+            <p className="text-gray-500 text-[8px] md:text-[9px] font-bold uppercase tracking-widest mt-1">
+              {isDemoMode ? 'Demo' : 'Official'} // {library.length} Collections
             </p>
           </div>
         </div>
@@ -152,16 +152,16 @@ const MyMusicApp = () => {
         </button>
       </header>
 
-      <main className="flex-1 p-6 relative z-20">
+      <main className="flex-1 p-4 md:p-6 relative z-20">
         {view === 'library' && (
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 max-w-7xl mx-auto">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6 max-w-7xl mx-auto">
             {library.map((album, i) => (
               <button 
                 key={i} 
                 onClick={() => { setSelectedAlbum(album); setView('album'); }}
-                className="group text-left space-y-3 focus:outline-none"
+                className="group text-left space-y-2 md:space-y-3 focus:outline-none"
               >
-                <div className="relative aspect-square rounded-2xl overflow-hidden glass-card group-hover:border-yellow-500/30 transition-all shadow-2xl">
+                <div className="relative aspect-square rounded-xl md:rounded-2xl overflow-hidden glass-card group-hover:border-yellow-500/30 transition-all shadow-2xl">
                   <LazyImage 
                     src={album.cover_url} 
                     alt={album.album_name} 
@@ -170,8 +170,8 @@ const MyMusicApp = () => {
                   <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors" />
                 </div>
                 <div>
-                  <h3 className="text-sm font-black truncate uppercase tracking-tight text-white">{album.album_name}</h3>
-                  <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">{album.artist}</p>
+                  <h3 className="text-xs md:text-sm font-black truncate uppercase tracking-tight text-white">{album.album_name}</h3>
+                  <p className="text-[8px] md:text-[10px] text-gray-500 font-bold uppercase tracking-widest">{album.artist}</p>
                 </div>
               </button>
             ))}
@@ -179,32 +179,32 @@ const MyMusicApp = () => {
         )}
 
         {view === 'album' && selectedAlbum && (
-          <div className="max-w-4xl mx-auto space-y-8 animate-in slide-in-from-right-4 duration-300">
-            <button onClick={() => setView('library')} className="text-xs font-black text-gray-500 hover:text-white flex items-center gap-2 uppercase tracking-widest transition-colors">
-              <ArrowLeft size={14} /> Back to Library
+          <div className="max-w-4xl mx-auto space-y-6 md:space-y-8 animate-in slide-in-from-right-4 duration-300">
+            <button onClick={() => setView('library')} className="text-[10px] font-black text-gray-500 hover:text-white flex items-center gap-2 uppercase tracking-widest transition-colors">
+              <ArrowLeft size={12} /> Back
             </button>
             
-            <div className="flex flex-col md:flex-row gap-8 items-end">
-              <div className="w-48 h-48 rounded-2xl overflow-hidden shadow-2xl glass-card">
+            <div className="flex flex-col md:flex-row gap-6 md:gap-8 items-center md:items-end text-center md:text-left">
+              <div className="w-40 h-40 md:w-48 md:h-48 rounded-xl md:rounded-2xl overflow-hidden shadow-2xl glass-card">
                 <LazyImage src={selectedAlbum.cover_url} alt={selectedAlbum.album_name} />
               </div>
               <div className="flex-1 space-y-2">
-                <span className="text-[10px] font-black text-yellow-500 uppercase tracking-[0.3em]">{selectedAlbum.type}</span>
-                <h2 className="text-4xl font-black text-white uppercase italic tracking-tighter">{selectedAlbum.album_name}</h2>
-                <p className="text-sm text-gray-400 font-bold uppercase tracking-widest">{selectedAlbum.artist} • {selectedAlbum.releaseDate}</p>
+                <span className="text-[8px] md:text-[10px] font-black text-yellow-500 uppercase tracking-[0.3em]">{selectedAlbum.type}</span>
+                <h2 className="text-2xl md:text-4xl font-black text-white uppercase italic tracking-tighter leading-none">{selectedAlbum.album_name}</h2>
+                <p className="text-xs md:text-sm text-gray-400 font-bold uppercase tracking-widest">{selectedAlbum.artist} • {selectedAlbum.releaseDate}</p>
               </div>
             </div>
 
-            <div className="glass-card rounded-2xl border border-white/5 divide-y divide-white/5 overflow-hidden shadow-2xl">
+            <div className="glass-card rounded-xl md:rounded-2xl border border-white/5 divide-y divide-white/5 overflow-hidden shadow-2xl">
               {selectedAlbum.tracks.map((track, i) => (
                 <button 
                   key={i} 
                   onClick={() => playCollection(selectedAlbum, i)}
-                  className="w-full flex items-center gap-4 p-4 hover:bg-white/10 transition-colors text-left group"
+                  className="w-full flex items-center gap-3 md:gap-4 p-3 md:p-4 hover:bg-white/10 transition-colors text-left group"
                 >
-                  <span className="text-xs font-mono text-gray-600 w-4">{i + 1}</span>
-                  <span className="flex-1 text-sm font-bold group-hover:text-yellow-500 transition-colors uppercase tracking-tight">{track.title}</span>
-                  <Music size={14} className="text-gray-800 group-hover:text-yellow-500 transition-colors" />
+                  <span className="text-[10px] md:text-xs font-mono text-gray-600 w-4">{i + 1}</span>
+                  <span className="flex-1 text-xs md:text-sm font-bold group-hover:text-yellow-500 transition-colors uppercase tracking-tight truncate">{track.title}</span>
+                  <Music size={12} className="text-gray-800 group-hover:text-yellow-500 transition-colors" />
                 </button>
               ))}
             </div>
@@ -213,30 +213,30 @@ const MyMusicApp = () => {
       </main>
 
       {queue.length > 0 && (
-        <div className="fixed bottom-0 left-0 right-0 h-20 bg-black/95 backdrop-blur-3xl border-t border-white/10 px-6 flex items-center justify-between z-50 shadow-[0_-10px_50px_rgba(0,0,0,0.9)]">
-          <div className="flex items-center gap-4 w-1/3 cursor-pointer group" onClick={() => setView('album')}>
-            <div className="relative">
-              <LazyImage src={queue[currentIndex].cover_url} alt={queue[currentIndex].title} className="w-12 h-12 rounded-xl object-cover border border-white/10 relative z-10" />
+        <div className="fixed bottom-0 left-0 right-0 h-20 md:h-24 bg-black/95 backdrop-blur-3xl border-t border-white/10 px-4 md:px-8 flex items-center justify-between z-50 shadow-[0_-10px_50px_rgba(0,0,0,0.9)]">
+          <div className="flex items-center gap-3 md:gap-4 flex-1 md:w-1/3 cursor-pointer group" onClick={() => setView('album')}>
+            <div className="relative shrink-0">
+              <LazyImage src={queue[currentIndex].cover_url} alt={queue[currentIndex].title} className="w-10 h-10 md:w-12 md:h-12 rounded-lg md:rounded-xl object-cover border border-white/10 relative z-10" />
               <div className="absolute inset-0 blur-2xl opacity-40 group-hover:opacity-80 transition-opacity bg-pink-500" />
             </div>
             <div className="min-w-0">
-              <div className="text-xs font-black truncate uppercase text-white tracking-tight">{queue[currentIndex].title}</div>
-              <div className="text-[9px] text-gray-500 font-bold truncate uppercase tracking-widest">{queue[currentIndex].artist}</div>
+              <div className="text-[10px] md:text-xs font-black truncate uppercase text-white tracking-tight">{queue[currentIndex].title}</div>
+              <div className="text-[8px] md:text-[9px] text-gray-500 font-bold truncate uppercase tracking-widest">{queue[currentIndex].artist}</div>
             </div>
           </div>
 
-          <div className="flex flex-col items-center gap-2">
-            <div className="flex items-center gap-6">
-              <button onClick={() => skipTrack(-1)} className="hover:text-white transition-colors"><SkipForward size={20} className="rotate-180" /></button>
-              <button onClick={togglePlay} className="w-10 h-10 bg-white rounded-full flex items-center justify-center text-black hover:scale-110 active:scale-95 transition-all">
-                {isPlaying ? <Pause size={20} fill="black" /> : <Play size={20} fill="black" className="ml-0.5" />}
+          <div className="flex flex-col items-center gap-1 md:gap-2 px-4 shrink-0">
+            <div className="flex items-center gap-4 md:gap-6">
+              <button onClick={() => skipTrack(-1)} className="hover:text-white transition-colors"><SkipForward size={18} className="rotate-180" /></button>
+              <button onClick={togglePlay} className="w-9 h-9 md:w-10 md:h-10 bg-white rounded-full flex items-center justify-center text-black hover:scale-110 active:scale-95 transition-all">
+                {isPlaying ? <Pause size={18} fill="black" /> : <Play size={18} fill="black" className="ml-0.5" />}
               </button>
-              <button onClick={() => skipTrack(1)} className="hover:text-white transition-colors"><SkipForward size={20} /></button>
+              <button onClick={() => skipTrack(1)} className="hover:text-white transition-colors"><SkipForward size={18} /></button>
             </div>
           </div>
 
-          <div className="w-1/3 flex justify-end items-center gap-4">
-            <div className="hidden md:block w-48 h-1 bg-white/10 rounded-full overflow-hidden">
+          <div className="hidden md:flex w-1/3 justify-end items-center gap-4">
+            <div className="w-48 h-1 bg-white/10 rounded-full overflow-hidden">
               <div className="h-full bg-yellow-500 transition-all duration-300" style={{ width: `${(progress / (duration || 1)) * 100}%` }} />
             </div>
             <span className="text-[10px] font-mono text-gray-500 w-10 text-right">{Math.floor(progress / 60)}:{(Math.floor(progress % 60)).toString().padStart(2, '0')}</span>

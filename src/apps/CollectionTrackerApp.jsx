@@ -193,59 +193,59 @@ export default function CollectionTrackerApp() {
     <div className="min-h-[100dvh] bg-[#050505] text-slate-100 flex flex-col font-sans pb-20 relative overflow-hidden">
       <div className="absolute bottom-0 left-0 w-[60%] h-[60%] bg-amber-950/10 blur-[150px] rounded-full pointer-events-none" />
 
-      <header className="glass-header sticky top-0 z-40 px-6 py-6 flex items-center justify-between">
-        <div className="flex items-center gap-6">
+      <header className="glass-header sticky top-0 z-40 px-4 md:px-6 py-4 md:py-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="flex items-center gap-4 md:gap-6">
           <button onClick={() => navigate('/')} className="p-2 bg-white/5 hover:bg-white/10 rounded-xl text-amber-500 transition-all border border-white/5 shadow-xl">
-            <ArrowLeft size={20} />
+            <ArrowLeft size={isMobile ? 18 : 20} />
           </button>
           <div>
-            <h1 className="text-xl font-black tracking-tighter text-white uppercase italic">The Vault</h1>
-            <p className="text-[9px] text-gray-500 uppercase tracking-[0.4em] font-bold mt-1">ASSET_LINK // SECURE_TRACKING</p>
+            <h1 className="text-lg md:text-xl font-black tracking-tighter text-white uppercase italic leading-none">The Vault</h1>
+            <p className="text-[8px] md:text-[9px] text-gray-500 uppercase tracking-[0.4em] font-bold mt-1 mobile-hide">ASSET_LINK // SECURE_TRACKING</p>
           </div>
         </div>
-        <div className="flex items-center gap-4">
-          <div className="relative hidden md:block">
+        <div className="flex items-center gap-3 md:gap-4">
+          <div className="relative flex-1 md:flex-none">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" size={14} />
             <input
               type="text"
-              placeholder="Search assets..."
+              placeholder="Search..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="bg-white/5 border border-white/10 rounded-xl py-2 pl-10 pr-4 text-[10px] font-bold text-white focus:outline-none w-64"
+              className="bg-white/5 border border-white/10 rounded-xl py-2 pl-10 pr-4 text-[10px] font-bold text-white focus:outline-none w-full md:w-64 shadow-inner transition-all focus:border-amber-500/50"
             />
           </div>
-          <button onClick={fetchAndParseCSV} className="p-2 bg-white/5 hover:bg-white/10 rounded-xl border border-white/5 transition-all">
-            <RefreshCcw size={16} className={loading ? 'animate-spin' : 'text-amber-500'} />
+          <button onClick={fetchAndParseCSV} className="p-2 bg-white/5 hover:bg-white/10 rounded-xl border border-white/5 transition-all text-amber-500">
+            <RefreshCcw size={16} className={loading ? 'animate-spin' : ''} />
           </button>
         </div>
       </header>
 
-      <main className="flex-1 p-6 md:p-12 relative z-10 space-y-12 max-w-7xl mx-auto w-full">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="glass-card p-8 rounded-[2rem] space-y-2 relative overflow-hidden">
-            <div className="absolute top-0 right-0 p-4 opacity-5 text-amber-500"><DollarSign size={80} /></div>
-            <p className="text-[10px] font-black text-amber-500 uppercase tracking-widest">Market Value</p>
-            <p className="text-4xl font-black text-white tracking-tighter italic">
+      <main className="flex-1 p-4 md:p-12 relative z-10 space-y-8 md:space-y-12 max-w-7xl mx-auto w-full">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
+          <div className="glass-card p-6 md:p-8 rounded-2xl md:rounded-[2rem] space-y-1 md:space-y-2 relative overflow-hidden">
+            <div className="absolute top-0 right-0 p-4 opacity-5 text-amber-500"><DollarSign size={isMobile ? 60 : 80} /></div>
+            <p className="text-[8px] md:text-[10px] font-black text-amber-500 uppercase tracking-widest">Market Value</p>
+            <p className="text-3xl md:text-4xl font-black text-white tracking-tighter italic leading-none">
               ${stats.total.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </p>
-            <p className="text-[9px] text-gray-500 font-bold uppercase tracking-widest">{activeCategory === 'All' ? 'Total Portfolio' : activeCategory}</p>
+            <p className="text-[8px] md:text-[9px] text-gray-500 font-bold uppercase tracking-widest leading-none">{activeCategory === 'All' ? 'Total Portfolio' : activeCategory}</p>
           </div>
-          <div className="md:col-span-2 glass-card rounded-[2rem] p-6 h-48">
+          <div className="md:col-span-2 glass-card rounded-2xl md:rounded-[2rem] p-4 md:p-6 h-40 md:h-48">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={chartData} margin={{ top: 20, right: 30, left: 0, bottom: 0 }}>
+              <BarChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#ffffff05" vertical={false} />
                 <XAxis 
                   dataKey="name" 
                   axisLine={false} 
                   tickLine={false} 
-                  tick={{ fill: '#6b7280', fontSize: 10, fontWeight: 'bold' }} 
+                  tick={{ fill: '#6b7280', fontSize: isMobile ? 8 : 10, fontWeight: 'bold' }} 
                 />
                 <YAxis hide />
                 <Tooltip 
                   cursor={{ fill: 'rgba(255,255,255,0.05)' }}
                   content={<CustomTooltip />}
                 />
-                <Bar dataKey="value" radius={[6, 6, 0, 0]} barSize={40}>
+                <Bar dataKey="value" radius={[4, 4, 0, 0]} barSize={isMobile ? 24 : 40}>
                   {chartData.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={entry.color} fillOpacity={0.6} />
                   ))}
@@ -255,18 +255,18 @@ export default function CollectionTrackerApp() {
           </div>
         </div>
 
-        <div className="flex gap-2 overflow-x-auto pb-4 scrollbar-hide">
+        <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide -mx-4 px-4 md:mx-0 md:px-0">
           {categories.map(cat => (
             <button
               key={cat}
               onClick={() => setActiveTab(cat)}
-              className={`flex items-center gap-2 px-4 py-2 rounded-full text-[9px] font-black uppercase tracking-widest transition-all border ${
+              className={`flex items-center gap-2 px-4 py-2 rounded-full text-[8px] md:text-[9px] font-black uppercase tracking-widest transition-all border shrink-0 ${
                 activeCategory === cat 
                   ? 'bg-white text-black border-white shadow-[0_0_20px_rgba(255,255,255,0.2)]' 
                   : 'bg-white/5 text-gray-500 border-white/5 hover:text-white'
               }`}
             >
-              {cat !== 'All' && <CategoryIcon category={cat} size={12} />}
+              {cat !== 'All' && <CategoryIcon category={cat} size={10} />}
               {cat}
             </button>
           ))}
@@ -277,17 +277,17 @@ export default function CollectionTrackerApp() {
             const broadConfig = CATEGORY_MAP[item.broadCategory] || CATEGORY_MAP['Other'];
             const SpecificIcon = getSpecificIcon(item.specificSet, item.broadCategory);
             return (
-              <div key={item.id} className="glass-card p-6 rounded-2xl group hover:bg-white/[0.05] transition-all relative">
-                <div className="flex justify-between items-start mb-4">
+              <div key={item.id} className="glass-card p-5 md:p-6 rounded-xl md:rounded-2xl group hover:bg-white/[0.05] transition-all relative">
+                <div className="flex justify-between items-start mb-3 md:mb-4">
                   <div className="p-2 rounded-lg bg-black/40 border border-white/5 transition-colors" style={{ color: broadConfig.color }}>
-                    <SpecificIcon size={16} />
+                    <SpecificIcon size={14} />
                   </div>
-                  <span className="text-[10px] font-mono font-black" style={{ color: broadConfig.color }}>
+                  <span className="text-[9px] md:text-[10px] font-mono font-black" style={{ color: broadConfig.color }}>
                     ${item.value.toFixed(2)}
                   </span>
                 </div>
-                <h3 className="text-xs font-black text-white uppercase italic tracking-tight line-clamp-2 mb-1">{item.name}</h3>
-                <p className="text-[8px] font-black text-gray-600 uppercase tracking-widest">{item.specificSet}</p>
+                <h3 className="text-[11px] md:text-xs font-black text-white uppercase italic tracking-tight line-clamp-2 mb-1 leading-tight">{item.name}</h3>
+                <p className="text-[7px] md:text-[8px] font-black text-gray-600 uppercase tracking-widest">{item.specificSet}</p>
                 <div className="absolute bottom-0 left-6 right-6 h-[1px] bg-gradient-to-r from-transparent via-white/5 to-transparent group-hover:via-white/20 transition-all" />
                 <div 
                   className="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-[2px] transition-all duration-500 group-hover:w-1/2" 

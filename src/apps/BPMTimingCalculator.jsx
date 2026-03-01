@@ -33,17 +33,17 @@ const BPMTimingCalculator = () => {
       <div className="absolute top-0 right-0 w-[50%] h-[50%] bg-rose-950/10 blur-[120px] rounded-full pointer-events-none" />
 
       {/* Header */}
-      <header className="glass-header sticky top-0 z-40 px-6 py-6 flex items-center justify-between border-b border-white/5">
-        <div className="flex items-center gap-6">
+      <header className="glass-header sticky top-0 z-40 px-4 md:px-6 py-4 md:py-6 flex items-center justify-between border-b border-white/5">
+        <div className="flex items-center gap-4 md:gap-6">
           <button onClick={() => navigate('/')} className="p-2 bg-white/5 hover:bg-white/10 rounded-xl text-rose-500 transition-all border border-white/5 shadow-xl">
-            <ArrowLeft size={20} />
+            <ArrowLeft size={isMobile ? 18 : 20} />
           </button>
           <div>
-            <h1 className="text-xl font-black tracking-tighter text-white uppercase italic leading-none">BPM Sync</h1>
-            <p className="text-[9px] text-gray-500 uppercase tracking-[0.4em] font-bold mt-1.5">Production Assistant // v2.5.2</p>
+            <h1 className="text-lg md:text-xl font-black tracking-tighter text-white uppercase italic leading-none">BPM Sync</h1>
+            <p className="text-[8px] md:text-[9px] text-gray-500 uppercase tracking-[0.4em] font-bold mt-1 mobile-hide">Assistant // v2.5.2</p>
           </div>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 md:gap-3">
           <div className="text-right hidden sm:block">
             <p className="text-[8px] font-black text-gray-600 uppercase tracking-widest leading-none">Status</p>
             <p className="text-[10px] font-black text-rose-500 uppercase italic">Computing</p>
@@ -52,54 +52,52 @@ const BPMTimingCalculator = () => {
         </div>
       </header>
 
-      <main className="flex-1 p-6 lg:p-12 relative z-10 max-w-7xl mx-auto w-full space-y-12">
+      <main className="flex-1 p-4 md:p-12 relative z-10 max-w-7xl mx-auto w-full space-y-8 md:space-y-12">
         {/* Tempo Module */}
-        <section className="flex flex-col items-center gap-8 py-12 glass-card rounded-[3rem] border-white/5 shadow-2xl relative overflow-hidden group">
+        <section className="flex flex-col items-center gap-4 md:gap-8 py-8 md:py-12 glass-card rounded-2xl md:rounded-[3rem] border-white/5 shadow-2xl relative overflow-hidden group">
           <div className="absolute inset-0 bg-gradient-to-b from-rose-500/5 to-transparent pointer-events-none" />
-          <div className="text-center space-y-2 relative z-10">
-            <label className="text-[10px] font-black uppercase tracking-[0.6em] text-rose-500">Universal Tempo Pulse</label>
-            <p className="text-[9px] text-gray-600 font-bold uppercase">Adjust to match your DAW session for exact alignment</p>
+          <div className="text-center space-y-1 md:space-y-2 relative z-10 px-4">
+            <label className="text-[8px] md:text-[10px] font-black uppercase tracking-[0.4em] md:tracking-[0.6em] text-rose-500">Universal Tempo Pulse</label>
+            <p className="text-[7px] md:text-[9px] text-gray-600 font-bold uppercase mobile-hide">Adjust to match your DAW session</p>
           </div>
-          <div className="flex items-end gap-6 relative z-10">
+          <div className="flex items-end gap-3 md:gap-6 relative z-10">
             <input
               type="number"
               value={bpm}
               onChange={(e) => setBpm(Math.max(1, parseInt(e.target.value) || 0))}
-              className="bg-transparent text-white text-[10rem] font-black tracking-tighter w-72 text-center border-b-4 border-rose-500/10 focus:border-rose-500/40 transition-all outline-none italic leading-none selection:bg-rose-500/30"
+              className="bg-transparent text-white text-7xl md:text-[10rem] font-black tracking-tighter w-40 md:w-72 text-center border-b-2 md:border-b-4 border-rose-500/10 focus:border-rose-500/40 transition-all outline-none italic leading-none selection:bg-rose-500/30"
             />
-            <span className="text-3xl font-black text-rose-500 mb-6 tracking-tighter italic uppercase drop-shadow-[0_0_20px_rgba(244,63,94,0.3)]">BPM</span>
+            <span className="text-xl md:text-3xl font-black text-rose-500 mb-2 md:mb-6 tracking-tighter italic uppercase drop-shadow-[0_0_20px_rgba(244,63,94,0.3)]">BPM</span>
           </div>
         </section>
 
         {hasResults ? (
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 animate-elegant">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8 animate-elegant">
             {/* Delay & Time Alignment Module */}
-            <div className="lg:col-span-5 space-y-8">
-              <div className="space-y-6">
+            <div className="lg:col-span-5 space-y-6 md:space-y-8">
+              <div className="space-y-4 md:space-y-6">
                 <div className="flex items-center gap-3 border-l-2 border-rose-500 pl-4">
-                  <Clock size={18} className="text-rose-500" />
-                  <h2 className="text-sm font-black text-white uppercase tracking-widest italic">Time Alignment</h2>
+                  <Clock size={16} className="text-rose-500" />
+                  <h2 className="text-xs md:text-sm font-black text-white uppercase tracking-widest italic">Time Alignment</h2>
                 </div>
-                <InfoTag text="Set your Delay/Echo plugins to these exact MS values" />
                 <div className="grid grid-cols-1 gap-3">
                   {Object.entries(results.delays).map(([note, v]) => (
-                    <div key={note} className="glass-card p-5 rounded-[1.5rem] flex items-center justify-between group hover:bg-white/[0.03] transition-all border-white/[0.02]">
+                    <div key={note} className="glass-card p-4 md:p-5 rounded-xl md:rounded-[1.5rem] flex items-center justify-between group hover:bg-white/[0.03] transition-all border-white/[0.02]">
                       <div className="flex flex-col">
-                        <span className="text-xs font-black text-gray-500 group-hover:text-rose-400 transition-colors tracking-[0.2em]">{note}</span>
-                        <span className="text-[7px] font-bold text-gray-700 uppercase">Division</span>
+                        <span className="text-[10px] md:text-xs font-black text-gray-500 group-hover:text-rose-400 transition-colors tracking-widest">{note}</span>
                       </div>
-                      <div className="flex gap-8">
+                      <div className="flex gap-4 md:gap-8">
                         <div className="text-right space-y-0.5">
-                          <p className="text-[8px] text-gray-600 font-black uppercase tracking-tighter">Straight</p>
-                          <p className="text-sm font-black text-white italic">{v.straight}ms</p>
+                          <p className="text-[7px] md:text-[8px] text-gray-600 font-black uppercase tracking-tighter">Str</p>
+                          <p className="text-xs md:text-sm font-black text-white italic">{v.straight}</p>
                         </div>
                         <div className="text-right space-y-0.5">
-                          <p className="text-[8px] text-rose-900 font-black uppercase tracking-tighter">Dotted</p>
-                          <p className="text-sm font-black text-rose-400/80 italic">{v.dotted}ms</p>
+                          <p className="text-[7px] md:text-[8px] text-rose-900 font-black uppercase tracking-tighter">Dot</p>
+                          <p className="text-xs md:text-sm font-black text-rose-400/80 italic">{v.dotted}</p>
                         </div>
                         <div className="text-right space-y-0.5">
-                          <p className="text-[8px] text-gray-600 font-black uppercase tracking-tighter">Triplet</p>
-                          <p className="text-sm font-black text-white italic">{v.triplet}ms</p>
+                          <p className="text-[7px] md:text-[8px] text-gray-600 font-black uppercase tracking-tighter">Tri</p>
+                          <p className="text-xs md:text-sm font-black text-white italic">{v.triplet}</p>
                         </div>
                       </div>
                     </div>
@@ -109,86 +107,83 @@ const BPMTimingCalculator = () => {
             </div>
 
             {/* Modulation & Dynamics Modules */}
-            <div className="lg:col-span-7 space-y-12">
+            <div className="lg:col-span-7 space-y-10 md:space-y-12">
               {/* LFO Section */}
-              <div className="space-y-6">
+              <div className="space-y-4 md:space-y-6">
                 <div className="flex items-center gap-3 border-l-2 border-rose-500 pl-4">
-                  <Waves size={18} className="text-rose-500" />
-                  <h2 className="text-sm font-black text-white uppercase tracking-widest italic">Oscillation Rates</h2>
+                  <Waves size={16} className="text-rose-500" />
+                  <h2 className="text-xs md:text-sm font-black text-white uppercase tracking-widest italic">Oscillation Rates</h2>
                 </div>
-                <InfoTag text="Use these Hz values for LFO Speed in Synths & Auto-Filters" />
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 md:gap-4">
                   {Object.entries(results.lfoHz).map(([note, hz]) => (
-                    <div key={note} className="glass-card p-6 rounded-3xl text-center space-y-2 group hover:border-rose-500/20 transition-all">
-                      <p className="text-[10px] font-black text-gray-600 uppercase tracking-widest">{note}</p>
-                      <p className="text-2xl font-black text-rose-500 italic tracking-tighter">{hz}Hz</p>
+                    <div key={note} className="glass-card p-4 md:p-6 rounded-2xl md:rounded-3xl text-center space-y-1 group hover:border-rose-500/20 transition-all">
+                      <p className="text-[8px] md:text-[10px] font-black text-gray-600 uppercase tracking-widest">{note}</p>
+                      <p className="text-lg md:text-2xl font-black text-rose-500 italic tracking-tighter">{hz}Hz</p>
                     </div>
                   ))}
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
                 {/* Compressor Section */}
-                <div className="space-y-6">
+                <div className="space-y-4 md:space-y-6">
                   <div className="flex items-center gap-3 border-l-2 border-rose-500 pl-4">
-                    <Zap size={18} className="text-rose-500" />
-                    <h2 className="text-sm font-black text-white uppercase tracking-widest italic">Dynamics</h2>
+                    <Zap size={16} className="text-rose-500" />
+                    <h2 className="text-xs md:text-sm font-black text-white uppercase tracking-widest italic">Dynamics</h2>
                   </div>
-                  <InfoTag text="Sync your Compressor Release to these timings" />
-                  <div className="glass-card p-6 rounded-[2rem] space-y-6">
+                  <div className="glass-card p-5 md:p-6 rounded-2xl md:rounded-[2rem] space-y-4 md:space-y-6">
                     <div className="flex justify-between items-center group">
-                      <span className="text-[9px] font-black text-gray-500 uppercase tracking-widest group-hover:text-rose-400 transition-colors">Snap Attack</span>
-                      <span className="text-xl font-black text-white italic">{results.compressor.attackSnapMs}ms</span>
+                      <span className="text-[8px] md:text-[9px] font-black text-gray-500 uppercase tracking-widest group-hover:text-rose-400 transition-colors">Snap Attack</span>
+                      <span className="text-lg md:text-xl font-black text-white italic">{results.compressor.attackSnapMs}ms</span>
                     </div>
                     <div className="h-[1px] bg-white/5" />
-                    <div className="space-y-4">
+                    <div className="space-y-3 md:space-y-4">
                       <div className="flex justify-between items-center">
-                        <span className="text-[9px] font-black text-gray-600 uppercase">Fast Release</span>
-                        <span className="text-sm font-black text-white italic">{results.compressor.releaseFastMs}ms</span>
+                        <span className="text-[8px] md:text-[9px] font-black text-gray-600 uppercase">Fast</span>
+                        <span className="text-xs md:text-sm font-black text-white italic">{results.compressor.releaseFastMs}ms</span>
                       </div>
                       <div className="flex justify-between items-center">
-                        <span className="text-[9px] font-black text-gray-600 uppercase">Mid Release</span>
-                        <span className="text-sm font-black text-white italic">{results.compressor.releaseMediumMs}ms</span>
+                        <span className="text-[8px] md:text-[9px] font-black text-gray-600 uppercase">Mid</span>
+                        <span className="text-xs md:text-sm font-black text-white italic">{results.compressor.releaseMediumMs}ms</span>
                       </div>
                       <div className="flex justify-between items-center">
-                        <span className="text-[9px] font-black text-gray-600 uppercase">Slow Release</span>
-                        <span className="text-sm font-black text-white italic">{results.compressor.releaseSlowMs}ms</span>
+                        <span className="text-[8px] md:text-[9px] font-black text-gray-600 uppercase">Slow</span>
+                        <span className="text-xs md:text-sm font-black text-white italic">{results.compressor.releaseSlowMs}ms</span>
                       </div>
                     </div>
                   </div>
                 </div>
 
                 {/* Reverb Section */}
-                <div className="space-y-6">
+                <div className="space-y-4 md:space-y-6">
                   <div className="flex items-center gap-3 border-l-2 border-rose-500 pl-4">
-                    <Mic2 size={18} className="text-rose-500" />
-                    <h2 className="text-sm font-black text-white uppercase tracking-widest italic">Ambience</h2>
+                    <Mic2 size={16} className="text-rose-500" />
+                    <h2 className="text-xs md:text-sm font-black text-white uppercase tracking-widest italic">Ambience</h2>
                   </div>
-                  <InfoTag text="Space calculations for natural depth" />
-                  <div className="glass-card p-6 rounded-[2rem] space-y-6 bg-gradient-to-br from-rose-500/5 to-transparent">
-                    <div className="space-y-4">
+                  <div className="glass-card p-5 md:p-6 rounded-2xl md:rounded-[2rem] space-y-4 md:space-y-6 bg-gradient-to-br from-rose-500/5 to-transparent">
+                    <div className="space-y-3 md:space-y-4">
                       <div className="flex justify-between items-center">
                         <div className="flex flex-col">
-                          <span className="text-[9px] font-black text-gray-500 uppercase">Pre-Delay Tight</span>
-                          <span className="text-[7px] font-bold text-gray-700 uppercase italic">Close Room</span>
+                          <span className="text-[8px] md:text-[9px] font-black text-gray-500 uppercase leading-none">Pre-Delay</span>
+                          <span className="text-[6px] md:text-[7px] font-bold text-gray-700 uppercase italic">Tight</span>
                         </div>
-                        <span className="text-xl font-black text-white italic">{results.reverb.preDelayTightMs}ms</span>
+                        <span className="text-lg md:text-xl font-black text-white italic">{results.reverb.preDelayTightMs}ms</span>
                       </div>
                       <div className="flex justify-between items-center">
                         <div className="flex flex-col">
-                          <span className="text-[9px] font-black text-gray-500 uppercase">Pre-Delay Medium</span>
-                          <span className="text-[7px] font-bold text-gray-700 uppercase italic">Medium Hall</span>
+                          <span className="text-[8px] md:text-[9px] font-black text-gray-500 uppercase leading-none">Pre-Delay</span>
+                          <span className="text-[6px] md:text-[7px] font-bold text-gray-700 uppercase italic">Hall</span>
                         </div>
-                        <span className="text-xl font-black text-white italic">{results.reverb.preDelayMediumMs}ms</span>
+                        <span className="text-lg md:text-xl font-black text-white italic">{results.reverb.preDelayMediumMs}ms</span>
                       </div>
                     </div>
                     <div className="h-[1px] bg-white/10" />
                     <div className="flex justify-between items-center group">
                       <div className="flex flex-col">
-                        <span className="text-[9px] font-black text-rose-500 uppercase tracking-widest group-hover:scale-105 transition-transform origin-left">Max Tail Decay</span>
-                        <span className="text-[7px] font-bold text-rose-900 uppercase italic">Full Whole Note</span>
+                        <span className="text-[8px] md:text-[9px] font-black text-rose-500 uppercase tracking-widest">Decay</span>
+                        <span className="text-[6px] md:text-[7px] font-bold text-rose-900 uppercase italic leading-none">Whole</span>
                       </div>
-                      <span className="text-2xl font-black text-white italic">{results.reverb.tailDecayMs}ms</span>
+                      <span className="text-xl md:text-2xl font-black text-white italic">{results.reverb.tailDecayMs}ms</span>
                     </div>
                   </div>
                 </div>

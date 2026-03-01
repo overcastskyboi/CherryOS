@@ -142,99 +142,93 @@ const GameCenterApp = () => {
 
   return (
     <div className="bg-[#050505] text-gray-100 min-h-[100dvh] flex flex-col relative overflow-hidden font-sans">
-      <header className="bg-black/60 backdrop-blur-md border-b border-white/10 px-6 py-6 flex flex-col lg:flex-row lg:items-center justify-between sticky top-0 z-50 gap-6">
-        <div className="flex items-center gap-6">
+      <header className="bg-black/60 backdrop-blur-md border-b border-white/10 px-4 md:px-6 py-4 md:py-6 flex flex-col md:flex-row md:items-center justify-between sticky top-0 z-50 gap-4">
+        <div className="flex items-center gap-4 md:gap-6">
           <button onClick={() => navigate('/')} className="p-2 bg-white/5 hover:bg-white/10 rounded-xl text-emerald-500 transition-all border border-white/5 shadow-xl">
-            <ArrowLeft size={20} />
+            <ArrowLeft size={isMobile ? 20 : 24} />
           </button>
           <div>
-            <h1 className="text-xl font-black tracking-tighter text-white uppercase italic leading-none">Game Center</h1>
+            <h1 className="text-lg md:text-xl font-black tracking-tighter text-white uppercase italic leading-none">Game Center</h1>
             <div className="flex items-center gap-2 mt-1">
-              <p className={`text-[9px] uppercase tracking-[0.4em] font-bold ${isMirror ? 'text-emerald-500' : 'text-yellow-600'}`}>
-                {isMirror ? 'Neural Link // Active' : 'Local Buffer // Offline'}
+              <p className={`text-[8px] md:text-[9px] uppercase tracking-[0.4em] font-bold ${isMirror ? 'text-emerald-500' : 'text-yellow-600'}`}>
+                {isMirror ? 'Neural Link' : 'Local'} // Active
               </p>
-              {lastSynced && (
-                <div className="flex items-center gap-1 text-[8px] text-gray-500 font-mono">
-                  <Clock size={10} />
-                  <span>{new Date(lastSynced).toLocaleString()}</span>
-                </div>
-              )}
             </div>
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-4">
-          <div className="relative">
+        <div className="flex items-center gap-3 md:gap-4">
+          <div className="relative flex-1 md:flex-none">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" size={14} />
             <input
               type="text"
               placeholder="Search library..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="bg-white/5 border border-white/10 rounded-xl py-2.5 pl-10 pr-4 text-[10px] font-bold text-white focus:outline-none w-64 lg:w-80 transition-all focus:border-emerald-500/50 shadow-inner"
+              className="bg-white/5 border border-white/10 rounded-xl py-2 md:py-2.5 pl-10 pr-4 text-[10px] font-bold text-white focus:outline-none w-full md:w-64 lg:w-80 transition-all focus:border-emerald-500/50 shadow-inner"
             />
           </div>
-          <button onClick={fetchMirroredData} className="p-2.5 bg-white/5 hover:bg-white/10 rounded-xl border border-white/5 transition-all shadow-xl text-emerald-500">
+          <button onClick={fetchMirroredData} className="p-2 md:p-2.5 bg-white/5 hover:bg-white/10 rounded-xl border border-white/5 transition-all text-emerald-500">
             <RefreshCcw size={18} className={loading ? 'animate-spin' : ''} />
           </button>
         </div>
       </header>
 
-      <main className="flex-1 p-6 lg:p-12 relative z-10 space-y-12">
+      <main className="flex-1 p-4 md:p-12 relative z-10 space-y-8 md:space-y-12">
         {/* Revamped Dashboard Stats */}
         {stats && (
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 animate-elegant">
-            <div className="glass-card p-8 rounded-[2.5rem] relative overflow-hidden group border-emerald-500/10 shadow-2xl">
-              <div className="absolute top-0 right-0 p-6 opacity-5 text-emerald-500 group-hover:scale-110 transition-transform duration-700"><Clock size={80} /></div>
-              <p className="text-[10px] font-black text-gray-500 uppercase tracking-[0.4em] mb-2">Neural Immersion</p>
-              <div className="flex items-end gap-3">
-                <span className="text-5xl font-black text-white italic tracking-tighter">{stats.immersion.label.split(' ')[0]}</span>
-                <span className="text-xs font-bold text-emerald-500 mb-2 uppercase tracking-widest">{stats.immersion.label.split(' ').slice(1).join(' ') || 'Total'}</span>
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 md:gap-6 animate-elegant">
+            <div className="glass-card p-6 md:p-8 rounded-2xl md:rounded-[2.5rem] relative overflow-hidden group border-emerald-500/10 shadow-2xl">
+              <div className="absolute top-0 right-0 p-4 md:p-6 opacity-5 text-emerald-500 group-hover:scale-110 transition-transform duration-700"><Clock size={60} /></div>
+              <p className="text-[8px] md:text-[10px] font-black text-gray-500 uppercase tracking-[0.4em] mb-1">Neural Immersion</p>
+              <div className="flex items-end gap-2">
+                <span className="text-3xl md:text-5xl font-black text-white italic tracking-tighter leading-none">{stats.immersion.label.split(' ')[0]}</span>
+                <span className="text-[10px] md:text-xs font-bold text-emerald-500 mb-1 uppercase tracking-widest leading-none">{stats.immersion.label.split(' ').slice(1).join(' ') || 'Total'}</span>
               </div>
             </div>
 
-            <div className="glass-card p-8 rounded-[2.5rem] relative overflow-hidden group border-yellow-500/10 shadow-2xl">
-              <div className="absolute top-0 right-0 p-6 opacity-5 text-yellow-500 group-hover:scale-110 transition-transform duration-700"><Trophy size={80} /></div>
-              <p className="text-[10px] font-black text-gray-500 uppercase tracking-[0.4em] mb-2">Mastered Sequences</p>
-              <div className="flex items-end gap-3">
-                <span className="text-5xl font-black text-white italic tracking-tighter">{stats.masteryCount}</span>
-                <span className="text-xs font-bold text-yellow-500 mb-2 uppercase tracking-widest">Games</span>
+            <div className="glass-card p-6 md:p-8 rounded-2xl md:rounded-[2.5rem] relative overflow-hidden group border-yellow-500/10 shadow-2xl">
+              <div className="absolute top-0 right-0 p-4 md:p-6 opacity-5 text-yellow-500 group-hover:scale-110 transition-transform duration-700"><Trophy size={60} /></div>
+              <p className="text-[8px] md:text-[10px] font-black text-gray-500 uppercase tracking-[0.4em] mb-1">Mastered Sequences</p>
+              <div className="flex items-end gap-2">
+                <span className="text-3xl md:text-5xl font-black text-white italic tracking-tighter leading-none">{stats.masteryCount}</span>
+                <span className="text-[10px] md:text-xs font-bold text-yellow-500 mb-1 uppercase tracking-widest leading-none">Games</span>
               </div>
             </div>
 
-            <div className="glass-card p-8 rounded-[2.5rem] relative overflow-hidden group border-cyan-500/10 shadow-2xl">
-              <div className="absolute top-0 right-0 p-6 opacity-5 text-cyan-500 group-hover:scale-110 transition-transform duration-700"><Target size={80} /></div>
-              <p className="text-[10px] font-black text-gray-500 uppercase tracking-[0.4em] mb-2">Avg completion</p>
-              <div className="flex items-end gap-3">
-                <span className="text-5xl font-black text-white italic tracking-tighter">{stats.avgComp}</span>
-                <span className="text-xs font-bold text-cyan-500 mb-2 uppercase tracking-widest">% total</span>
+            <div className="glass-card p-6 md:p-8 rounded-2xl md:rounded-[2.5rem] relative overflow-hidden group border-cyan-500/10 shadow-2xl">
+              <div className="absolute top-0 right-0 p-4 md:p-6 opacity-5 text-cyan-500 group-hover:scale-110 transition-transform duration-700"><Target size={60} /></div>
+              <p className="text-[8px] md:text-[10px] font-black text-gray-500 uppercase tracking-[0.4em] mb-1">Avg completion</p>
+              <div className="flex items-end gap-2">
+                <span className="text-3xl md:text-5xl font-black text-white italic tracking-tighter leading-none">{stats.avgComp}</span>
+                <span className="text-[10px] md:text-xs font-bold text-cyan-500 mb-1 uppercase tracking-widest leading-none">% total</span>
               </div>
             </div>
 
-            <div className="glass-card p-8 rounded-[2.5rem] relative overflow-hidden group border-purple-500/10 shadow-2xl">
-              <div className="absolute top-0 right-0 p-6 opacity-5 text-purple-500 group-hover:scale-110 transition-transform duration-700"><Library size={80} /></div>
-              <p className="text-[10px] font-black text-gray-500 uppercase tracking-[0.4em] mb-2">Total artifacts</p>
-              <div className="flex items-end gap-3">
-                <span className="text-5xl font-black text-white italic tracking-tighter">{stats.totalGames}</span>
-                <span className="text-xs font-bold text-purple-500 mb-2 uppercase tracking-widest">Owned</span>
+            <div className="glass-card p-6 md:p-8 rounded-2xl md:rounded-[2.5rem] relative overflow-hidden group border-purple-500/10 shadow-2xl">
+              <div className="absolute top-0 right-0 p-4 md:p-6 opacity-5 text-purple-500 group-hover:scale-110 transition-transform duration-700"><Library size={60} /></div>
+              <p className="text-[8px] md:text-[10px] font-black text-gray-500 uppercase tracking-[0.4em] mb-1">Total artifacts</p>
+              <div className="flex items-end gap-2">
+                <span className="text-3xl md:text-5xl font-black text-white italic tracking-tighter leading-none">{stats.totalGames}</span>
+                <span className="text-[10px] md:text-xs font-bold text-purple-500 mb-1 uppercase tracking-widest leading-none">Owned</span>
               </div>
             </div>
           </div>
         )}
 
-        <div className="max-w-7xl mx-auto space-y-12">
+        <div className="max-w-7xl mx-auto space-y-8 md:space-y-12">
           {!loading && filteredAndSortedData.length === 0 && (
-            <div className="flex flex-col items-center justify-center py-40 text-gray-600 space-y-6 opacity-50">
+            <div className="flex flex-col items-center justify-center py-20 md:py-40 text-gray-600 space-y-6 opacity-50">
               <Activity size={64} className="animate-pulse" />
-              <p className="text-sm font-black uppercase tracking-[0.5em] italic">No compatible artifacts found in sector...</p>
+              <p className="text-sm font-black uppercase tracking-[0.5em] italic text-center">No compatible artifacts found in sector...</p>
             </div>
           )}
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-8">
             {visibleData.map((item, idx) => (
               <div 
                 key={idx} 
-                className="group relative bg-[#0a0a0a] rounded-[2.5rem] overflow-hidden border border-white/5 hover:border-emerald-500/30 transition-all duration-700 shadow-2xl flex flex-col hover:-translate-y-2 animate-elegant"
+                className="group relative bg-[#0a0a0a] rounded-2xl md:rounded-[2.5rem] overflow-hidden border border-white/5 hover:border-emerald-500/30 transition-all duration-700 shadow-2xl flex flex-col hover:-translate-y-2 animate-elegant"
                 style={{ animationDelay: `${idx * 50}ms` }}
               >
                 {/* Holographic Overlay */}
@@ -249,45 +243,45 @@ const GameCenterApp = () => {
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent opacity-90" />
                   
-                  <div className="absolute top-4 left-4 flex gap-2">
-                    <div className={`px-3 py-1.5 rounded-xl backdrop-blur-md border flex items-center gap-2 shadow-2xl ${Number(item.achievementPercent) >= 100 ? 'bg-yellow-500/20 border-yellow-500/30 text-yellow-500' : 'bg-black/60 border-white/10 text-emerald-400'}`}>
-                      {Number(item.achievementPercent) >= 100 ? <Trophy size={12} className="fill-current" /> : <Star size={12} className="fill-current" />}
-                      <span className="text-xs font-black">{Math.round(Number(item.achievementPercent) || 0)}%</span>
+                  <div className="absolute top-3 left-3 md:top-4 md:left-4 flex gap-2">
+                    <div className={`px-2 py-1 md:px-3 md:py-1.5 rounded-lg md:rounded-xl backdrop-blur-md border flex items-center gap-1.5 md:gap-2 shadow-2xl ${Number(item.achievementPercent) >= 100 ? 'bg-yellow-500/20 border-yellow-500/30 text-yellow-500' : 'bg-black/60 border-white/10 text-emerald-400'}`}>
+                      {Number(item.achievementPercent) >= 100 ? <Trophy size={10} className="fill-current" /> : <Star size={10} className="fill-current" />}
+                      <span className="text-[10px] md:text-xs font-black">{Math.round(Number(item.achievementPercent) || 0)}%</span>
                     </div>
                   </div>
 
-                  <div className="absolute bottom-5 left-6 right-6 space-y-1.5">
-                    <span className="text-[9px] font-black uppercase tracking-[0.4em] text-blue-400 opacity-80 italic">Steam Registry Entry</span>
-                    <h3 className="text-lg font-black text-white leading-tight line-clamp-2 uppercase italic tracking-tighter drop-shadow-2xl">{item.title}</h3>
+                  <div className="absolute bottom-4 left-4 right-4 md:bottom-5 md:left-6 md:right-6 space-y-1">
+                    <span className="text-[7px] md:text-[9px] font-black uppercase tracking-[0.2em] md:tracking-[0.4em] text-blue-400 opacity-80 italic leading-none">Steam Entry</span>
+                    <h3 className="text-sm md:text-lg font-black text-white leading-tight line-clamp-2 uppercase italic tracking-tighter drop-shadow-2xl">{item.title}</h3>
                   </div>
                 </div>
                 
-                <div className="p-6 flex-1 flex flex-col justify-between gap-6 bg-gradient-to-b from-transparent to-white/[0.01]">
-                  <div className="grid grid-cols-2 gap-6">
-                    <div className="space-y-1.5">
-                      <p className="text-[9px] text-gray-600 font-black uppercase tracking-[0.3em] flex items-center gap-2">
+                <div className="p-4 md:p-6 flex-1 flex flex-col justify-between gap-4 md:gap-6 bg-gradient-to-b from-transparent to-white/[0.01]">
+                  <div className="grid grid-cols-2 gap-4 md:gap-6">
+                    <div className="space-y-1">
+                      <p className="text-[7px] md:text-[9px] text-gray-600 font-black uppercase tracking-[0.2em] md:tracking-[0.3em] flex items-center gap-1.5 md:gap-2">
                         <Clock size={10} /> Runtime
                       </p>
-                      <p className="text-sm font-black text-white italic">{formatTime(Number(item.playtime_raw)).label}</p>
+                      <p className="text-xs md:text-sm font-black text-white italic truncate">{formatTime(Number(item.playtime_raw)).label}</p>
                     </div>
                     {item.lastPlayed && item.lastPlayed > 0 && (
-                      <div className="space-y-1.5">
-                        <p className="text-[9px] text-gray-600 font-black uppercase tracking-[0.3em] flex items-center gap-2">
+                      <div className="space-y-1">
+                        <p className="text-[7px] md:text-[9px] text-gray-600 font-black uppercase tracking-[0.2em] md:tracking-[0.3em] flex items-center gap-1.5 md:gap-2">
                           <Calendar size={10} /> Logged
                         </p>
-                        <p className="text-sm font-black text-gray-400 italic">{formatLastPlayed(item.lastPlayed)}</p>
+                        <p className="text-xs md:text-sm font-black text-gray-400 italic truncate">{formatLastPlayed(item.lastPlayed)}</p>
                       </div>
                     )}
                   </div>
 
-                  <div className="space-y-3">
-                    <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest text-gray-500">
+                  <div className="space-y-2 md:space-y-3">
+                    <div className="flex justify-between items-center text-[8px] md:text-[10px] font-black uppercase tracking-widest text-gray-500">
                       <span>Neural Mastery</span>
                       <span className={Number(item.achievementPercent) >= 100 ? 'text-yellow-500' : 'text-emerald-500 opacity-80'}>
-                        {item.achievements ? `${item.achievements.won}/${item.achievements.total} LINKED` : `${Math.round(Number(item.achievementPercent) || 0)}% SYNC`}
+                        {item.achievements ? `${item.achievements.won}/${item.achievements.total}` : `${Math.round(Number(item.achievementPercent) || 0)}%`}
                       </span>
                     </div>
-                    <div className="h-1.5 bg-white/5 rounded-full overflow-hidden border border-white/5 shadow-inner">
+                    <div className="h-1 bg-white/5 rounded-full overflow-hidden border border-white/5 shadow-inner">
                       <div 
                         className={`h-full transition-all duration-[1500ms] ease-out shadow-[0_0_15px_rgba(16,185,129,0.2)] ${Number(item.achievementPercent) >= 100 ? 'bg-gradient-to-r from-yellow-600 to-amber-400' : 'bg-gradient-to-r from-emerald-600 to-cyan-400'}`}
                         style={{ width: `${Number(item.achievementPercent) || 0}%` }}

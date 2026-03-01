@@ -101,6 +101,19 @@ button:active,
   transition: opacity 0.5s ease, transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
+/* Responsive Spacing & Scaling */
+@media (max-width: 768px) {
+  .glass-card {
+    padding: 1.5rem !important;
+    border-radius: 1.5rem !important;
+  }
+  .mobile-hide { display: none !important; }
+  .mobile-text-xs { font-size: 0.65rem !important; }
+  .mobile-text-sm { font-size: 0.8rem !important; }
+  .mobile-p-4 { padding: 1rem !important; }
+  .mobile-gap-4 { gap: 1rem !important; }
+}
+
 /* Rain Canvas */
 canvas {
   filter: blur(0.5px);

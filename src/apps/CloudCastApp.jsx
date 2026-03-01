@@ -76,30 +76,30 @@ const CloudCastApp = () => {
       </div>
 
       {/* Header */}
-      <div className="bg-black border-b-4 border-[#111] px-6 py-6 flex items-center justify-between sticky top-0 z-40">
-        <div className="flex items-center gap-6">
+      <div className="bg-black border-b-4 border-[#111] px-4 md:px-6 py-4 md:py-6 flex items-center justify-between sticky top-0 z-40">
+        <div className="flex items-center gap-4 md:gap-6">
           <button 
             onClick={() => navigate('/')}
             className="p-2 bg-[#111] border-2 border-[#333] text-indigo-400 hover:border-white transition-all shadow-[2px_2px_0_#000]"
           >
-            <ArrowLeft size={24} />
+            <ArrowLeft size={isMobile ? 20 : 24} />
           </button>
           <div>
-            <h1 className="text-2xl font-black tracking-tighter text-white uppercase italic">CloudCast</h1>
-            <p className="text-[10px] text-gray-600 uppercase tracking-[0.4em] font-bold mt-1">SATELLITE_LINK // ACTIVE</p>
+            <h1 className="text-xl md:text-2xl font-black tracking-tighter text-white uppercase italic leading-none">CloudCast</h1>
+            <p className="text-[8px] md:text-[10px] text-gray-600 uppercase tracking-[0.4em] font-bold mt-1 mobile-hide">SATELLITE_LINK // ACTIVE</p>
           </div>
         </div>
       </div>
 
-      <main className="flex-1 p-6 md:p-12 flex flex-col items-center justify-center relative z-10">
-        <div className="w-full max-w-lg bg-[#111] border-4 border-white shadow-[8px_8px_0_#000] p-8 md:p-12 space-y-8 animate-in zoom-in-95 duration-300">
+      <main className="flex-1 p-4 md:p-12 flex flex-col items-center justify-center relative z-10">
+        <div className="w-full max-w-lg bg-[#111] border-4 border-white shadow-[8px_8px_0_#000] p-6 md:p-12 space-y-6 md:space-y-8 animate-in zoom-in-95 duration-300">
           <div className="flex justify-between items-start">
-            <div className="space-y-2">
+            <div className="space-y-1 md:space-y-2">
               <div className="flex items-center gap-2 text-indigo-400">
-                <MapPin size={14} />
-                <span className="text-[10px] font-black uppercase tracking-widest">{location}</span>
+                <MapPin size={12} />
+                <span className="text-[8px] md:text-[10px] font-black uppercase tracking-widest">{location}</span>
               </div>
-              <h2 className="text-4xl font-black tracking-tighter uppercase italic leading-none">
+              <h2 className="text-3xl md:text-4xl font-black tracking-tighter uppercase italic leading-none">
                 {weatherData?.name || '---'}
               </h2>
             </div>
@@ -107,40 +107,40 @@ const CloudCastApp = () => {
               onClick={fetchWeather}
               className="p-2 bg-white text-black hover:bg-indigo-500 hover:text-white transition-all"
             >
-              <RefreshCcw size={20} className={loading ? 'animate-spin' : ''} />
+              <RefreshCcw size={18} className={loading ? 'animate-spin' : ''} />
             </button>
           </div>
 
           {weatherData && (
-            <div className="space-y-8">
-              <div className="flex items-center gap-8">
-                <div className="p-6 bg-black border-2 border-[#333] text-white">
-                  <PixelIcon name="rain" size={64} color="currentColor" />
+            <div className="space-y-6 md:space-y-8">
+              <div className="flex items-center gap-6 md:gap-8">
+                <div className="p-4 md:p-6 bg-black border-2 border-[#333] text-white shrink-0">
+                  <PixelIcon name="rain" size={isMobile ? 48 : 64} color="currentColor" />
                 </div>
                 <div className="flex flex-col">
-                  <span className="text-6xl font-black tracking-tighter italic">
+                  <span className="text-5xl md:text-6xl font-black tracking-tighter italic leading-none">
                     {Math.round(weatherData.main.temp)}°F
                   </span>
-                  <span className="text-xs font-bold text-gray-500 uppercase tracking-widest">
+                  <span className="text-[10px] md:text-xs font-bold text-gray-500 uppercase tracking-widest mt-1">
                     {weatherData.weather[0].description}
                   </span>
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div className="bg-black/40 border-2 border-[#222] p-4 flex flex-col gap-1">
+              <div className="grid grid-cols-2 gap-3 md:gap-4">
+                <div className="bg-black/40 border-2 border-[#222] p-3 md:p-4 flex flex-col gap-1">
                   <div className="flex items-center gap-2 text-gray-600">
-                    <Thermometer size={12} />
-                    <span className="text-[8px] font-black uppercase tracking-widest">Feels Like</span>
+                    <Thermometer size={10} />
+                    <span className="text-[7px] md:text-[8px] font-black uppercase tracking-widest">Feels Like</span>
                   </div>
-                  <span className="text-lg font-black italic">{Math.round(weatherData.main.feels_like)}°F</span>
+                  <span className="text-base md:text-lg font-black italic">{Math.round(weatherData.main.feels_like)}°F</span>
                 </div>
-                <div className="bg-black/40 border-2 border-[#222] p-4 flex flex-col gap-1">
+                <div className="bg-black/40 border-2 border-[#222] p-3 md:p-4 flex flex-col gap-1">
                   <div className="flex items-center gap-2 text-gray-600">
-                    <Droplet size={12} />
-                    <span className="text-[8px] font-black uppercase tracking-widest">Humidity</span>
+                    <Droplet size={10} />
+                    <span className="text-[7px] md:text-[8px] font-black uppercase tracking-widest">Humidity</span>
                   </div>
-                  <span className="text-lg font-black italic">{weatherData.main.humidity}%</span>
+                  <span className="text-base md:text-lg font-black italic">{weatherData.main.humidity}%</span>
                 </div>
               </div>
             </div>

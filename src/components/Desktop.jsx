@@ -13,22 +13,22 @@ const Desktop = () => {
   }, [setThemeColor]);
 
   return (
-    <div className="min-h-[100dvh] w-screen bg-transparent flex flex-col p-6 md:p-12 relative overflow-x-hidden">
+    <div className="min-h-[100dvh] w-screen bg-transparent flex flex-col p-4 md:p-12 relative overflow-x-hidden">
       {/* Background Glows Refined */}
       <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-blue-600/10 blur-[150px] rounded-full pointer-events-none" />
       <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-indigo-600/10 blur-[150px] rounded-full pointer-events-none" />
 
-      <div className="flex-1 flex flex-col items-center justify-center py-12 relative z-10">
+      <div className="flex-1 flex flex-col items-center justify-center py-8 md:py-12 relative z-10">
         <div className="w-full max-w-7xl">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-8">
             {DESKTOP_APPS.map((app) => (
               <button
                 key={app.id}
                 onClick={() => navigate(app.path)}
-                className="group relative flex items-center gap-6 p-8 glass-card rounded-[2.5rem] transition-all hover:bg-white/[0.08] hover:-translate-y-1 active:scale-[0.98] text-left overflow-hidden border-white/5 shadow-2xl"
+                className="group relative flex items-center gap-4 md:gap-6 p-5 md:p-8 glass-card rounded-2xl md:rounded-[2.5rem] transition-all hover:bg-white/[0.08] hover:-translate-y-1 active:scale-[0.98] text-left overflow-hidden border-white/5 shadow-2xl"
               >
-                <div className={`p-4 rounded-2xl bg-black/40 border border-white/5 ${app.color} group-hover:scale-110 transition-transform duration-500 shadow-inner relative z-10`}>
-                  <app.icon size={isMobile ? 28 : 36} strokeWidth={1.5} />
+                <div className={`p-3 md:p-4 rounded-xl md:rounded-2xl bg-black/40 border border-white/5 ${app.color} group-hover:scale-110 transition-transform duration-500 shadow-inner relative z-10`}>
+                  <app.icon size={isMobile ? 24 : 36} strokeWidth={1.5} />
                 </div>
                 <div className="flex-1 min-w-0 relative z-10">
                   <h3 className="text-base font-black text-white uppercase italic tracking-tighter group-hover:text-blue-400 transition-colors leading-none mb-1">
