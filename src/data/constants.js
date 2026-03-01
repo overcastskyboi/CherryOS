@@ -131,6 +131,51 @@ export const VST_LIST = {
   ]
 };
 
+export const VST_DETAILS = [
+  {
+    name: "Waves Renaissance Bundle",
+    category: "Dynamics & Mixing",
+    image: "https://images.unsplash.com/photo-1598653222000-6b7b7a552625?q=80&w=1000&auto=format&fit=crop",
+    link: "https://www.waves.com/bundles/renaissance-maxx",
+    blurb: "The classic 'R' series. Warm, musical, and incredibly simple to use for professional vocal and instrument processing."
+  },
+  {
+    name: "Valhalla Supermassive",
+    category: "Reverb & Delay",
+    image: "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?q=80&w=1000&auto=format&fit=crop",
+    link: "https://valhalladsp.com/shop/reverb/valhalla-supermassive/",
+    blurb: "Designed from the ground up for massive delays and reverbs. Lush, ethereal, and completely free."
+  },
+  {
+    name: "Kilohearts Essentials",
+    category: "Dynamics & Utility",
+    image: "https://images.unsplash.com/photo-1516280440614-37939bbacd81?q=80&w=1000&auto=format&fit=crop",
+    link: "https://kilohearts.com/products/kilohearts_essentials",
+    blurb: "A huge collection of high-quality effects covering everything from dynamics to pitch shifting. Extremely CPU efficient."
+  },
+  {
+    name: "Xfer Records Serum",
+    category: "Instruments",
+    image: "https://images.unsplash.com/photo-1514525253344-f814d074358a?q=80&w=1000&auto=format&fit=crop",
+    link: "https://xferrecords.com/products/serum",
+    blurb: "The industry-standard wavetable synthesizer. High-quality sound, visual and creative workflow, and a deep feature set."
+  },
+  {
+    name: "Tokyo Dawn TDR Nova",
+    category: "EQ & Mixing",
+    image: "https://images.unsplash.com/photo-1520523839897-bd0b52f945a0?q=80&w=1000&auto=format&fit=crop",
+    link: "https://www.tokyodawnlabs.com/tdr-nova/",
+    blurb: "A parallel dynamic equalizer. Appearing as a parametric equalizer, each band also includes a full featured dynamics section."
+  },
+  {
+    name: "Soothe2",
+    category: "Mixing",
+    image: "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?q=80&w=1000&auto=format&fit=crop",
+    link: "https://oeksound.com/plugins/soothe2/",
+    blurb: "A dynamic resonance suppressor. It identifies problematic resonances on the fly and applies matching reduction automatically."
+  }
+];
+
 export const calculateProductionValues = (bpm) => {
   if (bpm <= 0) return {};
   const quarterNote = 60000 / bpm;

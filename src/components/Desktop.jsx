@@ -25,10 +25,7 @@ const Desktop = () => {
     { id: 'games', name: 'Game Center', icon: <Gamepad2 size={isMobile ? 32 : 64} />, path: '/games', color: 'text-green-500' },
     { id: 'studio', name: 'Studio Rack', icon: <Monitor size={isMobile ? 32 : 64} />, path: '/studio', color: 'text-blue-500' },
     { id: 'cloud', name: 'OCI Console', icon: <Cloud size={isMobile ? 32 : 64} />, path: '/cloud', color: 'text-cyan-500' },
-    { id: 'codeflow', name: 'CodeFlow', icon: <FileText size={isMobile ? 32 : 64} />, path: '/codeflow', color: 'text-purple-500' },
     { id: 'cloudcast', name: 'CloudCast', icon: <CloudRain size={isMobile ? 32 : 64} />, path: '/cloudcast', color: 'text-blue-400' },
-    { id: 'scratchpad', name: 'Scratchpad', icon: <FileText size={isMobile ? 32 : 64} />, path: '/scratchpad', color: 'text-orange-400' },
-    { id: 'calculator', name: 'Calculator', icon: <Calculator size={isMobile ? 32 : 64} />, path: '/calculator', color: 'text-rose-500' },
     { id: 'collection-tracker', name: 'Collection Tracker', icon: <Package size={isMobile ? 32 : 64} />, path: '/collection-tracker', color: 'text-amber-500' },
     { id: 'bpm-calculator', name: 'BPM Calculator', icon: <Music size={isMobile ? 32 : 64} />, path: '/bpm-calculator', color: 'text-yellow-500' },
   ];
