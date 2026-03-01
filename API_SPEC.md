@@ -1,35 +1,29 @@
-# CherryOS API Specifications
+# CherryOS API & Data Specifications
 
-## 1. Steam Integration (Game Center)
+CherryOS Version 2.3 uses a **Hybrid Cloud Data Strategy** to ensure high performance, zero CORS issues, and real-time synchronization.
 
--   **User**: `AugustElliott`
--   **SteamID**: `76561198043191125`
--   **Pattern**: REST fetch via `VITE_PROXY_URL`.
--   **Image Logic**: `https://cdn.akamai.steamstatic.com/steam/apps/${id}/header.jpg`.
--   **Sorting**: `(a, b) => b.achievementPercent - a.achievementPercent`.
+## 1. Automated Data Mirroring (New)
 
-## 2. AniList Integration (Watch List)
+The system utilizes a GitHub Actions workflow (`Refresh API Data Mirror`) that runs hourly to fetch live data from external providers and save it as static JSON artifacts within the repository.
 
--   **Type**: GraphQL (v2)
--   **Auth**: Bearer Token injected as `VITE_AL_TOKEN`.
--   **Sorting**: `(a, b) => b.score - a.score`.
--   **Batching**: 12 items initial, triggered via `displayCount` increments.
+### **Endpoints**
+-   **Metadata**: `https://overcastskyboi.github.io/CherryOS/src/data/mirror/metadata.json`
+    -   Contains: `lastUpdated` (UTC Timestamp)
+-   **Steam Sync**: `https://overcastskyboi.github.io/CherryOS/src/data/mirror/steam.json`
+    -   Contains: Full user library, playtime, and achievement data for `AugustElliott`.
+-   **AniList Sync**: `https://overcastskyboi.github.io/CherryOS/src/data/mirror/anilist.json`
+    -   Contains: GraphQL response for combined Anime/Manga collections.
 
-## 3. OCI Integration (The Backbone)
+## 2. Infrastructure Endpoints (OCI)
 
--   **Namespace**: `idg3nfddgypd`
--   **Region**: `us-ashburn-1`
--   **Endpoints**:
-    -   Manifest: `.../o/music_manifest.json`
-    -   Collection: `.../o/collection.csv`
-    -   Health: `.../o/healthcheck.txt`
+-   **Music Manifest**: `https://objectstorage.us-ashburn-1.oraclecloud.com/n/idg3nfddgypd/b/cherryos-deploy-prod/o/music_manifest.json`
+-   **Collection Database**: `https://objectstorage.us-ashburn-1.oraclecloud.com/n/idg3nfddgypd/b/cherryos-deploy-prod/o/collection.csv`
 
-## 4. Environment Secrets
+## 3. Data Flow Diagram
 
-| Variable | Usage | Source |
-| :--- | :--- | :--- |
-| `VITE_PROXY_URL` | Steam/Weather Proxy | GH Secret |
-| `VITE_AL_TOKEN` | AniList GraphQL | GH Secret |
-| `VITE_WEATHER_API` | OpenWeather Maps | GH Secret |
-| `VITE_AL_ID` | User Identification | Build Var |
-| `VITE_STEAM_ID` | User Identification | Build Var |
+1.  **GitHub Action** ⮕ Fetches **Steam/AniList** ⮕ Commits to **`src/data/mirror/`**.
+2.  **App** ⮕ Fetches **Static Mirror JSON** (Fast, No CORS).
+3.  **App UI** ⮕ Displays **Last Updated** timestamp from metadata.
+
+---
+© 2026 CherryOS Core. All data validated via Zod.
